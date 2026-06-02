@@ -1,0 +1,289 @@
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FiEdit2, FiSave, FiUser, FiBookOpen, FiCalendar, FiAward, FiStar, FiFileText, FiMessageSquare, FiActivity, FiChevronLeft, FiBarChart2, FiTarget } from 'react-icons/fi';
+import PerformanceRadar from '../../components/charts/PerformanceRadar';
+import GradeTrendLine from '../../components/charts/GradeTrendLine';
+import AttendanceCalendar from '../../components/charts/AttendanceCalendar';
+import Modal from '../../components/shared/Modal';
+import { MOCK_STUDENT, MOCK_CERTIFICATES, MOCK_TROPHIES, MOCK_ATTENDANCE, MOCK_ASSIGNMENTS, MOCK_COURSES } from '../../utils/constants';
+
+const tabs = [
+  { key: 'academic', label: 'Academic', icon: FiBarChart2 },
+  { key: 'attendance', label: 'Attendance', icon: FiCalendar },
+  { key: 'courses', label: 'Courses', icon: FiBookOpen },
+  { key: 'cocurricular', label: 'Co-curricular', icon: FiStar },
+  { key: 'assignments', label: 'Assignments', icon: FiFileText },
+  { key: 'certificates', label: 'Certificates', icon: FiAward },
+  { key: 'trophies', label: 'Trophies', icon: FiTarget },
+  { key: 'notes', label: 'Notes', icon: FiMessageSquare },
+];
+
+const StudentDetailAdmin = () => {
+  const { id } = useParams();
+  const [activeTab, setActiveTab] = useState('academic');
+  const [editMode, setEditMode] = useState(false);
+  const [teacherNote, setTeacherNote] = useState('');
+  const [notes, setNotes] = useState(['Good progress in math this quarter. - Dr. Verma', 'Needs improvement in chemistry. - Dr. Gupta']);
+
+  const student = { ...MOCK_STUDENT, _id: id };
+
+  const gpaData = student.gpaHistory.map((gpa, i) => ({ term: `T${i + 1}`, gpa }));
+
+  const cocurricular = [
+    { activity: 'Debate Club', role: 'Member', date: '2026-01 to Present', outcome: 'Active', award: '' },
+    { activity: 'Basketball', role: 'Team Captain', date: '2025-08 to Present', outcome: 'School Champions', award: 'Best Player' },
+    { activity: 'Science Fair', role: 'Participant', date: '2026-03', outcome: '2nd Prize', award: 'Silver Medal' },
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'academic':
+        return (
+          <div className="space-y-4">
+            <div className="glass rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-white mb-3">Subject-wise Marks</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-2 text-slate-400 font-medium">Subject</th>
+                      <th className="text-center py-2 text-slate-400 font-medium">Term 1</th>
+                      <th className="text-center py-2 text-slate-400 font-medium">Term 2</th>
+                      <th className="text-center py-2 text-slate-400 font-medium">Overall</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {student.subjects.map(s => (
+                      <tr key={s.name} className="border-b border-white/5">
+                        <td className="py-2 text-white">{s.name}</td>
+                        <td className="text-center text-slate-300">{s.term1}</td>
+                        <td className="text-center text-slate-300">{s.term2}</td>
+                        <td className={`text-center font-medium ${s.score >= 90 ? 'text-emerald-400' : s.score >= 75 ? 'text-amber-400' : 'text-rose-400'}`}>{s.score}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="glass rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-white mb-3">GPA Trend</h3>
+              <GradeTrendLine data={gpaData} />
+            </div>
+            <div className="glass rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-white mb-3">Performance Radar</h3>
+              <PerformanceRadar />
+            </div>
+          </div>
+        );
+      case 'attendance':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-4 gap-3">
+              {[{ label: 'Present', value: 22, color: 'text-emerald-400' }, { label: 'Absent', value: 4, color: 'text-rose-400' }, { label: 'Leave', value: 2, color: 'text-amber-400' }, { label: 'Holiday', value: 2, color: 'text-slate-400' }].map(d => (
+                <div key={d.label} className="glass rounded-lg p-3 text-center">
+                  <div className={`text-lg font-bold ${d.color}`}>{d.value}</div>
+                  <div className="text-xs text-slate-500">{d.label}</div>
+                </div>
+              ))}
+            </div>
+            <AttendanceCalendar attendanceData={MOCK_ATTENDANCE} />
+            <div className="glass rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-white mb-3">Absent Reasons</h3>
+              {MOCK_ATTENDANCE.filter(a => a.status === 'absent').map(a => (
+                <div key={a.date} className="flex items-center justify-between py-2 border-b border-white/5">
+                  <span className="text-sm text-slate-300">{a.date}</span>
+                  <span className="text-xs text-slate-500">{a.reason || 'No reason provided'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'courses':
+        return (
+          <div className="space-y-3">
+            {student.enrolledCourses.map(c => (
+              <div key={c._id} className="glass rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white">{c.title}</h4>
+                    <p className="text-xs text-slate-500">{c.instructor}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${c.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                    {c.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <span>Progress: {c.progress}%</span>
+                  {c.creditPoints > 0 && <span>· {c.creditPoints} Credits</span>}
+                </div>
+                <div className="w-full h-1.5 bg-white/10 rounded-full mt-2 overflow-hidden">
+                  <div className="h-full gradient-accent rounded-full" style={{ width: `${c.progress}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      case 'cocurricular':
+        return (
+          <div className="space-y-3">
+            {cocurricular.map((c, i) => (
+              <div key={i} className="glass rounded-xl p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white">{c.activity}</h4>
+                    <p className="text-xs text-slate-500">{c.role} · {c.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-slate-400">{c.outcome}</span>
+                    {c.award && <p className="text-xs text-amber-400 mt-1">{c.award}</p>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      case 'assignments':
+        return (
+          <div className="space-y-3">
+            {MOCK_ASSIGNMENTS.map(a => (
+              <div key={a._id} className="glass rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white">{a.title}</h4>
+                    <p className="text-xs text-slate-500">{a.courseName}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    a.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+                    a.status === 'submitted' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-emerald-500/20 text-emerald-400'
+                  }`}>
+                    {a.status}
+                  </span>
+                </div>
+                {a.grade !== undefined && (
+                  <div className="mt-2 text-xs">
+                    <span className="text-emerald-400">Grade: {a.grade}/{a.maxMarks}</span>
+                    {a.feedback && <p className="text-slate-400 mt-1">Feedback: {a.feedback}</p>}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      case 'certificates':
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {MOCK_CERTIFICATES.map(c => (
+              <div key={c._id} className="glass rounded-xl p-4 border border-indigo-500/10">
+                <div className="flex items-center gap-2 mb-2">
+                  <FiAward className="text-indigo-400" size={20} />
+                  <h4 className="text-sm font-semibold text-white">{c.courseName}</h4>
+                </div>
+                <div className="text-xs text-slate-400 space-y-1">
+                  <p>Grade: {c.grade}</p>
+                  <p>Issued: {c.issuedAt}</p>
+                  {c.creditPoints > 0 && <p>Credits: {c.creditPoints}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      case 'trophies':
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {MOCK_TROPHIES.map(t => (
+              <div key={t._id} className="glass rounded-xl p-4 border border-amber-500/10">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{t.icon}</span>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white">{t.title}</h4>
+                    <p className="text-xs text-slate-400">{t.description}</p>
+                    <p className="text-xs text-slate-500 mt-1">Earned: {t.earnedAt}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      case 'notes':
+        return (
+          <div className="space-y-4">
+            <div className="glass rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-white mb-3">Add Teacher Note</h3>
+              <textarea value={teacherNote} onChange={e => setTeacherNote(e.target.value)}
+                placeholder="Write a private note about this student..."
+                className="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
+              />
+              <button onClick={() => { if (teacherNote.trim()) { setNotes([...notes, `${teacherNote} - Teacher`]); setTeacherNote(''); } }}
+                className="mt-2 px-4 py-2 rounded-lg gradient-accent text-white text-sm font-medium">
+                Add Note
+              </button>
+            </div>
+            <div className="space-y-2">
+              {notes.map((n, i) => (
+                <div key={i} className="glass rounded-xl p-3">
+                  <p className="text-sm text-slate-300">{n}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="gradient-hero rounded-2xl p-6 lg:p-8">
+        <Link to="/admin/students" className="flex items-center gap-1 text-sm text-slate-400 hover:text-white mb-4 transition-colors">
+          <FiChevronLeft size={16} /> Back to Students
+        </Link>
+        <div className="flex items-start gap-4">
+          <div className="w-16 h-16 rounded-full bg-indigo-500/20 border-2 border-indigo-500/30 flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl text-indigo-400 font-bold">AS</span>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-white">{student.name}</h1>
+                <p className="text-slate-300">Class {student.class} · Roll No. {student.rollNumber}</p>
+                <p className="text-xs text-slate-500 mt-1">Parent: {student.parentContact}</p>
+              </div>
+              <button onClick={() => setEditMode(!editMode)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition-colors">
+                {editMode ? <FiSave size={16} /> : <FiEdit2 size={16} />}
+                {editMode ? 'Save' : 'Edit Profile'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="lg:w-48 flex-shrink-0">
+          <div className="glass rounded-xl p-3 sticky top-20 space-y-1">
+            {tabs.map(tab => (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  activeTab === tab.key ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <tab.icon size={14} /> {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-white">{tabs.find(t => t.key === activeTab)?.label}</h2>
+            {editMode && <button className="text-xs text-indigo-400 hover:text-indigo-300">Update Section</button>}
+          </div>
+          {renderTabContent()}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default StudentDetailAdmin;
