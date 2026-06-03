@@ -99,7 +99,7 @@ const Login = () => {
       </form>
 
       <p className="text-center text-xs text-slate-500 mt-6">
-        Don't have an account? <Link to="/register" className="text-indigo-400 hover:text-indigo-300">Contact Admin</Link>
+        Don't have an account? <Link to="/register" className="text-indigo-400 hover:text-indigo-300">Create Account</Link>
       </p>
     </motion.div>
   );
