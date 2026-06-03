@@ -25,7 +25,7 @@ const Login = () => {
     setLoading(true);
     await new Promise(r => setTimeout(r, 1000));
     const mockUser = {
-      _id: '1', name: role === 'student' ? 'Arjun Sharma' : role === 'teacher' ? 'Dr. Verma' : 'Admin User',
+      _id: '1', name: role === 'student' ? email.split('@')[0] : role === 'teacher' ? email.split('@')[0] : 'Admin',
       email: email || `${role}@school.com`, role, class: role === 'student' ? '10A' : undefined,
       profilePhoto: '',
     };
