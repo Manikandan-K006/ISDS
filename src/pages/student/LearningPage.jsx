@@ -1,23 +1,60 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiChevronDown, FiChevronUp, FiPlay, FiCheckCircle, FiFileText, FiMessageSquare, FiBookOpen, FiDownload, FiAward, FiX } from 'react-icons/fi';
 import { MOCK_COURSES } from '../../utils/constants';
+
+const getYoutubeEmbedUrl = (url) => {
+  if (!url) return null;
+  const reg = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/;
+  const match = url.match(reg);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+};
 
 const modules = {
   'c1': {
     title: 'Advanced Mathematics',
     chapters: [
-      { title: 'Module 1: Algebra Fundamentals', lessons: ['Introduction to Algebra', 'Linear Equations', 'Quadratic Equations', 'Polynomials'], completed: [true, true, true, true] },
-      { title: 'Module 2: Calculus', lessons: ['Limits & Continuity', 'Derivatives', 'Integration', 'Applications'], completed: [true, true, false, false] },
-      { title: 'Module 3: Geometry', lessons: ['Coordinate Geometry', 'Vectors', '3D Geometry'], completed: [false, false, false] },
+      {
+        title: 'Module 1: Algebra',
+        lessons: [
+          { title: 'Introduction to Algebra', videoUrl: 'https://youtu.be/NybHckSEQBI' },
+          { title: 'Linear Equations', videoUrl: 'https://youtu.be/Ft2_QtXAnh8' },
+          { title: 'Quadratic Equations', videoUrl: 'https://youtu.be/1F1LQh1_sNc' }
+        ],
+        completed: [true, true, true]
+      },
+      {
+        title: 'Module 2: Calculus',
+        lessons: [
+          { title: 'Limits & Continuity', videoUrl: 'https://youtu.be/9I7TVGvnIDg' },
+          { title: 'Derivatives', videoUrl: 'https://youtu.be/PIWAkMpGZTs' },
+          { title: 'Integration', videoUrl: 'https://youtu.be/JWlKfQ3MBXU' }
+        ],
+        completed: [true, false, false]
+      }
     ]
   },
   'c2': {
     title: 'Quantum Physics',
     chapters: [
-      { title: 'Module 1: Basics', lessons: ['Introduction to Quantum', 'Wave-Particle Duality', 'Schrodinger Equation'], completed: [true, true, false] },
-      { title: 'Module 2: Quantum Mechanics', lessons: ['Quantum States', 'Operators & Observables'], completed: [false, false] },
+      {
+        title: 'Module 1: Basics',
+        lessons: [
+          { title: 'Introduction to Quantum', videoUrl: 'https://youtu.be/JzIYSr3k5_s' },
+          { title: 'Wave-Particle Duality', videoUrl: 'https://youtu.be/Q_h4IoPJXZw' },
+          { title: 'Schrodinger Equation', videoUrl: '' }
+        ],
+        completed: [true, true, false]
+      },
+      {
+        title: 'Module 2: Quantum Mechanics',
+        lessons: [
+          { title: 'Quantum States', videoUrl: '' },
+          { title: 'Operators & Observables', videoUrl: '' }
+        ],
+        completed: [false, false]
+      }
     ]
   }
 };
@@ -35,7 +72,9 @@ const LearningPage = () => {
 
   const { chapterIdx, lessonIdx } = currentLesson;
   const currentChapter = moduleData.chapters[chapterIdx];
-  const currentLessonTitle = currentChapter?.lessons[lessonIdx] || 'No lesson selected';
+  const currentLessonObj = currentChapter?.lessons[lessonIdx] || { title: 'No lesson selected' };
+  const currentLessonTitle = typeof currentLessonObj === 'string' ? currentLessonObj : currentLessonObj.title;
+  const videoUrl = getYoutubeEmbedUrl(currentLessonObj.videoUrl);
 
   const totalLessons = moduleData.chapters.reduce((acc, ch) => acc + ch.lessons.length, 0);
   const completedLessons = moduleData.chapters.reduce((acc, ch) => acc + ch.completed.filter(Boolean).length, 0);
@@ -83,6 +122,7 @@ const LearningPage = () => {
                   {expandedChapters.includes(ci) && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                       {ch.lessons.map((lesson, li) => {
+                        const lessonTitle = typeof lesson === 'string' ? lesson : lesson.title;
                         const isActive = ci === chapterIdx && li === lessonIdx;
                         const isDone = ch.completed[li];
                         return (
@@ -94,7 +134,7 @@ const LearningPage = () => {
                             }`}
                           >
                             {isDone ? <FiCheckCircle className="text-emerald-400" size={12} /> : <FiPlay size={12} />}
-                            {lesson}
+                            {lessonTitle}
                           </button>
                         );
                       })}
@@ -113,14 +153,26 @@ const LearningPage = () => {
             <h2 className="text-lg font-semibold text-white">{moduleData.title}</h2>
             <p className="text-sm text-slate-400">{currentLessonTitle}</p>
           </div>
-          <div className="flex-1 flex items-center justify-center bg-black/40">
-            <div className="text-center">
-              <div className="w-20 h-20 rounded-full bg-indigo-500/20 flex items-center justify-center mx-auto mb-4">
-                <FiPlay className="text-indigo-400" size={36} />
+          <div className="flex-1 bg-black/90">
+            {videoUrl ? (
+              <iframe
+                src={videoUrl}
+                title={currentLessonTitle}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="w-20 h-20 rounded-full bg-indigo-500/20 flex items-center justify-center mx-auto mb-4">
+                    <FiPlay className="text-indigo-400" size={36} />
+                  </div>
+                  <p className="text-slate-400">No video added for this lesson</p>
+                  <p className="text-xs text-slate-600 mt-1">Add a YouTube link in the course settings</p>
+                </div>
               </div>
-              <p className="text-slate-400">Video player for "{currentLessonTitle}"</p>
-              <p className="text-xs text-slate-600 mt-1">ReactPlayer integration ready</p>
-            </div>
+            )}
           </div>
         </div>
 
@@ -172,8 +224,7 @@ const LearningPage = () => {
             {activeTab === 'notes' && (
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-white">Your Notes</h3>
-                <textarea
-                  value={notes} onChange={e => setNotes(e.target.value)}
+                <textarea value={notes} onChange={e => setNotes(e.target.value)}
                   placeholder="Take notes for this lesson..."
                   className="w-full h-40 bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
                 />
@@ -227,9 +278,7 @@ const LearningPage = () => {
                           className={`block w-full text-left px-3 py-2 rounded-lg text-xs transition-all ${
                             quizAnswers[q.id] === oi ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-white/5 text-slate-300 hover:bg-white/10'
                           }`}
-                        >
-                          {opt}
-                        </button>
+                        >{opt}</button>
                       ))}
                     </div>
                   </div>

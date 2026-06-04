@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getCourses } from '../api/courses';
-import { MOCK_COURSES } from '../utils/constants';
+import axios from 'axios';
+import { API_BASE } from '../utils/constants';
+
+const api = axios.create({ baseURL: `${API_BASE}/api/courses` });
 
 export const useCourses = (params) => {
   const [courses, setCourses] = useState([]);
@@ -11,10 +13,11 @@ export const useCourses = (params) => {
     const fetch = async () => {
       try {
         setLoading(true);
-        const data = await getCourses(params);
+        const { data } = await api.get('/', { params });
         setCourses(data);
-      } catch {
-        setCourses(MOCK_COURSES);
+      } catch (err) {
+        setError(err.message);
+        setCourses([]);
       } finally {
         setLoading(false);
       }

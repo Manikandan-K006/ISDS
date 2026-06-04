@@ -3,18 +3,20 @@ import { FiBookOpen, FiClipboard, FiAward, FiCalendar, FiTrendingUp, FiClock, Fi
 import { Link } from 'react-router-dom';
 import StatCard from '../../components/shared/StatCard';
 import CourseProgressCard from '../../components/CourseProgressCard';
-import { MOCK_STUDENT, MOCK_ACTIVITY_FEED } from '../../utils/constants';
+import { useStudentData } from '../../hooks/useStudentData';
 import { useAuth } from '../../hooks/useAuth';
-import { timeAgo } from '../../utils/helpers';
+import { getInitials } from '../../utils/helpers';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
+  const { student, courses, loading } = useStudentData();
+  const enrolledCourses = courses?.filter?.(c => student?.enrolledCourses?.includes?.(c._id)) || [];
 
   const stats = [
-    { icon: FiAward, label: 'Credit Points', value: '28 / 120', trend: 'up', trendValue: '+5 this month', color: 'emerald' },
-    { icon: FiBookOpen, label: 'Courses in Progress', value: '3', trend: 'up', trendValue: '+1', color: 'indigo' },
-    { icon: FiClipboard, label: 'Certificates', value: '2', trend: 'up', trendValue: '+1', color: 'amber' },
-    { icon: FiCalendar, label: 'Attendance', value: '87%', trend: 'up', trendValue: '+2%', color: 'rose' },
+    { icon: FiAward, label: 'Credit Points', value: `${student?.credits || 0} / ${student?.graduationCredits || 120}`, trend: 'up', trendValue: 'Total earned', color: 'emerald' },
+    { icon: FiBookOpen, label: 'Courses in Progress', value: String(student?.enrolledCourses?.length || 0), trend: 'up', trendValue: 'Enrolled', color: 'indigo' },
+    { icon: FiClipboard, label: 'Certificates', value: '0', trend: 'up', trendValue: 'Earned', color: 'amber' },
+    { icon: FiCalendar, label: 'Attendance', value: `${student?.attendance || 0}%`, trend: 'up', trendValue: 'This month', color: 'rose' },
   ];
 
   const timetable = [
@@ -39,11 +41,11 @@ const StudentDashboard = () => {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full translate-y-24 -translate-x-24" />
         <div className="relative flex flex-col sm:flex-row items-start gap-4">
           <div className="w-16 h-16 rounded-full bg-indigo-500/20 border-2 border-indigo-500/30 flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl text-indigo-400 font-bold">AS</span>
+            <span className="text-2xl text-indigo-400 font-bold">{getInitials(student?.name || user?.name)}</span>
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl lg:text-3xl font-bold text-white font-heading">Good morning, {user?.name?.split(' ')[0] || 'Student'}!</h1>
-            <p className="text-slate-300 mt-1">Class 10A · Roll No. 1012 · Let's make today productive!</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-white font-heading">Good morning, {student?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Student'}!</h1>
+            <p className="text-slate-300 mt-1">Class {student?.class || user?.class || ''} · Roll No. {student?.rollNumber || ''} · Let's make today productive!</p>
             <div className="flex flex-wrap gap-3 mt-4">
               <Link to="/courses" className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition-colors">
                 <FiBookOpen size={16} /> Continue Learning <FiChevronRight size={14} />
@@ -62,8 +64,10 @@ const StudentDashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s, i) => (
           <StatCard key={i} icon={s.icon} label={s.label} value={s.value} trend={s.trend} trendValue={s.trendValue} color={s.color} variant="gradient" />
-        ))}
-      </div>
+              )) : (
+                <p className="text-sm text-slate-500 text-center py-4">No recent activity.</p>
+              )}
+            </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
@@ -72,8 +76,8 @@ const StudentDashboard = () => {
               <FiTrendingUp className="text-indigo-400" /> Recent Activity
             </h2>
             <div className="space-y-3">
-              {MOCK_ACTIVITY_FEED.map(a => (
-                <div key={a.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors">
+              {(student?.recentActivity || []).length > 0 ? student.recentActivity.map((a, i) => (
+                <div key={i} className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     a.type === 'course' ? 'bg-indigo-500/20 text-indigo-400' :
                     a.type === 'assignment' ? 'bg-amber-500/20 text-amber-400' :
@@ -95,9 +99,12 @@ const StudentDashboard = () => {
               <FiBookOpen className="text-indigo-400" /> My Courses
             </h2>
             <div className="space-y-3">
-              {MOCK_STUDENT.enrolledCourses.map(c => (
-                <CourseProgressCard key={c._id} course={c} onContinue={() => {}} />
+              {(student?.enrolledCourses || []).map(c => (
+                <CourseProgressCard key={c._id || c} course={typeof c === 'object' ? c : { _id: c, title: 'Course', progress: 0 }} onContinue={() => {}} />
               ))}
+              {(!student?.enrolledCourses || student.enrolledCourses.length === 0) && (
+                <p className="text-sm text-slate-500 text-center py-4">No courses enrolled yet.</p>
+              )}
             </div>
           </div>
         </div>

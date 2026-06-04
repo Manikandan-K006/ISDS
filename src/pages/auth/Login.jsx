@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiCpu } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
+import { login as loginApi } from '../../api/auth';
 import toast from 'react-hot-toast';
 
 const roles = [
@@ -23,16 +24,17 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    const mockUser = {
-      _id: '1', name: role === 'student' ? email.split('@')[0] : role === 'teacher' ? email.split('@')[0] : 'Admin',
-      email: email || `${role}@school.com`, role, class: role === 'student' ? '10A' : undefined,
-      profilePhoto: '',
-    };
-    login(mockUser, 'mock-jwt-token');
-    toast.success(`Welcome back, ${mockUser.name}!`);
-    const redirect = role === 'admin' ? '/admin' : role === 'teacher' ? '/admin' : '/dashboard';
-    navigate(redirect);
+    try {
+      const data = await loginApi({ email, password });
+      login({ id: data.user._id, ...data.user }, data.token);
+      toast.success(`Welcome back, ${data.user.name}!`);
+      const redirect = data.user.role === 'admin' ? '/admin' : data.user.role === 'teacher' ? '/admin' : '/dashboard';
+      navigate(redirect);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Login failed. Try demo accounts: arjun@school.com / password123');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

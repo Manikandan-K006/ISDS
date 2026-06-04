@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiCpu } from 'react-icons/fi';
+import { register as registerApi } from '../../api/auth';
 import toast from 'react-hot-toast';
 
 const Register = () => {
@@ -12,9 +13,15 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    toast.success('Account created successfully!');
-    navigate('/login');
+    try {
+      await registerApi(form);
+      toast.success('Account created successfully! You can now login.');
+      navigate('/login');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
