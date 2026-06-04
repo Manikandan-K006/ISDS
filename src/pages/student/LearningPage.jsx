@@ -62,7 +62,16 @@ const modules = {
 const LearningPage = () => {
   const { courseId } = useParams();
   const course = MOCK_COURSES.find(c => c._id === courseId);
-  const moduleData = modules[courseId] || modules['c1'];
+  const hardcoded = modules[courseId] || modules['c1'];
+  const hasModules = course?.modules?.length > 0 && course.modules[0]?.lessons;
+  const moduleData = hasModules ? {
+    title: course.title,
+    chapters: course.modules.map(m => ({
+      title: m.title,
+      lessons: m.lessons || [],
+      completed: (m.lessons || []).map(() => false)
+    }))
+  } : hardcoded;
   const [currentLesson, setCurrentLesson] = useState({ chapterIdx: 0, lessonIdx: 0 });
   const [expandedChapters, setExpandedChapters] = useState([0]);
   const [activeTab, setActiveTab] = useState('notes');

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiBookOpen, FiSearch, FiToggleLeft, FiToggleRight } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiBookOpen, FiSearch, FiToggleLeft, FiToggleRight, FiVideo, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Modal from '../../components/shared/Modal';
 import { MOCK_COURSES, DOMAINS, DIFFICULTIES } from '../../utils/constants';
 
@@ -11,8 +11,10 @@ const ManageCourses = () => {
   const [editingCourse, setEditingCourse] = useState(null);
   const [form, setForm] = useState({
     title: '', domain: 'Engineering', type: 'elective', creditPoints: 0,
-    instructor: '', duration: '', difficulty: 'Beginner', status: 'draft'
+    instructor: '', duration: '', difficulty: 'Beginner', status: 'draft',
+    modules: []
   });
+  const [expandedModules, setExpandedModules] = useState([]);
 
   const filtered = courses.filter(c => c.title.toLowerCase().includes(search.toLowerCase()));
 
@@ -24,7 +26,8 @@ const ManageCourses = () => {
     }
     setShowForm(false);
     setEditingCourse(null);
-    setForm({ title: '', domain: 'Engineering', type: 'elective', creditPoints: 0, instructor: '', duration: '', difficulty: 'Beginner', status: 'draft' });
+    setForm({ title: '', domain: 'Engineering', type: 'elective', creditPoints: 0, instructor: '', duration: '', difficulty: 'Beginner', status: 'draft', modules: [] });
+    setExpandedModules([]);
   };
 
   const handleEdit = (course) => {
@@ -32,9 +35,43 @@ const ManageCourses = () => {
     setForm({
       title: course.title, domain: course.domain, type: course.type,
       creditPoints: course.creditPoints, instructor: course.instructor,
-      duration: course.duration, difficulty: course.difficulty, status: course.status
+      duration: course.duration, difficulty: course.difficulty, status: course.status,
+      modules: course.modules || []
     });
     setShowForm(true);
+  };
+
+  const addModule = () => {
+    setForm(prev => ({ ...prev, modules: [...prev.modules, { title: '', lessons: [] }] }));
+    setExpandedModules(prev => [...prev, form.modules.length]);
+  };
+
+  const updateModule = (idx, val) => {
+    const m = [...form.modules];
+    m[idx] = { ...m[idx], title: val };
+    setForm(prev => ({ ...prev, modules: m }));
+  };
+
+  const removeModule = (idx) => {
+    setForm(prev => ({ ...prev, modules: prev.modules.filter((_, i) => i !== idx) }));
+  };
+
+  const addLesson = (modIdx) => {
+    const m = [...form.modules];
+    m[modIdx] = { ...m[modIdx], lessons: [...m[modIdx].lessons, { title: '', videoUrl: '' }] };
+    setForm(prev => ({ ...prev, modules: m }));
+  };
+
+  const updateLesson = (modIdx, lesIdx, field, val) => {
+    const m = [...form.modules];
+    m[modIdx].lessons[lesIdx] = { ...m[modIdx].lessons[lesIdx], [field]: val };
+    setForm(prev => ({ ...prev, modules: m }));
+  };
+
+  const removeLesson = (modIdx, lesIdx) => {
+    const m = [...form.modules];
+    m[modIdx].lessons = m[modIdx].lessons.filter((_, i) => i !== lesIdx);
+    setForm(prev => ({ ...prev, modules: m }));
   };
 
   const handleDelete = (id) => {
@@ -49,7 +86,7 @@ const ManageCourses = () => {
             <h1 className="text-2xl lg:text-3xl font-bold text-white font-heading">Manage Courses</h1>
             <p className="text-slate-300 mt-1">Create, edit, and manage courses</p>
           </div>
-          <button onClick={() => { setEditingCourse(null); setForm({ title: '', domain: 'Engineering', type: 'elective', creditPoints: 0, instructor: '', duration: '', difficulty: 'Beginner', status: 'draft' }); setShowForm(true); }}
+          <button onClick={() => { setEditingCourse(null); setForm({ title: '', domain: 'Engineering', type: 'elective', creditPoints: 0, instructor: '', duration: '', difficulty: 'Beginner', status: 'draft', modules: [] }); setShowForm(true); setExpandedModules([]); }}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg gradient-accent text-white text-sm font-medium">
             <FiPlus size={16} /> Add Course
           </button>
@@ -94,7 +131,7 @@ const ManageCourses = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
-                  <span>{course.enrolledCount} enrolled</span>
+                  <span>{course.enrolledCount} enrolled · {(course.modules || []).length} modules</span>
                   <button className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300">
                     {course.status === 'published' ? <FiToggleRight size={14} /> : <FiToggleLeft size={14} />}
                     {course.status === 'published' ? 'Published' : 'Draft'}
@@ -152,6 +189,62 @@ const ManageCourses = () => {
             </select>
           </div>
         </div>
+
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-white">Course Content (Modules & Lessons)</h3>
+            <button onClick={addModule} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 text-xs border border-indigo-500/20 hover:bg-indigo-500/30">
+              <FiPlus size={12} /> Add Module
+            </button>
+          </div>
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {form.modules.map((mod, mi) => (
+              <div key={mi} className="bg-white/5 rounded-lg p-3 border border-white/10">
+                <div className="flex items-center gap-2">
+                  <input value={mod.title} onChange={e => updateModule(mi, e.target.value)}
+                    placeholder="Module title (e.g. Module 1: Algebra)"
+                    className="flex-1 bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50"
+                  />
+                  <button onClick={() => setExpandedModules(prev => prev.includes(mi) ? prev.filter(i => i !== mi) : [...prev, mi])}
+                    className="p-1 text-slate-400 hover:text-white">
+                    {expandedModules.includes(mi) ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}
+                  </button>
+                  <button onClick={() => removeModule(mi)} className="p-1 text-rose-400 hover:text-rose-300">
+                    <FiTrash2 size={14} />
+                  </button>
+                </div>
+                {expandedModules.includes(mi) && (
+                  <div className="mt-2 pl-3 space-y-1.5 border-l border-white/10">
+                    {mod.lessons.map((les, li) => (
+                      <div key={li} className="flex items-center gap-1.5">
+                        <input value={les.title} onChange={e => updateLesson(mi, li, 'title', e.target.value)}
+                          placeholder="Lesson title"
+                          className="flex-1 bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50"
+                        />
+                        <input value={les.videoUrl} onChange={e => updateLesson(mi, li, 'videoUrl', e.target.value)}
+                          placeholder="YouTube URL"
+                          className="w-36 bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50"
+                        />
+                        <FiVideo className="text-slate-500" size={12} />
+                        <button onClick={() => removeLesson(mi, li)} className="p-0.5 text-rose-400 hover:text-rose-300">
+                          <FiTrash2 size={11} />
+                        </button>
+                      </div>
+                    ))}
+                    <button onClick={() => addLesson(mi)}
+                      className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 mt-1">
+                      <FiPlus size={11} /> Add Lesson
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {form.modules.length === 0 && (
+              <p className="text-xs text-slate-500 text-center py-3">No modules yet. Click "Add Module" to create course content.</p>
+            )}
+          </div>
+        </div>
+
         <button onClick={handleSave} className="mt-4 w-full py-2.5 rounded-lg gradient-accent text-white text-sm font-medium">
           {editingCourse ? 'Update Course' : 'Create Course'}
         </button>

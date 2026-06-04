@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { FiUsers, FiBookOpen, FiAlertTriangle, FiClipboard, FiTrendingUp, FiMessageSquare } from 'react-icons/fi';
 import StatCard from '../../components/shared/StatCard';
 import ParticipationHeatmap from '../../components/charts/ParticipationHeatmap';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const stats = [
     { icon: FiUsers, label: 'Total Students', value: '428', trend: 'up', trendValue: '+12 this month', color: 'indigo' },
     { icon: FiBookOpen, label: 'Active Courses', value: '24', trend: 'up', trendValue: '+3', color: 'emerald' },
@@ -55,7 +57,7 @@ const AdminDashboard = () => {
             </h2>
             <div className="space-y-3">
               {topPerformers.map((s, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5">
+                <div key={i} onClick={() => navigate('/admin/students')} className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                       i === 0 ? 'bg-amber-500/20 text-amber-400' : i === 1 ? 'bg-slate-400/20 text-slate-400' : i === 2 ? 'bg-amber-700/20 text-amber-700' : 'bg-indigo-500/20 text-indigo-400'
@@ -90,7 +92,7 @@ const AdminDashboard = () => {
                     <span className="text-xs text-rose-400">{s.attendance}%</span>
                   </div>
                   <p className="text-xs text-slate-500">{s.reason}</p>
-                  <button className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                  <button onClick={() => navigate('/admin/calls')} className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
                     <FiMessageSquare size={12} /> Contact
                   </button>
                 </div>
@@ -101,11 +103,18 @@ const AdminDashboard = () => {
           <div className="glass rounded-xl p-5">
             <h2 className="text-sm font-semibold text-white mb-3">Quick Actions</h2>
             <div className="space-y-2">
-              {['Create Announcement', 'Add New Course', 'Schedule Meeting', 'Export Reports'].map(action => (
-                <button key={action} className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-colors">
-                  {action}
-                </button>
-              ))}
+              <button onClick={() => navigate('/admin/courses')} className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-colors">
+                Add New Course
+              </button>
+              <button onClick={() => navigate('/admin/assignments')} className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-colors">
+                Manage Assignments
+              </button>
+              <button onClick={() => navigate('/admin/students')} className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-colors">
+                View All Students
+              </button>
+              <button onClick={() => navigate('/admin/calls')} className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-white/5 transition-colors">
+                Contact Parents
+              </button>
             </div>
           </div>
         </div>

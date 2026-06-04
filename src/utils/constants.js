@@ -63,14 +63,23 @@ export const MOCK_STUDENT = {
 };
 
 export const MOCK_COURSES = [
-  { _id: 'c1', title: 'Advanced Mathematics', domain: 'Mandatory', type: 'mandatory', creditPoints: 4, instructor: 'Dr. Verma', duration: '12 weeks', difficulty: 'Advanced', enrolledCount: 120, thumbnail: '', modules: ['Module 1: Algebra', 'Module 2: Calculus', 'Module 3: Geometry'], status: 'published' },
-  { _id: 'c2', title: 'Quantum Physics', domain: 'Science', type: 'elective', creditPoints: 0, instructor: 'Prof. Kumar', duration: '10 weeks', difficulty: 'Advanced', enrolledCount: 85, thumbnail: '', modules: ['Module 1: Basics', 'Module 2: Quantum Mechanics'], status: 'published' },
-  { _id: 'c3', title: 'English Literature', domain: 'Humanities', type: 'elective', creditPoints: 0, instructor: 'Ms. Singh', duration: '8 weeks', difficulty: 'Intermediate', enrolledCount: 95, thumbnail: '', modules: ['Module 1: Poetry', 'Module 2: Prose'], status: 'published' },
-  { _id: 'c4', title: 'Basketball Fundamentals', domain: 'Physical Education', type: 'elective', creditPoints: 0, instructor: 'Coach Ravi', duration: '6 weeks', difficulty: 'Beginner', enrolledCount: 60, thumbnail: '', modules: ['Module 1: Dribbling', 'Module 2: Shooting'], status: 'published' },
-  { _id: 'c5', title: 'Music Theory 101', domain: 'Music', type: 'elective', creditPoints: 0, instructor: 'Mr. Taylor', duration: '8 weeks', difficulty: 'Beginner', enrolledCount: 45, thumbnail: '', modules: ['Module 1: Notes', 'Module 2: Scales'], status: 'published' },
-  { _id: 'c6', title: 'Environmental Science', domain: 'Science', type: 'mandatory', creditPoints: 3, instructor: 'Dr. Gupta', duration: '10 weeks', difficulty: 'Intermediate', enrolledCount: 110, thumbnail: '', modules: ['Module 1: Ecosystems', 'Module 2: Climate'], status: 'published' },
-  { _id: 'c7', title: 'Debate & Communication', domain: 'Co-curricular', type: 'elective', creditPoints: 0, instructor: 'Ms. Patel', duration: '6 weeks', difficulty: 'Intermediate', enrolledCount: 70, thumbnail: '', modules: ['Module 1: Speaking', 'Module 2: Argumentation'], status: 'published' },
-  { _id: 'c8', title: 'Hindi Literature', domain: 'Humanities', type: 'elective', creditPoints: 0, instructor: 'Dr. Mishra', duration: '8 weeks', difficulty: 'Intermediate', enrolledCount: 80, thumbnail: '', modules: ['Module 1: Poetry', 'Module 2: Stories'], status: 'published' },
+  { _id: 'c1', title: 'Advanced Mathematics', domain: 'Mandatory', type: 'mandatory', creditPoints: 4, instructor: 'Dr. Verma', duration: '12 weeks', difficulty: 'Advanced', enrolledCount: 120, thumbnail: '', status: 'published', modules: [
+    { title: 'Module 1: Algebra', lessons: [{ title: 'Introduction to Algebra', videoUrl: 'https://youtu.be/NybHckSEQBI' }, { title: 'Linear Equations', videoUrl: 'https://youtu.be/Ft2_QtXAnh8' }, { title: 'Quadratic Equations', videoUrl: 'https://youtu.be/1F1LQh1_sNc' }] },
+    { title: 'Module 2: Calculus', lessons: [{ title: 'Limits & Continuity', videoUrl: 'https://youtu.be/9I7TVGvnIDg' }, { title: 'Derivatives', videoUrl: 'https://youtu.be/PIWAkMpGZTs' }, { title: 'Integration', videoUrl: 'https://youtu.be/JWlKfQ3MBXU' }] },
+  ]},
+  { _id: 'c2', title: 'Quantum Physics', domain: 'Science', type: 'elective', creditPoints: 0, instructor: 'Prof. Kumar', duration: '10 weeks', difficulty: 'Advanced', enrolledCount: 85, thumbnail: '', status: 'published', modules: [
+    { title: 'Module 1: Basics', lessons: [{ title: 'Introduction to Quantum', videoUrl: 'https://youtu.be/JzIYSr3k5_s' }, { title: 'Wave-Particle Duality', videoUrl: 'https://youtu.be/Q_h4IoPJXZw' }, { title: 'Schrodinger Equation', videoUrl: '' }] },
+    { title: 'Module 2: Quantum Mechanics', lessons: [{ title: 'Quantum States', videoUrl: '' }, { title: 'Operators & Observables', videoUrl: '' }] },
+  ]},
+  { _id: 'c3', title: 'English Literature', domain: 'Humanities', type: 'elective', creditPoints: 0, instructor: 'Ms. Singh', duration: '8 weeks', difficulty: 'Intermediate', enrolledCount: 95, thumbnail: '', status: 'published', modules: [
+    { title: 'Module 1: Poetry', lessons: [{ title: 'Romantic Poetry', videoUrl: '' }, { title: 'Modern Poetry', videoUrl: '' }] },
+    { title: 'Module 2: Prose', lessons: [{ title: 'Fiction', videoUrl: '' }, { title: 'Non-Fiction', videoUrl: '' }] },
+  ]},
+  { _id: 'c4', title: 'Basketball Fundamentals', domain: 'Physical Education', type: 'elective', creditPoints: 0, instructor: 'Coach Ravi', duration: '6 weeks', difficulty: 'Beginner', enrolledCount: 60, thumbnail: '', status: 'published', modules: [] },
+  { _id: 'c5', title: 'Music Theory 101', domain: 'Music', type: 'elective', creditPoints: 0, instructor: 'Mr. Taylor', duration: '8 weeks', difficulty: 'Beginner', enrolledCount: 45, thumbnail: '', status: 'published', modules: [] },
+  { _id: 'c6', title: 'Environmental Science', domain: 'Science', type: 'mandatory', creditPoints: 3, instructor: 'Dr. Gupta', duration: '10 weeks', difficulty: 'Intermediate', enrolledCount: 110, thumbnail: '', status: 'published', modules: [] },
+  { _id: 'c7', title: 'Debate & Communication', domain: 'Co-curricular', type: 'elective', creditPoints: 0, instructor: 'Ms. Patel', duration: '6 weeks', difficulty: 'Intermediate', enrolledCount: 70, thumbnail: '', status: 'published', modules: [] },
+  { _id: 'c8', title: 'Hindi Literature', domain: 'Humanities', type: 'elective', creditPoints: 0, instructor: 'Dr. Mishra', duration: '8 weeks', difficulty: 'Intermediate', enrolledCount: 80, thumbnail: '', status: 'published', modules: [] },
 ];
 
 export const MOCK_ASSIGNMENTS = [

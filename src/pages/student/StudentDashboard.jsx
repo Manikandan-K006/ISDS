@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { FiBookOpen, FiClipboard, FiAward, FiCalendar, FiTrendingUp, FiClock, FiMessageSquare, FiChevronRight } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import StatCard from '../../components/shared/StatCard';
 import CourseProgressCard from '../../components/CourseProgressCard';
 import { useStudentData } from '../../hooks/useStudentData';
@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { getInitials } from '../../utils/helpers';
 
 const StudentDashboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { student, courses, loading } = useStudentData();
   const enrolledCourses = courses?.filter?.(c => student?.enrolledCourses?.includes?.(c._id)) || [];
@@ -100,7 +101,7 @@ const StudentDashboard = () => {
             </h2>
             <div className="space-y-3">
               {(student?.enrolledCourses || []).map(c => (
-                <CourseProgressCard key={c._id || c} course={typeof c === 'object' ? c : { _id: c, title: 'Course', progress: 0 }} onContinue={() => {}} />
+                <CourseProgressCard key={c._id || c} course={typeof c === 'object' ? c : { _id: c, title: 'Course', progress: 0 }} onContinue={(id) => navigate(`/learning/${id}`)} />
               ))}
               {(!student?.enrolledCourses || student.enrolledCourses.length === 0) && (
                 <p className="text-sm text-slate-500 text-center py-4">No courses enrolled yet.</p>
