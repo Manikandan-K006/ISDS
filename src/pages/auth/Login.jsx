@@ -100,9 +100,17 @@ const Login = () => {
         </motion.button>
       </form>
 
-      <p className="text-center text-xs text-slate-500 mt-6">
-        Don't have an account? <Link to="/register" className="text-indigo-400 hover:text-indigo-300">Create Account</Link>
-      </p>
+      <div className="mt-6 pt-6 border-t border-white/10">
+        <p className="text-center text-xs text-slate-500 mb-3">New to ISDS?</p>
+        <Link to="/register">
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            className="w-full py-2.5 rounded-lg bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 transition-all"
+          >
+            Create a New Account
+          </motion.button>
+        </Link>
+      </div>
     </motion.div>
   );
 };

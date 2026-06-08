@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiChevronLeft, FiChevronRight, FiChevronDown, FiChevronUp, FiPlay, FiCheckCircle, FiFileText, FiMessageSquare, FiBookOpen, FiDownload, FiAward, FiX } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight, FiChevronDown, FiChevronUp, FiPlay, FiCheckCircle, FiFileText, FiMessageSquare, FiBookOpen, FiDownload, FiAward, FiX, FiVideo, FiVideoOff } from 'react-icons/fi';
 import { MOCK_COURSES } from '../../utils/constants';
 
 const getYoutubeEmbedUrl = (url) => {
   if (!url) return null;
   const reg = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/;
   const match = url.match(reg);
-  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+  return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : null;
 };
 
 const modules = {
@@ -74,12 +74,15 @@ const LearningPage = () => {
   } : hardcoded;
   const [currentLesson, setCurrentLesson] = useState({ chapterIdx: 0, lessonIdx: 0 });
   const [expandedChapters, setExpandedChapters] = useState([0]);
-  const [activeTab, setActiveTab] = useState('notes');
+  const { chapterIdx, lessonIdx } = currentLesson;
+  const notesKey = `isds_note_${courseId}_${chapterIdx}_${lessonIdx}`;
   const [notes, setNotes] = useState('');
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState({});
 
-  const { chapterIdx, lessonIdx } = currentLesson;
+  useEffect(() => {
+    setNotes(localStorage.getItem(notesKey) || '');
+  }, [notesKey]);
   const currentChapter = moduleData.chapters[chapterIdx];
   const currentLessonObj = currentChapter?.lessons[lessonIdx] || { title: 'No lesson selected' };
   const currentLessonTitle = typeof currentLessonObj === 'string' ? currentLessonObj : currentLessonObj.title;
@@ -132,6 +135,7 @@ const LearningPage = () => {
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                       {ch.lessons.map((lesson, li) => {
                         const lessonTitle = typeof lesson === 'string' ? lesson : lesson.title;
+                        const lessonVideoUrl = typeof lesson === 'string' ? null : lesson.videoUrl;
                         const isActive = ci === chapterIdx && li === lessonIdx;
                         const isDone = ch.completed[li];
                         return (
@@ -142,8 +146,9 @@ const LearningPage = () => {
                               isActive ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-white hover:bg-white/5'
                             }`}
                           >
-                            {isDone ? <FiCheckCircle className="text-emerald-400" size={12} /> : <FiPlay size={12} />}
-                            {lessonTitle}
+                            {isDone ? <FiCheckCircle className="text-emerald-400" size={12} /> : lessonVideoUrl ? <FiVideo size={12} className="text-green-500/60" /> : <FiVideoOff size={12} className="text-slate-600" />}
+                            <span className="truncate flex-1">{lessonTitle}</span>
+                            {lessonVideoUrl && <span className="text-[10px] text-green-500/40">▶</span>}
                           </button>
                         );
                       })}
@@ -233,11 +238,11 @@ const LearningPage = () => {
             {activeTab === 'notes' && (
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-white">Your Notes</h3>
-                <textarea value={notes} onChange={e => setNotes(e.target.value)}
+                <textarea value={notes} onChange={e => { setNotes(e.target.value); localStorage.setItem(notesKey, e.target.value); }}
                   placeholder="Take notes for this lesson..."
                   className="w-full h-40 bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
                 />
-                <p className="text-xs text-slate-500">Auto-saved</p>
+                <p className="text-xs text-slate-500">Auto-saved to this lesson</p>
               </div>
             )}
             {activeTab === 'qa' && (
