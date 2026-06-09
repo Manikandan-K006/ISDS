@@ -1,121 +1,227 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiUser, FiEdit2, FiSave, FiAward, FiActivity, FiCalendar } from 'react-icons/fi';
-import GradeTrendLine from '../../components/charts/GradeTrendLine';
-import PerformanceRadar from '../../components/charts/PerformanceRadar';
-import { MOCK_STUDENT } from '../../utils/constants';
+import { FiEdit2, FiSave, FiAward, FiBookOpen, FiCalendar, FiTrendingUp, FiMail, FiPhone, FiStar } from 'react-icons/fi';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useAuth } from '../../hooks/useAuth';
+import { MOCK_STUDENT, MOCK_TROPHIES, MOCK_CERTIFICATES } from '../../utils/constants';
+import { getInitials, formatDate } from '../../utils/helpers';
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-[#1E293B] border border-white/[0.06] rounded-xl px-3 py-2 shadow-lg">
+      <p className="text-xs text-slate-400">{label}</p>
+      <p className="text-sm text-white font-semibold">GPA: {payload[0].value}</p>
+    </div>
+  );
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+};
 
 const StudentProfile = () => {
+  const { user } = useAuth();
+  const data = MOCK_STUDENT;
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState({
-    name: MOCK_STUDENT.name, email: MOCK_STUDENT.email,
-    phone: MOCK_STUDENT.parentContact, bio: 'Passionate learner | Math enthusiast'
+    name: data.name, email: data.email,
+    phone: data.parentContact, bio: 'Passionate learner | Math enthusiast',
   });
 
-  const gpaData = MOCK_STUDENT.gpaHistory.map((gpa, i) => ({ term: `T${i + 1}`, gpa }));
+  const gpaData = data.gpaHistory.map((gpa, i) => ({ term: `T${i + 1}`, gpa }));
+
+  const stats = [
+    { icon: FiBookOpen, label: 'Total Courses', value: data.enrolledCourses.length, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+    { icon: FiAward, label: 'Certificates', value: MOCK_CERTIFICATES.length, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    { icon: FiCalendar, label: 'Attendance', value: `${data.attendance}%`, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { icon: FiTrendingUp, label: 'Rank', value: '#2', color: 'text-rose-400', bg: 'bg-rose-500/10' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="gradient-hero rounded-2xl p-6 lg:p-8">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-full bg-indigo-500/20 border-2 border-indigo-500/30 flex items-center justify-center">
-            <span className="text-3xl text-indigo-400 font-bold">AS</span>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 pb-8">
+      <motion.div
+        variants={itemVariants}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-white/[0.06] p-6 lg:p-8"
+      >
+        <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-500/10 rounded-full -translate-y-36 translate-x-36 blur-3xl" />
+        <div className="relative flex flex-col sm:flex-row items-start gap-6">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 p-[3px] flex-shrink-0">
+            <div className="w-full h-full rounded-full bg-[#0B1120] flex items-center justify-center">
+              <span className="text-3xl text-indigo-400 font-bold">{getInitials(data.name)}</span>
+            </div>
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-white">{MOCK_STUDENT.name}</h1>
-            <p className="text-slate-300">Class {MOCK_STUDENT.class} · Roll No. {MOCK_STUDENT.rollNumber}</p>
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-white">{data.name}</h1>
+                <p className="text-slate-300 mt-1">
+                  Class {data.class} &middot; Roll No. {data.rollNumber} &middot; {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Student'}
+                </p>
+              </div>
+              <button
+                onClick={() => setEditing(!editing)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition-colors"
+              >
+                {editing ? <FiSave size={16} /> : <FiEdit2 size={16} />}
+                {editing ? 'Save' : 'Edit'}
+              </button>
+            </div>
           </div>
-          <button onClick={() => setEditing(!editing)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition-colors"
-          >
-            {editing ? <FiSave size={16} /> : <FiEdit2 size={16} />}
-            {editing ? 'Save' : 'Edit'}
-          </button>
+          <div className="flex flex-col items-center">
+            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
+              {data.gpa}
+            </div>
+            <span className="text-xs text-slate-400">GPA</span>
+          </div>
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 space-y-4">
-          <div className="glass rounded-xl p-5">
-            <h2 className="text-lg font-semibold text-white mb-4">Personal Information</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { label: 'Full Name', key: 'name' },
-                { label: 'Email', key: 'email' },
-                { label: 'Parent Contact', key: 'phone' },
-                { label: 'Bio', key: 'bio', full: true },
-              ].map(field => (
-                <div key={field.key} className={field.full ? 'sm:col-span-2' : ''}>
-                  <label className="block text-xs text-slate-400 mb-1">{field.label}</label>
-                  {editing ? (
-                    <input value={profile[field.key]} onChange={e => setProfile({...profile, [field.key]: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
-                    />
-                  ) : (
-                    <p className="text-sm text-white">{profile[field.key]}</p>
-                  )}
+      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((s, i) => (
+          <div key={i} className="bg-[#0F172A] rounded-2xl border border-white/[0.06] p-4 flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center`}>
+              <s.icon className={s.color} size={20} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">{s.label}</p>
+              <p className="text-lg font-bold text-white">{s.value}</p>
+            </div>
+          </div>
+        ))}
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div variants={itemVariants} className="lg:col-span-2 bg-[#0F172A] rounded-2xl border border-white/[0.06] p-5">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <FiTrendingUp className="text-indigo-400" /> Academic Performance
+          </h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={gpaData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="term" stroke="#64748B" tick={{ fill: '#64748B', fontSize: 12 }} />
+                <YAxis domain={[0, 4]} stroke="#64748B" tick={{ fill: '#64748B', fontSize: 12 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line type="monotone" dataKey="gpa" stroke="#818CF8" strokeWidth={2} dot={{ fill: '#818CF8', strokeWidth: 2 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="bg-[#0F172A] rounded-2xl border border-white/[0.06] p-5">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <FiStar className="text-amber-400" /> Skills
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {data.subjects.map(s => {
+              const color = s.score >= 90 ? 'emerald' : s.score >= 75 ? 'amber' : 'rose';
+              const map = {
+                emerald: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+                amber: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+                rose: 'bg-rose-500/10 text-rose-300 border-rose-500/20',
+              };
+              return (
+                <div
+                  key={s.name}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border ${map[color]}`}
+                >
+                  {s.name} - {s.score}%
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-
-          <div className="glass rounded-xl p-5">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <FiActivity className="text-indigo-400" /> GPA Trend
-            </h2>
-            <GradeTrendLine data={gpaData} />
-          </div>
-
-          <div className="glass rounded-xl p-5">
-            <h2 className="text-lg font-semibold text-white mb-4">Performance Overview</h2>
-            <PerformanceRadar />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="glass rounded-xl p-5">
-            <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <FiAward className="text-emerald-400" /> Credit Points
-            </h2>
-            <div className="text-center py-4">
-              <div className="text-3xl font-bold text-emerald-400">{MOCK_STUDENT.credits}</div>
-              <div className="text-xs text-slate-500">of {MOCK_STUDENT.graduationCredits} needed</div>
-            </div>
-            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full gradient-success rounded-full" style={{ width: `${(MOCK_STUDENT.credits / MOCK_STUDENT.graduationCredits) * 100}%` }} />
-            </div>
-            <p className="text-xs text-slate-500 mt-2 text-center">{Math.round((MOCK_STUDENT.credits / MOCK_STUDENT.graduationCredits) * 100)}% toward graduation</p>
-          </div>
-
-          <div className="glass rounded-xl p-5">
-            <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <FiUser className="text-indigo-400" /> Subjects
-            </h2>
-            <div className="space-y-2">
-              {MOCK_STUDENT.subjects.map(s => (
-                <div key={s.name} className="flex items-center justify-between">
-                  <span className="text-xs text-slate-300">{s.name}</span>
-                  <span className={`text-xs font-medium ${s.score >= 90 ? 'text-emerald-400' : s.score >= 75 ? 'text-amber-400' : 'text-rose-400'}`}>
-                    {s.score}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="glass rounded-xl p-5">
-            <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <FiCalendar className="text-indigo-400" /> Quick Info
-            </h2>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-slate-400">Attendance</span><span className="text-white">{MOCK_STUDENT.attendance}%</span></div>
-              <div className="flex justify-between"><span className="text-slate-400">GPA</span><span className="text-white">{MOCK_STUDENT.gpa}</span></div>
-              <div className="flex justify-between"><span className="text-slate-400">Courses</span><span className="text-white">{MOCK_STUDENT.enrolledCourses.length}</span></div>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div variants={itemVariants} className="bg-[#0F172A] rounded-2xl border border-white/[0.06] p-5">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <FiAward className="text-emerald-400" /> Achievements
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {MOCK_TROPHIES.map(t => (
+              <div key={t._id} className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.04]">
+                <div className="text-2xl mb-1">{t.icon}</div>
+                <p className="text-xs font-medium text-white">{t.title}</p>
+                <p className="text-[10px] text-slate-500">{formatDate(t.earnedAt)}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="bg-[#0F172A] rounded-2xl border border-white/[0.06] p-5">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <FiBookOpen className="text-indigo-400" /> Certificates
+          </h2>
+          <div className="space-y-2">
+            {MOCK_CERTIFICATES.map(c => (
+              <div key={c._id} className="flex items-center gap-3 bg-white/[0.03] rounded-xl p-3 border border-white/[0.04]">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <FiAward className="text-emerald-400" size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">{c.courseName}</p>
+                  <p className="text-xs text-slate-500">Grade {c.grade} &middot; {formatDate(c.issuedAt)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      <motion.div variants={itemVariants} className="bg-[#0F172A] rounded-2xl border border-white/[0.06] p-5">
+        <h2 className="text-lg font-semibold text-white mb-4">Profile Information</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1">
+              <FiMail size={12} /> Email
+            </label>
+            {editing ? (
+              <input value={profile.email} onChange={e => setProfile({...profile, email: e.target.value})}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
+              />
+            ) : (
+              <p className="text-sm text-white">{data.email}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1">
+              <FiPhone size={12} /> Parent Contact
+            </label>
+            {editing ? (
+              <input value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
+              />
+            ) : (
+              <p className="text-sm text-white">{data.parentContact}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1 flex items-center gap-1">
+              <FiAward size={12} /> Credits
+            </label>
+            <p className="text-sm text-white">{data.credits} / {data.graduationCredits}</p>
+          </div>
+          <div className="sm:col-span-2 lg:col-span-1">
+            <label className="block text-xs text-slate-400 mb-1">Bio</label>
+            {editing ? (
+              <input value={profile.bio} onChange={e => setProfile({...profile, bio: e.target.value})}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50"
+              />
+            ) : (
+              <p className="text-sm text-white">{profile.bio}</p>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
