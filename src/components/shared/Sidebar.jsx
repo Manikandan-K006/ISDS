@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiHome, FiBookOpen, FiGrid, FiClipboard, FiCalendar, FiAward,
@@ -48,6 +48,7 @@ const navMap = {
 const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const navLinks = navMap[user?.role] || studentNav;
 
   const isActive = (path) => {
@@ -107,7 +108,7 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
 
           <div className="border-t border-white/[0.06] py-3 px-2 space-y-1">
             <button
-              onClick={() => { logout(); }}
+              onClick={() => { logout(); navigate('/login'); }}
               className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-red-400 hover:bg-white/[0.04] transition-colors"
               title={collapsed ? 'Sign Out' : undefined}
             >

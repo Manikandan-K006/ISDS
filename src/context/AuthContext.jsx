@@ -1,11 +1,17 @@
 import { createContext, useState, useCallback } from 'react';
+import { signOut } from 'firebase/auth';
+import { auth } from '../config/firebase';
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('isds_user');
-    return stored ? JSON.parse(stored) : null;
+    try {
+      const stored = localStorage.getItem('isds_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
   });
   const [token, setToken] = useState(() => localStorage.getItem('isds_token'));
 
@@ -21,6 +27,9 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('isds_user');
     localStorage.removeItem('isds_token');
+    if (auth) {
+      signOut(auth).catch(() => {});
+    }
   }, []);
 
   const updateUser = useCallback((updates) => {
