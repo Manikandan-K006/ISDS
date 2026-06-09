@@ -38,7 +38,7 @@ const TeacherProfile = () => {
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="gradient-hero rounded-2xl p-6 lg:p-8">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0B1120] rounded-2xl p-6 lg:p-8">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-indigo-500/20 border-2 border-indigo-500/30 flex items-center justify-center">
             <span className="text-2xl text-indigo-400 font-bold">AV</span>
@@ -55,7 +55,7 @@ const TeacherProfile = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="space-y-4">
-          <div className="glass rounded-xl p-5">
+          <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
             <h2 className="text-sm font-semibold text-white mb-3">Personal Info</h2>
             <div className="space-y-3 text-sm">
               {[
@@ -77,7 +77,7 @@ const TeacherProfile = () => {
               ))}
             </div>
           </div>
-          <div className="glass rounded-xl p-5">
+          <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
             <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2"><FiStar className="text-indigo-400" /> Assigned Classes</h2>
             <div className="flex flex-wrap gap-2">
               {assignedClasses.map(c => (
@@ -88,7 +88,7 @@ const TeacherProfile = () => {
         </div>
 
         <div className="lg:col-span-2 space-y-4">
-          <div className="glass rounded-xl p-5">
+          <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
             <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2"><FiBarChart2 className="text-emerald-400" /> Class Performance</h2>
             <div className="space-y-3">
               {classPerformance.map(c => (
@@ -99,7 +99,7 @@ const TeacherProfile = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div className="h-full gradient-accent rounded-full" style={{ width: `${c.avg}%` }} />
+                      <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${c.avg}%` }} />
                     </div>
                     <span className="text-sm font-medium text-white">{c.avg}%</span>
                   </div>
@@ -108,7 +108,7 @@ const TeacherProfile = () => {
             </div>
           </div>
 
-          <div className="glass rounded-xl p-5">
+          <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
             <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2"><FiBookOpen className="text-indigo-400" /> Professional Development Courses</h2>
             <div className="space-y-3">
               {loading ? (

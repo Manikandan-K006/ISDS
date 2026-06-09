@@ -31,7 +31,7 @@ const ForgotPassword = () => {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
       <div className="text-center mb-8">
-        <div className="w-16 h-16 rounded-2xl gradient-accent flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/25">
+        <div className="w-16 h-16 rounded-xl bg-indigo-500 flex items-center justify-center mx-auto mb-4">
           <FiCpu className="text-white" size={32} />
         </div>
         <h1 className="text-2xl font-bold text-white font-heading">Reset Password</h1>
@@ -44,7 +44,7 @@ const ForgotPassword = () => {
             <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@school.com" className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-indigo-500/50" />
           </div>
-          <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-2.5 rounded-lg gradient-accent text-white font-medium text-sm disabled:opacity-50">
+          <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-2.5 rounded-lg bg-indigo-500 text-white font-medium text-sm disabled:opacity-50">
             {loading ? 'Sending...' : 'Send OTP'}
           </motion.button>
         </form>
@@ -55,7 +55,7 @@ const ForgotPassword = () => {
           <p className="text-sm text-slate-400 text-center">Enter the OTP sent to your email</p>
           <input value={otp} onChange={e => setOtp(e.target.value)} placeholder="Enter OTP" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm text-center tracking-widest focus:outline-none focus:border-indigo-500/50" />
           <input type="password" placeholder="New password" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500/50" />
-          <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-2.5 rounded-lg gradient-accent text-white font-medium text-sm disabled:opacity-50">
+          <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-2.5 rounded-lg bg-indigo-500 text-white font-medium text-sm disabled:opacity-50">
             {loading ? 'Resetting...' : 'Reset Password'}
           </motion.button>
         </form>
@@ -67,7 +67,7 @@ const ForgotPassword = () => {
             <FiCheck className="text-emerald-400" size={32} />
           </div>
           <p className="text-white font-medium">Password reset successful!</p>
-          <Link to="/login" className="inline-block py-2.5 px-6 rounded-lg gradient-accent text-white text-sm font-medium">Back to Login</Link>
+          <Link to="/login" className="inline-block py-2.5 px-6 rounded-lg bg-indigo-500 text-white text-sm font-medium">Back to Login</Link>
         </div>
       )}
 

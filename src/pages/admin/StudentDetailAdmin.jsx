@@ -92,7 +92,7 @@ const StudentDetailAdmin = () => {
       case 'academic':
         return (
           <div className="space-y-4">
-            <div className="glass rounded-xl p-5">
+            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-white mb-3">Subject-wise Marks</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -117,11 +117,11 @@ const StudentDetailAdmin = () => {
                 </table>
               </div>
             </div>
-            <div className="glass rounded-xl p-5">
+            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-white mb-3">GPA Trend</h3>
               <GradeTrendLine data={gpaData} />
             </div>
-            <div className="glass rounded-xl p-5">
+            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-white mb-3">Performance Radar</h3>
               <PerformanceRadar />
             </div>
@@ -137,14 +137,14 @@ const StudentDetailAdmin = () => {
                 { label: 'Leave', value: leaveCount, color: 'text-amber-400' },
                 { label: 'Holiday', value: holidayCount, color: 'text-slate-400' }
               ].map(d => (
-                <div key={d.label} className="glass rounded-lg p-3 text-center">
+                <div key={d.label} className="bg-[#0F172A] border border-white/[0.06] rounded-lg p-3 text-center">
                   <div className={`text-lg font-bold ${d.color}`}>{d.value}</div>
                   <div className="text-xs text-slate-500">{d.label}</div>
                 </div>
               ))}
             </div>
             <AttendanceCalendar attendanceData={attendanceData} />
-            <div className="glass rounded-xl p-5">
+            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-white mb-3">Absent Reasons</h3>
               {attendanceData.filter(a => a.status === 'absent').map(a => (
                 <div key={a.date || a._id} className="flex items-center justify-between py-2 border-b border-white/5">
@@ -159,7 +159,7 @@ const StudentDetailAdmin = () => {
         return (
           <div className="space-y-3">
             {student.enrolledCourses && student.enrolledCourses.map(c => (
-              <div key={c._id} className="glass rounded-xl p-4">
+              <div key={c._id} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <h4 className="text-sm font-semibold text-white">{c.title}</h4>
@@ -174,7 +174,7 @@ const StudentDetailAdmin = () => {
                   {c.creditPoints > 0 && <span>· {c.creditPoints} Credits</span>}
                 </div>
                 <div className="w-full h-1.5 bg-white/10 rounded-full mt-2 overflow-hidden">
-                  <div className="h-full gradient-accent rounded-full" style={{ width: `${c.progress}%` }} />
+                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${c.progress}%` }} />
                 </div>
               </div>
             ))}
@@ -184,7 +184,7 @@ const StudentDetailAdmin = () => {
         return (
           <div className="space-y-3">
             {(student.cocurricular || []).map((c, i) => (
-              <div key={i} className="glass rounded-xl p-4">
+              <div key={i} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <h4 className="text-sm font-semibold text-white">{c.activity}</h4>
@@ -203,7 +203,7 @@ const StudentDetailAdmin = () => {
         return (
           <div className="space-y-3">
             {assignments.map(a => (
-              <div key={a._id} className="glass rounded-xl p-4">
+              <div key={a._id} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-sm font-semibold text-white">{a.title}</h4>
@@ -230,7 +230,7 @@ const StudentDetailAdmin = () => {
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {certificates.map(c => (
-              <div key={c._id} className="glass rounded-xl p-4 border border-indigo-500/10">
+              <div key={c._id} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4 border border-indigo-500/10">
                 <div className="flex items-center gap-2 mb-2">
                   <FiAward className="text-indigo-400" size={20} />
                   <h4 className="text-sm font-semibold text-white">{c.courseName}</h4>
@@ -248,7 +248,7 @@ const StudentDetailAdmin = () => {
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {trophies.map(t => (
-              <div key={t._id} className="glass rounded-xl p-4 border border-amber-500/10">
+              <div key={t._id} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4 border border-amber-500/10">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{t.icon}</span>
                   <div>
@@ -264,20 +264,20 @@ const StudentDetailAdmin = () => {
       case 'notes':
         return (
           <div className="space-y-4">
-            <div className="glass rounded-xl p-5">
+            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
               <h3 className="text-sm font-semibold text-white mb-3">Add Teacher Note</h3>
               <textarea value={teacherNote} onChange={e => setTeacherNote(e.target.value)}
                 placeholder="Write a private note about this student..."
                 className="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
               />
               <button onClick={() => { if (teacherNote.trim()) { setNotes([...notes, `${teacherNote} - Teacher`]); setTeacherNote(''); } }}
-                className="mt-2 px-4 py-2 rounded-lg gradient-accent text-white text-sm font-medium">
+                className="mt-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium">
                 Add Note
               </button>
             </div>
             <div className="space-y-2">
               {notes.map((n, i) => (
-                <div key={i} className="glass rounded-xl p-3">
+                <div key={i} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-3">
                   <p className="text-sm text-slate-300">{n}</p>
                 </div>
               ))}
@@ -293,7 +293,7 @@ const StudentDetailAdmin = () => {
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="gradient-hero rounded-2xl p-6 lg:p-8">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0B1120] rounded-2xl p-6 lg:p-8">
         <Link to="/admin/students" className="flex items-center gap-1 text-sm text-slate-400 hover:text-white mb-4 transition-colors">
           <FiChevronLeft size={16} /> Back to Students
         </Link>
@@ -320,7 +320,7 @@ const StudentDetailAdmin = () => {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-48 flex-shrink-0">
-          <div className="glass rounded-xl p-3 sticky top-20 space-y-1">
+          <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-3 sticky top-20 space-y-1">
             {tabs.map(tab => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all ${

@@ -86,7 +86,7 @@ const ManageAssignments = () => {
             <p className="text-slate-300 mt-1">Create and grade assignments</p>
           </div>
           <button onClick={() => { setEditing(null); setForm({ courseId: courses.length > 0 ? courses[0]._id : '', title: '', description: '', deadline: '', maxMarks: 100, type: 'file' }); setShowForm(true); }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg gradient-accent text-white text-sm font-medium">
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium">
             <FiPlus size={16} /> Create Assignment
           </button>
         </div>
@@ -174,7 +174,7 @@ const ManageAssignments = () => {
               <option value="text">Text Entry</option>
             </select>
           </div>
-          <button onClick={handleSave} className="w-full py-2.5 rounded-lg gradient-accent text-white text-sm font-medium">
+          <button onClick={handleSave} className="w-full py-2.5 rounded-lg bg-indigo-500 text-white text-sm font-medium">
             {editing ? 'Update Assignment' : 'Create Assignment'}
           </button>
         </div>

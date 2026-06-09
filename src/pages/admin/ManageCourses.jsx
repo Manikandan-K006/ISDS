@@ -130,7 +130,7 @@ const ManageCourses = () => {
             <p className="text-slate-300 mt-1">Create, edit, and manage courses</p>
           </div>
           <button onClick={() => { setEditingCourse(null); setForm({ title: '', domain: 'Engineering', type: 'elective', creditPoints: 0, instructor: '', duration: '', difficulty: 'Beginner', status: 'draft', modules: [] }); setShowForm(true); setExpandedModules([]); }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg gradient-accent text-white text-sm font-medium">
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium">
             <FiPlus size={16} /> Add Course
           </button>
         </div>
@@ -288,7 +288,7 @@ const ManageCourses = () => {
           </div>
         </div>
 
-        <button onClick={handleSave} className="mt-4 w-full py-2.5 rounded-lg gradient-accent text-white text-sm font-medium">
+        <button onClick={handleSave} className="mt-4 w-full py-2.5 rounded-lg bg-indigo-500 text-white text-sm font-medium">
           {editingCourse ? 'Update Course' : 'Create Course'}
         </button>
       </Modal>

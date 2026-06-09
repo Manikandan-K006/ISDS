@@ -106,7 +106,7 @@ const CallModule = () => {
                   placeholder="Type your message..."
                   className="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
                 />
-                <button className="mt-2 w-full py-2.5 rounded-lg gradient-accent text-white text-sm font-medium">
+                <button className="mt-2 w-full py-2.5 rounded-lg bg-indigo-500 text-white text-sm font-medium">
                   Send Message
                 </button>
               </div>
