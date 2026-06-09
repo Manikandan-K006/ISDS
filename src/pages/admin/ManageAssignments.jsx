@@ -1,38 +1,81 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiPlus, FiClipboard, FiEdit2, FiTrash2, FiSearch, FiCheck, FiX } from 'react-icons/fi';
+import { FiPlus, FiClipboard, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
 import Modal from '../../components/shared/Modal';
-import { MOCK_ASSIGNMENTS, MOCK_COURSES } from '../../utils/constants';
+import { getAssignments, createAssignment, updateAssignment, deleteAssignment } from '../../api/assignments';
+import { getCourses } from '../../api/courses';
 import { formatDateTime } from '../../utils/helpers';
 
 const ManageAssignments = () => {
-  const [assignments, setAssignments] = useState(MOCK_ASSIGNMENTS);
+  const [assignments, setAssignments] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [form, setForm] = useState({
-    courseId: 'c1', title: '', description: '', deadline: '', maxMarks: 100, type: 'file'
+    courseId: '', title: '', description: '', deadline: '', maxMarks: 100, type: 'file'
   });
 
-  const filtered = assignments.filter(a => a.title.toLowerCase().includes(search.toLowerCase()));
-  const submissions = [
-    { _id: 's1', student: 'Arjun Sharma', assignment: 'Calculus Problem Set', submitted: '2026-05-28T10:30:00', status: 'pending', downloadUrl: '#' },
-    { _id: 's2', student: 'Priya Patel', assignment: 'Calculus Problem Set', submitted: '2026-05-27T14:00:00', status: 'graded', grade: 92 },
-    { _id: 's3', student: 'Rahul Singh', assignment: 'Calculus Problem Set', submitted: '2026-05-29T09:00:00', status: 'pending' },
-  ];
-
-  const handleSave = () => {
-    if (editing) {
-      setAssignments(assignments.map(a => a._id === editing._id ? { ...a, ...form } : a));
-    } else {
-      setAssignments([...assignments, {
-        ...form, _id: String(Date.now()), courseName: MOCK_COURSES.find(c => c._id === form.courseId)?.title || '', status: 'pending'
-      }]);
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const results = await Promise.allSettled([getAssignments(), getCourses()]);
+      if (results[0].status === 'fulfilled') setAssignments(Array.isArray(results[0].value) ? results[0].value : []);
+      if (results[1].status === 'fulfilled') setCourses(Array.isArray(results[1].value) ? results[1].value : []);
+      if (results.every(r => r.status === 'rejected')) setError('Failed to load data');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    setShowForm(false);
-    setEditing(null);
-    setForm({ courseId: 'c1', title: '', description: '', deadline: '', maxMarks: 100, type: 'file' });
   };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const filtered = assignments.filter(a => a.title && a.title.toLowerCase().includes(search.toLowerCase()));
+
+  const handleSave = async () => {
+    try {
+      if (editing) {
+        await updateAssignment(editing._id, form);
+      } else {
+        await createAssignment(form);
+      }
+      setShowForm(false);
+      setEditing(null);
+      setForm({ courseId: courses.length > 0 ? courses[0]._id : '', title: '', description: '', deadline: '', maxMarks: 100, type: 'file' });
+      await fetchData();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteAssignment(id);
+      await fetchData();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-6">
+      <p className="text-rose-400 text-sm font-medium">Failed to load assignments</p>
+      <p className="text-rose-400/60 text-xs mt-1">{error}</p>
+      <button onClick={fetchData} className="mt-3 px-4 py-2 bg-rose-500/20 rounded-lg text-rose-400 text-sm">Retry</button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -42,7 +85,7 @@ const ManageAssignments = () => {
             <h1 className="text-2xl lg:text-3xl font-bold text-white font-heading">Manage Assignments</h1>
             <p className="text-slate-300 mt-1">Create and grade assignments</p>
           </div>
-          <button onClick={() => { setEditing(null); setForm({ courseId: 'c1', title: '', description: '', deadline: '', maxMarks: 100, type: 'file' }); setShowForm(true); }}
+          <button onClick={() => { setEditing(null); setForm({ courseId: courses.length > 0 ? courses[0]._id : '', title: '', description: '', deadline: '', maxMarks: 100, type: 'file' }); setShowForm(true); }}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg gradient-accent text-white text-sm font-medium">
             <FiPlus size={16} /> Create Assignment
           </button>
@@ -66,7 +109,7 @@ const ManageAssignments = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white">{a.title}</h3>
-                  <p className="text-xs text-slate-500">{a.courseName}</p>
+                  <p className="text-xs text-slate-500">{a.courseName || courses.find(c => c._id === a.courseId)?.title || ''}</p>
                 </div>
               </div>
               <div className="flex gap-1">
@@ -74,7 +117,7 @@ const ManageAssignments = () => {
                   className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white">
                   <FiEdit2 size={14} />
                 </button>
-                <button onClick={() => setAssignments(assignments.filter(x => x._id !== a._id))}
+                <button onClick={() => handleDelete(a._id)}
                   className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-400">
                   <FiTrash2 size={14} />
                 </button>
@@ -83,51 +126,11 @@ const ManageAssignments = () => {
             <p className="text-xs text-slate-400 mt-2 line-clamp-1">{a.description}</p>
             <div className="flex gap-3 mt-2 text-xs text-slate-500">
               <span>Max Marks: {a.maxMarks}</span>
-              <span>Due: {formatDateTime(a.deadline)}</span>
+              {a.deadline && <span>Due: {formatDateTime(a.deadline)}</span>}
               <span>Type: {a.type}</span>
             </div>
           </div>
         ))}
-      </div>
-
-      <h2 className="text-lg font-semibold text-white mt-4">Recent Submissions</h2>
-      <div className="glass rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="p-3 text-left text-xs text-slate-400 font-medium uppercase">Student</th>
-                <th className="p-3 text-left text-xs text-slate-400 font-medium uppercase">Assignment</th>
-                <th className="p-3 text-left text-xs text-slate-400 font-medium uppercase">Submitted</th>
-                <th className="p-3 text-left text-xs text-slate-400 font-medium uppercase">Status</th>
-                <th className="p-3 text-left text-xs text-slate-400 font-medium uppercase">Grade</th>
-                <th className="p-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.map(s => (
-                <tr key={s._id} className="border-b border-white/5 hover:bg-white/5">
-                  <td className="p-3 text-sm text-white">{s.student}</td>
-                  <td className="p-3 text-sm text-slate-300">{s.assignment}</td>
-                  <td className="p-3 text-sm text-slate-500">{formatDateTime(s.submitted)}</td>
-                  <td className="p-3">
-                    <span className={`text-xs px-2 py-1 rounded-full ${s.status === 'graded' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                      {s.status}
-                    </span>
-                  </td>
-                  <td className="p-3 text-sm text-white">{s.grade ?? '-'}</td>
-                  <td className="p-3">
-                    {s.status === 'pending' ? (
-                      <button className="text-xs text-indigo-400 hover:text-indigo-300">Grade</button>
-                    ) : (
-                      <FiCheck className="text-emerald-400" size={16} />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
 
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editing ? 'Edit Assignment' : 'Create Assignment'}>
@@ -136,7 +139,7 @@ const ManageAssignments = () => {
             <label className="block text-xs text-slate-400 mb-1">Course</label>
             <select value={form.courseId} onChange={e => setForm({...form, courseId: e.target.value})}
               className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500/50">
-              {MOCK_COURSES.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
+              {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
             </select>
           </div>
           {['title', 'description'].map(f => (

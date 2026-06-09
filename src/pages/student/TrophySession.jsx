@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiAward, FiStar, FiTarget, FiTrendingUp, FiMapPin } from 'react-icons/fi';
-import { MOCK_TROPHIES } from '../../utils/constants';
+import { useStudentData } from '../../hooks/useStudentData';
 import { formatDate } from '../../utils/helpers';
 
 const categories = [
@@ -24,11 +24,25 @@ const iconColors = {
 };
 
 const TrophySession = () => {
+  const { trophies, loading, error } = useStudentData();
   const [filter, setFilter] = useState('all');
 
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-rose-400 text-sm">
+      Failed to load data: {error}
+    </div>
+  );
+
   const filtered = filter === 'all'
-    ? MOCK_TROPHIES
-    : MOCK_TROPHIES.filter(t => t.badgeType === filter);
+    ? trophies
+    : trophies.filter(t => t.badgeType === filter);
 
   return (
     <div className="space-y-6">
@@ -69,7 +83,7 @@ const TrophySession = () => {
           </div>
           <div>
             <p className="text-xs text-slate-400">Total Badges</p>
-            <p className="text-xl font-bold text-white">{MOCK_TROPHIES.length}</p>
+            <p className="text-xl font-bold text-white">{trophies.length}</p>
           </div>
         </motion.div>
       </div>

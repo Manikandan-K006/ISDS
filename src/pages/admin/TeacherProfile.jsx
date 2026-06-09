@@ -1,17 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiEdit2, FiSave, FiUser, FiBookOpen, FiAward, FiBarChart2, FiStar } from 'react-icons/fi';
-import { MOCK_COURSES } from '../../utils/constants';
+import { getCourses } from '../../api/courses';
 
 const TeacherProfile = () => {
   const [editing, setEditing] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
     name: 'Dr. Amit Verma', email: 'verma@school.com', subject: 'Mathematics',
     phone: '+91 98765 43200', bio: 'Senior Mathematics teacher with 12 years of experience'
   });
 
   const assignedClasses = ['10A', '10B', '9A'];
-  const teacherCourses = MOCK_COURSES.filter(c => c.instructor.includes('Dr.') || c.instructor.includes('Prof.'));
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await getCourses();
+        setCourses(Array.isArray(data) ? data : []);
+      } catch (e) {
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  const teacherCourses = courses.filter(c => (c.instructor && (c.instructor.includes('Dr.') || c.instructor.includes('Prof.'))));
 
   const classPerformance = [
     { class: '10A', avg: 82, students: 42 },
@@ -94,7 +111,12 @@ const TeacherProfile = () => {
           <div className="glass rounded-xl p-5">
             <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2"><FiBookOpen className="text-indigo-400" /> Professional Development Courses</h2>
             <div className="space-y-3">
-              {teacherCourses.slice(0, 3).map(c => (
+              {loading ? (
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                  Loading...
+                </div>
+              ) : teacherCourses.slice(0, 3).map(c => (
                 <div key={c._id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5">
                   <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                     <FiBookOpen className="text-indigo-400" size={18} />
@@ -106,6 +128,9 @@ const TeacherProfile = () => {
                   <span className="text-xs text-slate-400">{c.difficulty}</span>
                 </div>
               ))}
+              {!loading && teacherCourses.length === 0 && (
+                <p className="text-xs text-slate-500">No professional development courses found</p>
+              )}
             </div>
           </div>
         </div>

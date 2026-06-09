@@ -1,60 +1,60 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { API_BASE } from '../utils/constants';
+import API from '../api/client';
 import { useAuth } from './useAuth';
 
-const api = axios.create({ baseURL: `${API_BASE}/api` });
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('isds_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+const initialState = {
+  student: null,
+  attendance: [],
+  assignments: [],
+  certificates: [],
+  trophies: [],
+  courses: [],
+  loading: true,
+  error: null,
+};
 
 export const useStudentData = () => {
   const { user } = useAuth();
-  const [student, setStudent] = useState(null);
-  const [attendance, setAttendance] = useState([]);
-  const [assignments, setAssignments] = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [trophies, setTrophies] = useState([]);
-  const [activity, setActivity] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [state, setState] = useState(initialState);
 
   const fetchData = useCallback(async () => {
-    if (!user?._id && !user?.id) {
-      setLoading(false);
+    const uid = user?._id || user?.id;
+    if (!uid) {
+      setState(s => ({ ...s, loading: false, error: 'User not authenticated' }));
       return;
     }
-    try {
-      setLoading(true);
-      const uid = user._id || user.id;
 
-      const [studRes, attRes, assignRes, certRes, trophyRes, courseRes] = await Promise.all([
-        api.get(`/students/${uid}`).catch(() => null),
-        api.get(`/attendance?studentId=${uid}`).catch(() => null),
-        api.get(`/assignments`).catch(() => null),
-        api.get(`/certificates?studentId=${uid}`).catch(() => null),
-        api.get(`/trophies?studentId=${uid}`).catch(() => null),
-        api.get(`/courses`).catch(() => null),
+    setState(s => ({ ...s, loading: true, error: null }));
+
+    try {
+      const results = await Promise.allSettled([
+        API.get(`/students/${uid}`),
+        API.get(`/attendance?studentId=${uid}`),
+        API.get('/assignments'),
+        API.get(`/certificates?studentId=${uid}`),
+        API.get(`/trophies?studentId=${uid}`),
+        API.get('/courses'),
       ]);
 
-      if (studRes?.data) setStudent(studRes.data);
-      if (attRes?.data) setAttendance(attRes.data);
-      if (assignRes?.data) setAssignments(assignRes.data);
-      if (certRes?.data) setCertificates(certRes.data);
-      if (trophyRes?.data) setTrophies(trophyRes.data);
-      if (courseRes?.data) setCourses(courseRes.data);
+      const [studRes, attRes, assignRes, certRes, trophyRes, courseRes] = results;
+      const errors = results.filter(r => r.status === 'rejected').map(r => r.reason?.message);
+
+      setState({
+        student: studRes.status === 'fulfilled' ? studRes.value.data : null,
+        attendance: attRes.status === 'fulfilled' ? attRes.value.data : [],
+        assignments: assignRes.status === 'fulfilled' ? assignRes.value.data : [],
+        certificates: certRes.status === 'fulfilled' ? certRes.value.data : [],
+        trophies: trophyRes.status === 'fulfilled' ? trophyRes.value.data : [],
+        courses: courseRes.status === 'fulfilled' ? courseRes.value.data : [],
+        loading: false,
+        error: errors.length > 0 ? errors.join('; ') : null,
+      });
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      setState(s => ({ ...s, loading: false, error: err.message }));
     }
   }, [user?._id, user?.id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  return { student, setStudent, attendance, assignments, certificates, trophies, activity, courses, loading, error, refetch: fetchData };
+  return { ...state, refetch: fetchData };
 };

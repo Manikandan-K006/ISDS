@@ -4,7 +4,7 @@ import {
   FiClipboard, FiClock, FiCheckCircle, FiSend,
   FiFileText, FiChevronDown, FiChevronUp
 } from 'react-icons/fi';
-import { MOCK_ASSIGNMENTS } from '../../utils/constants';
+import { useStudentData } from '../../hooks/useStudentData';
 import { formatDateTime, getDeadlineStatus } from '../../utils/helpers';
 
 const TABS = ['All', 'Pending', 'Submitted', 'Graded'];
@@ -16,19 +16,33 @@ const statusConfig = {
 };
 
 const Assignments = () => {
+  const { assignments, loading, error } = useStudentData();
   const [activeTab, setActiveTab] = useState('All');
   const [expanded, setExpanded] = useState(null);
 
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-rose-400 text-sm">
+      Failed to load data: {error}
+    </div>
+  );
+
   const stats = {
-    total: MOCK_ASSIGNMENTS.length,
-    pending: MOCK_ASSIGNMENTS.filter(a => a.status === 'pending').length,
-    submitted: MOCK_ASSIGNMENTS.filter(a => a.status === 'submitted').length,
-    graded: MOCK_ASSIGNMENTS.filter(a => a.status === 'graded').length,
+    total: assignments.length,
+    pending: assignments.filter(a => a.status === 'pending').length,
+    submitted: assignments.filter(a => a.status === 'submitted').length,
+    graded: assignments.filter(a => a.status === 'graded').length,
   };
 
   const filtered = activeTab === 'All'
-    ? MOCK_ASSIGNMENTS
-    : MOCK_ASSIGNMENTS.filter(a => a.status === activeTab.toLowerCase());
+    ? assignments
+    : assignments.filter(a => a.status === activeTab.toLowerCase());
 
   return (
     <div className="space-y-6">

@@ -1,28 +1,42 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiAward, FiSearch, FiDownload, FiX, FiFileText, FiUser, FiCalendar } from 'react-icons/fi';
-import { MOCK_CERTIFICATES, MOCK_COURSES } from '../../utils/constants';
+import { useStudentData } from '../../hooks/useStudentData';
 import { formatDate } from '../../utils/helpers';
 
 const FILTERS = ['All', 'Academic', 'Co-curricular'];
-const courseDomainMap = Object.fromEntries(MOCK_COURSES.map(c => [c.title, c.domain]));
 
-const getCategory = (courseName) => {
+const getCategory = (courseName, courseDomainMap) => {
   const domain = courseDomainMap[courseName] || '';
   const coCurricularDomains = ['Music', 'Physical Education', 'Co-curricular'];
   return coCurricularDomains.includes(domain) ? 'co-curricular' : 'academic';
 };
 
 const Certificates = () => {
+  const { certificates, courses, loading, error } = useStudentData();
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [selected, setSelected] = useState(null);
 
-  const totalCredits = MOCK_CERTIFICATES.reduce((sum, c) => sum + (c.creditPoints || 0), 0);
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
 
-  const filtered = MOCK_CERTIFICATES.filter(cert => {
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-rose-400 text-sm">
+      Failed to load data: {error}
+    </div>
+  );
+
+  const courseDomainMap = Object.fromEntries((courses || []).map(c => [c.title, c.domain]));
+  const totalCredits = certificates.reduce((sum, c) => sum + (c.creditPoints || 0), 0);
+
+  const filtered = certificates.filter(cert => {
     const matchesSearch = cert.courseName.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = activeFilter === 'All' || getCategory(cert.courseName) === activeFilter.toLowerCase();
+    const matchesFilter = activeFilter === 'All' || getCategory(cert.courseName, courseDomainMap) === activeFilter.toLowerCase();
     return matchesSearch && matchesFilter;
   });
 

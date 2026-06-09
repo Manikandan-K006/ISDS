@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCalendar, FiAlertCircle, FiInfo, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import { MOCK_ATTENDANCE } from '../../utils/constants';
+import { useStudentData } from '../../hooks/useStudentData';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 
 const cellStyles = {
@@ -19,8 +19,22 @@ const dotColors = {
 };
 
 const Attendance = () => {
+  const { attendance, loading, error } = useStudentData();
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 4));
   const [selectedDay, setSelectedDay] = useState(null);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-rose-400 text-sm">
+      Failed to load data: {error}
+    </div>
+  );
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -28,15 +42,15 @@ const Attendance = () => {
   const calEnd = endOfWeek(monthEnd);
   const days = eachDayOfInterval({ start: calStart, end: calEnd });
 
-  const total = MOCK_ATTENDANCE.filter(a => a.status !== 'holiday').length;
-  const present = MOCK_ATTENDANCE.filter(a => a.status === 'present').length;
-  const absent = MOCK_ATTENDANCE.filter(a => a.status === 'absent').length;
-  const leave = MOCK_ATTENDANCE.filter(a => a.status === 'leave').length;
-  const holiday = MOCK_ATTENDANCE.filter(a => a.status === 'holiday').length;
+  const total = attendance.filter(a => a.status !== 'holiday').length;
+  const present = attendance.filter(a => a.status === 'present').length;
+  const absent = attendance.filter(a => a.status === 'absent').length;
+  const leave = attendance.filter(a => a.status === 'leave').length;
+  const holiday = attendance.filter(a => a.status === 'holiday').length;
   const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
 
   const getStatus = (dateStr) => {
-    const record = MOCK_ATTENDANCE.find(a => a.date === dateStr);
+    const record = attendance.find(a => a.date === dateStr);
     return record ? record.status : null;
   };
 
@@ -138,7 +152,7 @@ const Attendance = () => {
                 key={i}
                 onClick={() => {
                   if (status && status !== 'present') {
-                    const record = MOCK_ATTENDANCE.find(a => a.date === dateStr);
+                    const record = attendance.find(a => a.date === dateStr);
                     if (record) setSelectedDay(record);
                   }
                 }}

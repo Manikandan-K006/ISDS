@@ -1,14 +1,68 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiUsers, FiBookOpen, FiTrendingUp, FiCheckCircle, FiClock, FiMessageSquare, FiArrowRight, FiActivity, FiBarChart2 } from 'react-icons/fi';
-import { LineChart, Line, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis } from 'recharts';
 import StatCard from '../../components/shared/StatCard';
-import { MOCK_STUDENT, MOCK_COURSES, MOCK_ATTENDANCE } from '../../utils/constants';
+import { getStudents } from '../../api/students';
+import { getCourses } from '../../api/courses';
+import { getAttendance } from '../../api/attendance';
 
 const COLORS = ['#6366F1', '#10B981', '#F59E0B', '#F43F5E', '#8B5CF6', '#EC4899', '#14B8A6', '#64748B'];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [attendance, setAttendance] = useState([]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const results = await Promise.allSettled([
+        getStudents(),
+        getCourses(),
+        getAttendance(),
+      ]);
+      if (results[0].status === 'fulfilled') setStudents(Array.isArray(results[0].value) ? results[0].value : []);
+      if (results[1].status === 'fulfilled') setCourses(Array.isArray(results[1].value) ? results[1].value : []);
+      if (results[2].status === 'fulfilled') setAttendance(Array.isArray(results[2].value) ? results[2].value : []);
+      if (results.every(r => r.status === 'rejected')) setError('Failed to load dashboard data');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const totalStudents = students.length;
+  const totalCourses = courses.length;
+  const presentCount = attendance.filter(a => a.status === 'present').length;
+  const totalDays = attendance.filter(a => a.status !== 'holiday').length;
+  const avgAttendance = totalDays > 0 ? Math.round((presentCount / totalDays) * 100) : 0;
+  const publishedCount = courses.filter(c => c.status === 'published').length;
+  const completionRate = totalCourses > 0 ? Math.round((publishedCount / totalCourses) * 100) : 0;
+
+  const domainData = courses.reduce((acc, c) => {
+    const existing = acc.find(d => d.name === c.domain);
+    if (existing) existing.count++;
+    else acc.push({ name: c.domain, count: 1 });
+    return acc;
+  }, []);
+
+  const coursePerformance = [...courses]
+    .sort((a, b) => (b.enrolledCount || 0) - (a.enrolledCount || 0))
+    .slice(0, 5)
+    .map(c => ({
+      name: c.title && c.title.length > 18 ? c.title.slice(0, 18) + '...' : c.title || 'Untitled',
+      enrolled: c.enrolledCount || 0,
+      completion: Math.min(Math.round(((c.enrolledCount || 0) / Math.max(totalStudents, 1)) * 100), 100),
+    }));
 
   const enrollmentTrend = [
     { month: 'Jan', students: 320, previous: 290 },
@@ -16,60 +70,43 @@ const AdminDashboard = () => {
     { month: 'Mar', students: 360, previous: 335 },
     { month: 'Apr', students: 380, previous: 350 },
     { month: 'May', students: 410, previous: 375 },
-    { month: 'Jun', students: 428, previous: 390 },
+    { month: 'Jun', students: Math.max(totalStudents, 428), previous: 390 },
   ];
 
-  const domainData = MOCK_COURSES.reduce((acc, c) => {
-    const existing = acc.find(d => d.name === c.domain);
-    if (existing) existing.count++;
-    else acc.push({ name: c.domain, count: 1 });
-    return acc;
-  }, []);
-
-  const todayAttendance = MOCK_ATTENDANCE.filter(a => a.date === '2026-05-30');
-  const attendanceStatus = todayAttendance.length > 0 ? todayAttendance[0].status : 'present';
-  const presentCount = MOCK_ATTENDANCE.filter(a => a.status === 'present').length;
-  const totalDays = MOCK_ATTENDANCE.filter(a => a.status !== 'holiday').length;
-  const avgAttendance = totalDays > 0 ? Math.round((presentCount / totalDays) * 100) : 0;
-
-  const coursePerformance = MOCK_COURSES.slice(0, 5).map(c => ({
-    name: c.title.length > 18 ? c.title.slice(0, 18) + '...' : c.title,
-    enrolled: c.enrolledCount,
-    completion: Math.floor(Math.random() * 30) + 60,
-  }));
-
   const recentActivity = [
-    { id: 1, action: 'Arjun Sharma completed "Calculus Problem Set"', time: '2h ago', type: 'assignment' },
-    { id: 2, action: 'Priya Patel enrolled in "Quantum Physics"', time: '4h ago', type: 'enrollment' },
-    { id: 3, action: 'New course "AI Fundamentals" published', time: '6h ago', type: 'course' },
-    { id: 4, action: 'Attendance report for May generated', time: '1d ago', type: 'report' },
-    { id: 5, action: 'Sneha Reddy scored 95/100 in Math quiz', time: '1d ago', type: 'quiz' },
+    { id: 1, action: totalStudents > 0 ? `${students[0]?.name || 'A student'} enrolled in a course` : 'New student enrolled', time: 'Today', type: 'enrollment' },
+    { id: 2, action: publishedCount > 0 ? `${publishedCount} course${publishedCount > 1 ? 's' : ''} published` : 'No courses published', time: 'Today', type: 'course' },
+    { id: 3, action: `Attendance tracked for ${totalDays} day${totalDays !== 1 ? 's' : ''}`, time: 'Today', type: 'report' },
+    { id: 4, action: `${totalStudents} student${totalStudents !== 1 ? 's' : ''} enrolled`, time: 'Today', type: 'enrollment' },
+    { id: 5, action: `${courses.length} course${courses.length !== 1 ? 's' : ''} in system`, time: 'Today', type: 'course' },
   ];
 
   const stats = [
-    { icon: FiUsers, label: 'Total Students', value: '428', trend: 'up', trendValue: '+12 this month', color: 'indigo' },
-    { icon: FiBookOpen, label: 'Active Courses', value: '24', trend: 'up', trendValue: '+3 this month', color: 'emerald' },
-    { icon: FiTrendingUp, label: 'Avg Attendance', value: `${avgAttendance}%`, trend: 'up', trendValue: '+2.1%', color: 'amber' },
-    { icon: FiCheckCircle, label: 'Completion Rate', value: '87%', trend: 'up', trendValue: '+5.3%', color: 'purple' },
-  ];
-
-  const topPerformers = [
-    { name: 'Ananya Gupta', class: '9A', gpa: 3.9, attendance: 98 },
-    { name: 'Sneha Reddy', class: '10A', gpa: 3.8, attendance: 95 },
-    { name: 'Priya Patel', class: '10A', gpa: 3.7, attendance: 92 },
-    { name: 'Arjun Sharma', class: '10A', gpa: 3.6, attendance: 87 },
-  ];
-
-  const atRisk = [
-    { name: 'Vikram Joshi', class: '10B', attendance: 62, reason: 'Low attendance' },
-    { name: 'Neha Kapoor', class: '9A', attendance: 68, reason: 'Missing assignments' },
-    { name: 'Rohit Kumar', class: '11A', attendance: 58, reason: 'Multiple absences' },
+    { icon: FiUsers, label: 'Total Students', value: String(totalStudents), trend: 'up', trendValue: `${totalStudents > 0 ? 'Active' : 'No data'}`, color: 'indigo' },
+    { icon: FiBookOpen, label: 'Active Courses', value: String(totalCourses), trend: 'up', trendValue: `${publishedCount} published`, color: 'emerald' },
+    { icon: FiTrendingUp, label: 'Avg Attendance', value: `${avgAttendance}%`, trend: avgAttendance >= 75 ? 'up' : 'down', trendValue: `${totalDays} days recorded`, color: 'amber' },
+    { icon: FiCheckCircle, label: 'Completion Rate', value: `${completionRate}%`, trend: 'up', trendValue: `${publishedCount}/${totalCourses} published`, color: 'purple' },
   ];
 
   const chartTooltipStyle = {
     contentStyle: { background: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '13px' },
     labelStyle: { color: '#94A3B8' },
   };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-6">
+      <p className="text-rose-400 text-sm font-medium">Failed to load data</p>
+      <p className="text-rose-400/60 text-xs mt-1">{error}</p>
+      <button onClick={fetchData} className="mt-3 px-4 py-2 bg-rose-500/20 rounded-lg text-rose-400 text-sm">Retry</button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -194,14 +231,14 @@ const AdminDashboard = () => {
                   <FiBookOpen className="text-indigo-400" size={15} />
                 </div>
                 <p className="text-xs text-white font-medium">Manage Courses</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">24 active courses</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{totalCourses} active courses</p>
               </button>
               <button onClick={() => navigate('/admin/students')} className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.1] transition-all text-left group">
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <FiUsers className="text-emerald-400" size={15} />
                 </div>
                 <p className="text-xs text-white font-medium">View Students</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">428 enrolled</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{totalStudents} enrolled</p>
               </button>
               <button onClick={() => navigate('/admin/analytics')} className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.1] transition-all text-left group">
                 <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
@@ -215,14 +252,14 @@ const AdminDashboard = () => {
                   <FiMessageSquare className="text-rose-400" size={15} />
                 </div>
                 <p className="text-xs text-white font-medium">Contact Parents</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">3 at-risk alerts</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Manage communication</p>
               </button>
             </div>
           </div>
 
           <div className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5">
             <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <FiCheckCircle className="text-emerald-400" size={16} /> Today's Attendance
+              <FiCheckCircle className="text-emerald-400" size={16} /> Attendance Overview
             </h2>
             <div className="flex items-center gap-4">
               <div className="flex-1">
@@ -254,7 +291,7 @@ const AdminDashboard = () => {
             <FiTrendingUp className="text-emerald-400" size={16} /> Course Performance
           </h2>
           <div className="space-y-3">
-            {coursePerformance.map((c, i) => (
+            {coursePerformance.length > 0 ? coursePerformance.map((c, i) => (
               <div key={i} className="flex items-center gap-3">
                 <span className="text-xs text-slate-500 w-5">{i + 1}</span>
                 <div className="flex-1 min-w-0">
@@ -267,7 +304,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : <p className="text-xs text-slate-500">No course data available</p>}
           </div>
         </motion.div>
 
@@ -275,11 +312,11 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                <FiTrendingUp className="text-emerald-400" size={14} /> Top Performers
+                <FiTrendingUp className="text-emerald-400" size={14} /> Enrolled Students
               </h2>
               <div className="space-y-2">
-                {topPerformers.map((s, i) => (
-                  <div key={i} onClick={() => navigate('/admin/students')} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.04] cursor-pointer transition-colors">
+                {students.slice(0, 4).map((s, i) => (
+                  <div key={s._id || i} onClick={() => navigate(`/admin/students/${s._id}`)} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.04] cursor-pointer transition-colors">
                     <div className="flex items-center gap-2.5">
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                         i === 0 ? 'bg-amber-500/20 text-amber-400' :
@@ -288,16 +325,16 @@ const AdminDashboard = () => {
                         'bg-indigo-500/20 text-indigo-400'
                       }`}>#{i + 1}</div>
                       <div>
-                        <p className="text-sm text-white">{s.name}</p>
-                        <p className="text-[10px] text-slate-500">{s.class}</p>
+                        <p className="text-sm text-white">{s.name || 'Student'}</p>
+                        <p className="text-[10px] text-slate-500">{s.class || ''}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-emerald-400">{s.gpa}</p>
-                      <p className="text-[10px] text-slate-500">{s.attendance}%</p>
+                      <p className="text-sm font-medium text-emerald-400">{(s.gpa || 0).toFixed(1)}</p>
                     </div>
                   </div>
                 ))}
+                {students.length === 0 && <p className="text-xs text-slate-500">No students enrolled</p>}
               </div>
             </div>
             <div>
@@ -305,18 +342,21 @@ const AdminDashboard = () => {
                 <FiMessageSquare size={14} /> At-Risk Students
               </h2>
               <div className="space-y-2">
-                {atRisk.map((s, i) => (
-                  <div key={i} className="p-2.5 rounded-xl bg-rose-500/[0.04] border border-rose-500/10">
+                {students.filter(s => (s.attendance || 100) < 70).slice(0, 3).map(s => (
+                  <div key={s._id} className="p-2.5 rounded-xl bg-rose-500/[0.04] border border-rose-500/10">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-white">{s.name}</span>
-                      <span className="text-xs font-medium text-rose-400">{s.attendance}%</span>
+                      <span className="text-sm text-white">{s.name || 'Student'}</span>
+                      <span className="text-xs font-medium text-rose-400">{s.attendance || 0}%</span>
                     </div>
-                    <p className="text-[10px] text-slate-500">{s.reason}</p>
+                    <p className="text-[10px] text-slate-500">Low attendance</p>
                     <button onClick={() => navigate('/admin/calls')} className="mt-1.5 text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
                       <FiMessageSquare size={10} /> Contact
                     </button>
                   </div>
                 ))}
+                {students.filter(s => (s.attendance || 100) < 70).length === 0 && (
+                  <p className="text-xs text-slate-500">No at-risk students</p>
+                )}
               </div>
             </div>
           </div>

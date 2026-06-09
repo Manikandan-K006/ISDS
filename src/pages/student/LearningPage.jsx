@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiChevronDown, FiChevronUp, FiPlay, FiCheckCircle, FiFileText, FiMessageSquare, FiBookOpen, FiDownload, FiAward, FiX, FiVideo, FiVideoOff, FiSend } from 'react-icons/fi';
-import { MOCK_COURSES } from '../../utils/constants';
+import { useStudentData } from '../../hooks/useStudentData';
 
 const getYoutubeEmbedUrl = (url) => {
   if (!url) return null;
@@ -11,67 +11,10 @@ const getYoutubeEmbedUrl = (url) => {
   return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : null;
 };
 
-const modules = {
-  'c1': {
-    title: 'Advanced Mathematics',
-    chapters: [
-      {
-        title: 'Module 1: Algebra',
-        lessons: [
-          { title: 'Introduction to Algebra', videoUrl: 'https://youtu.be/NybHckSEQBI' },
-          { title: 'Linear Equations', videoUrl: 'https://youtu.be/Ft2_QtXAnh8' },
-          { title: 'Quadratic Equations', videoUrl: 'https://youtu.be/1F1LQh1_sNc' }
-        ],
-        completed: [true, true, true]
-      },
-      {
-        title: 'Module 2: Calculus',
-        lessons: [
-          { title: 'Limits & Continuity', videoUrl: 'https://youtu.be/9I7TVGvnIDg' },
-          { title: 'Derivatives', videoUrl: 'https://youtu.be/PIWAkMpGZTs' },
-          { title: 'Integration', videoUrl: 'https://youtu.be/JWlKfQ3MBXU' }
-        ],
-        completed: [true, false, false]
-      }
-    ]
-  },
-  'c2': {
-    title: 'Quantum Physics',
-    chapters: [
-      {
-        title: 'Module 1: Basics',
-        lessons: [
-          { title: 'Introduction to Quantum', videoUrl: 'https://youtu.be/JzIYSr3k5_s' },
-          { title: 'Wave-Particle Duality', videoUrl: 'https://youtu.be/Q_h4IoPJXZw' },
-          { title: 'Schrodinger Equation', videoUrl: '' }
-        ],
-        completed: [true, true, false]
-      },
-      {
-        title: 'Module 2: Quantum Mechanics',
-        lessons: [
-          { title: 'Quantum States', videoUrl: '' },
-          { title: 'Operators & Observables', videoUrl: '' }
-        ],
-        completed: [false, false]
-      }
-    ]
-  }
-};
-
 const LearningPage = () => {
   const { courseId } = useParams();
-  const course = MOCK_COURSES.find(c => c._id === courseId);
-  const hardcoded = modules[courseId] || modules['c1'];
-  const hasModules = course?.modules?.length > 0 && course.modules[0]?.lessons;
-  const moduleData = hasModules ? {
-    title: course.title,
-    chapters: course.modules.map(m => ({
-      title: m.title,
-      lessons: m.lessons || [],
-      completed: (m.lessons || []).map(() => false)
-    }))
-  } : hardcoded;
+  const { courses, loading, error } = useStudentData();
+  const course = courses.find(c => c._id === courseId);
   const [currentLesson, setCurrentLesson] = useState({ chapterIdx: 0, lessonIdx: 0 });
   const [expandedChapters, setExpandedChapters] = useState([0]);
   const { chapterIdx, lessonIdx } = currentLesson;
@@ -85,6 +28,42 @@ const LearningPage = () => {
   useEffect(() => {
     setNotes(localStorage.getItem(notesKey) || '');
   }, [notesKey]);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-rose-400 text-sm">
+      Failed to load data: {error}
+    </div>
+  );
+
+  if (!course) return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-slate-400">Course not found.</p>
+    </div>
+  );
+
+  const hasModules = course?.modules?.length > 0 && course.modules[0]?.lessons;
+  if (!hasModules) return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-slate-400">No modules available for this course.</p>
+    </div>
+  );
+
+  const moduleData = {
+    title: course.title,
+    chapters: course.modules.map(m => ({
+      title: m.title,
+      lessons: m.lessons || [],
+      completed: (m.lessons || []).map(() => false)
+    }))
+  };
+
   const currentChapter = moduleData.chapters[chapterIdx];
   const currentLessonObj = currentChapter?.lessons[lessonIdx] || { title: 'No lesson selected' };
   const currentLessonTitle = typeof currentLessonObj === 'string' ? currentLessonObj : currentLessonObj.title;

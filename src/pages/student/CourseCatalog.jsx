@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSearch, FiBookOpen, FiUsers, FiClock, FiChevronRight, FiPlay, FiAward, FiArrowRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { MOCK_COURSES, MOCK_STUDENT, DOMAINS } from '../../utils/constants';
+import { useStudentData } from '../../hooks/useStudentData';
+import { DOMAINS } from '../../utils/constants';
 import { getDifficultyColor } from '../../utils/helpers';
 
 const container = {
@@ -19,12 +20,26 @@ const item = {
 };
 
 const CourseCatalog = () => {
+  const { courses, student, loading, error } = useStudentData();
   const [search, setSearch] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('All');
 
-  const enrolledIds = MOCK_STUDENT.enrolledCourses.map(c => c._id);
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
 
-  const filtered = MOCK_COURSES.filter(c => {
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-rose-400 text-sm">
+      Failed to load data: {error}
+    </div>
+  );
+
+  const enrolledIds = (student?.enrolledCourses || []).map(c => c._id);
+
+  const filtered = (courses || []).filter(c => {
     if (selectedDomain !== 'All' && c.domain !== selectedDomain) return false;
     if (search && !c.title.toLowerCase().includes(search.toLowerCase()) && !c.instructor.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
@@ -37,13 +52,12 @@ const CourseCatalog = () => {
   };
 
   const getEnrolledProgress = (courseId) => {
-    const enrolled = MOCK_STUDENT.enrolledCourses.find(c => c._id === courseId);
+    const enrolled = (student?.enrolledCourses || []).find(c => c._id === courseId);
     return enrolled ? enrolled.progress : 0;
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -64,7 +78,6 @@ const CourseCatalog = () => {
         </div>
       </motion.div>
 
-      {/* Domain Filters */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,7 +99,6 @@ const CourseCatalog = () => {
         ))}
       </motion.div>
 
-      {/* Course Grid */}
       <motion.div
         variants={container}
         initial="hidden"
@@ -105,7 +117,6 @@ const CourseCatalog = () => {
               variants={item}
               className="bg-[#0F172A] border border-white/[0.06] rounded-2xl overflow-hidden hover:border-indigo-500/20 transition-all group"
             >
-              {/* Thumbnail */}
               <div className="relative h-36 bg-gradient-to-br from-indigo-600/20 via-violet-600/10 to-slate-800 flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(99,102,241,0.12),transparent_70%)]" />
                 <FiBookOpen className="text-white/[0.08]" size={48} />
@@ -127,7 +138,6 @@ const CourseCatalog = () => {
                 </span>
               </div>
 
-              {/* Card Body */}
               <div className="p-4">
                 <h3 className="text-sm font-semibold text-white/90 group-hover:text-indigo-300 transition-colors line-clamp-2 leading-snug">
                   {course.title}

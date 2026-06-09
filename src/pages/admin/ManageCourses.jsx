@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiPlus, FiEdit2, FiTrash2, FiBookOpen, FiSearch, FiToggleLeft, FiToggleRight, FiVideo, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Modal from '../../components/shared/Modal';
-import { MOCK_COURSES, DOMAINS, DIFFICULTIES } from '../../utils/constants';
+import { DOMAINS, DIFFICULTIES } from '../../utils/constants';
+import { getCourses, createCourse, updateCourse, deleteCourse } from '../../api/courses';
 
 const ManageCourses = () => {
-  const [courses, setCourses] = useState(MOCK_COURSES);
+  const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [form, setForm] = useState({
     title: '', domain: 'Engineering', type: 'elective', creditPoints: 0,
     instructor: '', duration: '', difficulty: 'Beginner', status: 'draft',
@@ -16,18 +19,38 @@ const ManageCourses = () => {
   });
   const [expandedModules, setExpandedModules] = useState([]);
 
-  const filtered = courses.filter(c => c.title.toLowerCase().includes(search.toLowerCase()));
-
-  const handleSave = () => {
-    if (editingCourse) {
-      setCourses(courses.map(c => c._id === editingCourse._id ? { ...c, ...form } : c));
-    } else {
-      setCourses([...courses, { ...form, _id: String(Date.now()), enrolledCount: 0, modules: [] }]);
+  const fetchCourses = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getCourses();
+      setCourses(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    setShowForm(false);
-    setEditingCourse(null);
-    setForm({ title: '', domain: 'Engineering', type: 'elective', creditPoints: 0, instructor: '', duration: '', difficulty: 'Beginner', status: 'draft', modules: [] });
-    setExpandedModules([]);
+  };
+
+  useEffect(() => { fetchCourses(); }, []);
+
+  const filtered = courses.filter(c => c.title && c.title.toLowerCase().includes(search.toLowerCase()));
+
+  const handleSave = async () => {
+    try {
+      if (editingCourse) {
+        await updateCourse(editingCourse._id, form);
+      } else {
+        await createCourse(form);
+      }
+      setShowForm(false);
+      setEditingCourse(null);
+      setForm({ title: '', domain: 'Engineering', type: 'elective', creditPoints: 0, instructor: '', duration: '', difficulty: 'Beginner', status: 'draft', modules: [] });
+      setExpandedModules([]);
+      await fetchCourses();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const handleEdit = (course) => {
@@ -74,9 +97,29 @@ const ManageCourses = () => {
     setForm(prev => ({ ...prev, modules: m }));
   };
 
-  const handleDelete = (id) => {
-    setCourses(courses.filter(c => c._id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await deleteCourse(id);
+      await fetchCourses();
+    } catch (err) {
+      setError(err.message);
+    }
   };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <span className="ml-3 text-slate-400">Loading...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-6">
+      <p className="text-rose-400 text-sm font-medium">Failed to load courses</p>
+      <p className="text-rose-400/60 text-xs mt-1">{error}</p>
+      <button onClick={fetchCourses} className="mt-3 px-4 py-2 bg-rose-500/20 rounded-lg text-rose-400 text-sm">Retry</button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -131,7 +174,7 @@ const ManageCourses = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
-                  <span>{course.enrolledCount} enrolled · {(course.modules || []).length} modules</span>
+                  <span>{course.enrolledCount || 0} enrolled · {(course.modules || []).length} modules</span>
                   <button className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300">
                     {course.status === 'published' ? <FiToggleRight size={14} /> : <FiToggleLeft size={14} />}
                     {course.status === 'published' ? 'Published' : 'Draft'}
