@@ -1,3 +1,4 @@
+import { Component } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -30,75 +31,112 @@ import TeacherProfile from './pages/admin/TeacherProfile';
 import ManageCourses from './pages/admin/ManageCourses';
 import ManageAssignments from './pages/admin/ManageAssignments';
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const hasGoogleConfig = GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'your_google_client_id_here';
+
+const GoogleWrapper = ({ children }) => {
+  if (hasGoogleConfig) {
+    return <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{children}</GoogleOAuthProvider>;
+  }
+  return children;
+};
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen bg-[#0B1120] flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] border border-red-500/20 rounded-2xl p-8 max-w-lg w-full text-center">
+            <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+              <span className="text-red-400 text-xl">!</span>
+            </div>
+            <h1 className="text-lg font-semibold text-white mb-2">Something went wrong</h1>
+            <p className="text-sm text-slate-400 mb-4 font-mono break-all">{this.state.error.message}</p>
+            <button onClick={() => { this.setState({ error: null }); window.location.href = '/login'; }} className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors">Reload</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
-    <AuthProvider>
-      <ThemeProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-            </Route>
+    <ErrorBoundary>
+      <GoogleWrapper>
+      <AuthProvider>
+        <ThemeProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AuthLayout />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+              </Route>
 
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute allowedRoles={['student']}>
-                  <StudentLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<StudentDashboard />} />
-              <Route path="courses" element={<CourseCatalog />} />
-              <Route path="learning/:courseId" element={<LearningPage />} />
-              <Route path="assignments" element={<Assignments />} />
-              <Route path="certificates" element={<Certificates />} />
-              <Route path="trophies" element={<TrophySession />} />
-              <Route path="leaderboard" element={<Leaderboard />} />
-              <Route path="knowledge-hub" element={<KnowledgeHub />} />
-              <Route path="profile" element={<StudentProfile />} />
-              <Route path="attendance" element={<Attendance />} />
-            </Route>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute allowedRoles={['student']}>
+                    <StudentLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<StudentDashboard />} />
+                <Route path="courses" element={<CourseCatalog />} />
+                <Route path="learning/:courseId" element={<LearningPage />} />
+                <Route path="assignments" element={<Assignments />} />
+                <Route path="certificates" element={<Certificates />} />
+                <Route path="trophies" element={<TrophySession />} />
+                <Route path="leaderboard" element={<Leaderboard />} />
+                <Route path="knowledge-hub" element={<KnowledgeHub />} />
+                <Route path="profile" element={<StudentProfile />} />
+                <Route path="attendance" element={<Attendance />} />
+              </Route>
 
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'teacher']}>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="students" element={<StudentList />} />
-              <Route path="students/:id" element={<StudentDetailAdmin />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="calls" element={<CallModule />} />
-              <Route path="profile" element={<TeacherProfile />} />
-              <Route path="courses" element={<ManageCourses />} />
-              <Route path="assignments" element={<ManageAssignments />} />
-            </Route>
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'teacher']}>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="students" element={<StudentList />} />
+                <Route path="students/:id" element={<StudentDetailAdmin />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="calls" element={<CallModule />} />
+                <Route path="profile" element={<TeacherProfile />} />
+                <Route path="courses" element={<ManageCourses />} />
+                <Route path="assignments" element={<ManageAssignments />} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: 'var(--toast-bg, #1E293B)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#fff',
-              borderRadius: '12px',
-            },
-          }}
-        />
-      </ThemeProvider>
-    </AuthProvider>
-    </GoogleOAuthProvider>
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'var(--toast-bg, #1E293B)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#fff',
+                borderRadius: '12px',
+              },
+            }}
+          />
+        </ThemeProvider>
+      </AuthProvider>
+      </GoogleWrapper>
+    </ErrorBoundary>
   );
 }
 
