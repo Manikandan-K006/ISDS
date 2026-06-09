@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
-import { login as loginApi } from '../../api/auth';
+import { login as loginApi, googleLogin as googleLoginApi } from '../../api/auth';
 import toast from 'react-hot-toast';
 import { Button, Input, Divider } from '../../components/ui';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const roles = [
   { id: 'student', label: 'Student', icon: '🎓' },
@@ -39,11 +40,31 @@ const Login = () => {
       const redirect = data.user.role === 'admin' ? '/admin' : data.user.role === 'teacher' ? '/admin' : '/dashboard';
       navigate(redirect);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed. Try demo accounts: arjun@school.com / password123');
+      toast.error(err.response?.data?.error || 'Login failed. Check your credentials and try again.');
     } finally {
       setLoading(false);
     }
   };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    try {
+      const data = await googleLoginApi(credentialResponse.credential);
+      login({ id: data.user._id, ...data.user }, data.token);
+      toast.success(`Welcome, ${data.user.name}!`);
+      const redirect = data.user.role === 'admin' ? '/admin' : data.user.role === 'teacher' ? '/admin' : '/dashboard';
+      navigate(redirect);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Google sign-in failed. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => toast.error('Google sign-in failed. Try again.'),
+  });
 
   return (
     <div className="min-h-screen bg-[#0B1120] flex items-center justify-center px-4 py-12">
@@ -131,7 +152,7 @@ const Login = () => {
             <Divider className="flex-1" />
           </div>
 
-          <Button variant="secondary" className="w-full">
+          <Button variant="secondary" className="w-full" onClick={() => googleLogin()} disabled={loading}>
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />

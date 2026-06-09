@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
@@ -31,6 +32,7 @@ import ManageAssignments from './pages/admin/ManageAssignments';
 
 function App() {
   return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
     <AuthProvider>
       <ThemeProvider>
         <BrowserRouter>
@@ -96,6 +98,7 @@ function App() {
         />
       </ThemeProvider>
     </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
 

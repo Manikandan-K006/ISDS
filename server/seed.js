@@ -124,10 +124,6 @@ async function seed() {
     console.log('Created trophies');
 
     console.log('\n✅ Seed completed successfully!');
-    console.log('\nLogin credentials:');
-    console.log('  Student: arjun@school.com / password123');
-    console.log('  Teacher: verma@school.com / password123');
-    console.log('  Admin:   admin@school.com / password123');
 
     process.exit(0);
   } catch (err) {

@@ -3,20 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock } from 'react-icons/fi';
 import { register as registerApi } from '../../api/auth';
+import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 
 const Register = () => {
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'student', class: '' });
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await registerApi(form);
-      toast.success('Account created successfully! You can now login.');
-      navigate('/login');
+      const data = await registerApi(form);
+      login({ id: data.user._id, ...data.user }, data.token);
+      toast.success(`Welcome, ${data.user.name}!`);
+      const redirect = data.user.role === 'admin' ? '/admin' : data.user.role === 'teacher' ? '/admin' : '/dashboard';
+      navigate(redirect);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Registration failed');
     } finally {
@@ -65,7 +69,7 @@ const Register = () => {
             </select>
           </div>
         )}
-        <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-medium text-sm hover:shadow-lg hover:shadow-indigo-500/25 transition-all disabled:opacity-50">
+        <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-indigo-500 text-white font-medium text-sm hover:bg-indigo-400 transition-colors disabled:opacity-50">
           {loading ? 'Creating...' : 'Create Account'}
         </motion.button>
       </form>
