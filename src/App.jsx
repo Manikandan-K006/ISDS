@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/layout/ProtectedRoute';
@@ -31,16 +30,6 @@ import TeacherProfile from './pages/admin/TeacherProfile';
 import ManageCourses from './pages/admin/ManageCourses';
 import ManageAssignments from './pages/admin/ManageAssignments';
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const hasGoogleConfig = GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'your_google_client_id_here';
-
-const GoogleWrapper = ({ children }) => {
-  if (hasGoogleConfig) {
-    return <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{children}</GoogleOAuthProvider>;
-  }
-  return children;
-};
-
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -69,7 +58,6 @@ class ErrorBoundary extends Component {
 function App() {
   return (
     <ErrorBoundary>
-      <GoogleWrapper>
       <AuthProvider>
         <ThemeProvider>
           <BrowserRouter>
@@ -135,7 +123,6 @@ function App() {
           />
         </ThemeProvider>
       </AuthProvider>
-      </GoogleWrapper>
     </ErrorBoundary>
   );
 }

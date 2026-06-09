@@ -1,60 +1,58 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
-const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
-
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const { verifyFirebaseToken, hasFirebaseAdminConfig } = require('../config/firebaseAdmin');
 
 const generateToken = (user) => {
   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
-router.post('/google', async (req, res) => {
-  try {
-    const { credential } = req.body;
-    if (!credential) return res.status(400).json({ error: 'Google credential is required' });
+const formatUser = (user) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  class: user.class,
+  profilePhoto: user.profilePhoto,
+  credits: user.credits,
+});
 
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    const { email, name, sub: googleId } = payload;
+// Verify Firebase ID token, find or create user, return JWT
+router.post('/firebase', async (req, res) => {
+  try {
+    const { idToken, name, role, class: className } = req.body;
+
+    if (!hasFirebaseAdminConfig()) {
+      return res.status(500).json({ error: 'Firebase Admin is not configured on the server.' });
+    }
+
+    const decoded = await verifyFirebaseToken(idToken);
+    const { email, uid, picture } = decoded;
 
     let user = await User.findOne({ email });
+
     if (!user) {
+      const userName = name || decoded.name || email.split('@')[0];
+      const userRole = role || 'student';
       user = await User.create({
-        name,
+        name: userName,
         email,
-        password: googleId,
-        role: 'student',
-        profilePhoto: payload.picture || '',
+        password: uid,
+        role: userRole,
+        class: className || '',
+        profilePhoto: picture || '',
       });
     }
 
     const token = generateToken(user);
-    res.json({
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, class: user.class, profilePhoto: user.profilePhoto, credits: user.credits },
-      token
-    });
+    res.json({ user: formatUser(user), token });
   } catch (err) {
-    res.status(500).json({ error: 'Google authentication failed: ' + err.message });
+    console.error('Firebase auth error:', err.message);
+    res.status(401).json({ error: 'Authentication failed: ' + err.message });
   }
 });
 
-router.post('/register', async (req, res) => {
-  try {
-    const { name, email, password, role, class: className, rollNumber, parentContact } = req.body;
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ error: 'Email already exists' });
-    const user = await User.create({ name, email, password, role, class: className, rollNumber, parentContact });
-    const token = generateToken(user);
-    res.status(201).json({ user: { id: user._id, name: user.name, email: user.email, role: user.role, class: user.class }, token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
+// Legacy email/password login (deprecated - kept for backward compat)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -63,10 +61,21 @@ router.post('/login', async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
     const token = generateToken(user);
-    res.json({
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, class: user.class, profilePhoto: user.profilePhoto, credits: user.credits },
-      token
-    });
+    res.json({ user: formatUser(user), token });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Legacy register (deprecated - kept for backward compat)
+router.post('/register', async (req, res) => {
+  try {
+    const { name, email, password, role, class: className, rollNumber, parentContact } = req.body;
+    const existing = await User.findOne({ email });
+    if (existing) return res.status(400).json({ error: 'Email already exists' });
+    const user = await User.create({ name, email, password, role, class: className, rollNumber, parentContact });
+    const token = generateToken(user);
+    res.status(201).json({ user: formatUser(user), token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
