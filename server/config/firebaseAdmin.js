@@ -1,8 +1,7 @@
-const admin = require('firebase-admin');
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
 
-const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
 let firebaseAdmin = null;
-let firestore = null;
 
 const hasFirebaseAdminConfig = () => {
   return !!(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64
@@ -10,39 +9,27 @@ const hasFirebaseAdminConfig = () => {
 };
 
 const getFirebaseAdmin = () => {
-  if (process.env.FIREBASE_PROJECT_ID && !serviceAccountBase64) {
-    // Use default application credentials (e.g., on Render with GCP integration)
-    try {
-      if (!firebaseAdmin) {
-        firebaseAdmin = admin.initializeApp({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-        });
-      }
-      return firebaseAdmin;
-    } catch (e) {
-      console.error('Failed to initialize Firebase Admin with default creds:', e.message);
-      return null;
-    }
+  if (getApps().length > 0) {
+    firebaseAdmin = getApps()[0];
+    return firebaseAdmin;
   }
 
-  if (hasFirebaseAdminConfig()) {
-    try {
-      if (!firebaseAdmin) {
-        const serviceAccount = JSON.parse(
-          Buffer.from(serviceAccountBase64, 'base64').toString('utf-8')
-        );
-        firebaseAdmin = admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount),
-        });
-      }
-      return firebaseAdmin;
-    } catch (e) {
-      console.error('Failed to initialize Firebase Admin:', e.message);
-      return null;
-    }
+  if (!hasFirebaseAdminConfig()) {
+    return null;
   }
 
-  return null;
+  try {
+    const serviceAccount = JSON.parse(
+      Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf-8')
+    );
+    firebaseAdmin = initializeApp({
+      credential: cert(serviceAccount),
+    });
+    return firebaseAdmin;
+  } catch (e) {
+    console.error('Failed to initialize Firebase Admin:', e.message);
+    return null;
+  }
 };
 
 const verifyFirebaseToken = async (idToken) => {
@@ -50,7 +37,7 @@ const verifyFirebaseToken = async (idToken) => {
   if (!fbAdmin) {
     throw new Error('Firebase Admin is not configured. Set FIREBASE_SERVICE_ACCOUNT_BASE64 or FIREBASE_PROJECT_ID.');
   }
-  const decodedToken = await fbAdmin.auth().verifyIdToken(idToken);
+  const decodedToken = await getAuth(fbAdmin).verifyIdToken(idToken);
   return decodedToken;
 };
 
