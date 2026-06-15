@@ -9,21 +9,21 @@ const CourseProgressCard = ({ course, onContinue }) => {
   return (
     <motion.div
       whileHover={{ y: -2 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-      className="glass rounded-xl p-4 border border-white/10 hover:border-indigo-500/20 transition-all"
+      className="glass rounded-xl p-4 border theme-border hover:border-indigo-500/20 transition-all"
     >
       <div className="flex gap-4">
         <div className="w-16 h-16 rounded-lg bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
           <FiBookOpen className="text-indigo-400" size={24} />
         </div>
         <div className="flex-1 min-w-0">
-          <Link to={`/learning/${course._id}`} className="text-sm font-semibold text-white hover:text-indigo-400 transition-colors line-clamp-2">
+          <Link to={`/learning/${course._id}`} className="text-sm font-semibold theme-text hover:text-indigo-400 transition-colors line-clamp-2">
             {course.title}
           </Link>
-          <p className="text-xs text-slate-500 mt-1">{course.instructor}</p>
+          <p className="text-xs theme-text-muted mt-1">{course.instructor}</p>
           <div className="mt-2">
             <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-slate-400">{progress}% complete</span>
-              <span className="text-slate-500">{course.lastAccessed ? 'Last accessed: recently' : ''}</span>
+              <span className="theme-text-muted">{progress}% complete</span>
+              <span className="theme-text-muted">{course.lastAccessed ? 'Last accessed: recently' : ''}</span>
             </div>
             <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full gradient-accent rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />

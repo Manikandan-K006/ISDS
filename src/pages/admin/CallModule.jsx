@@ -23,19 +23,19 @@ const CallModule = () => {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="gradient-hero rounded-2xl p-6 lg:p-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-white font-heading">Parent Communication</h1>
-        <p className="text-slate-300 mt-1">Call, message, and manage parent communications</p>
+        <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Parent Communication</h1>
+        <p className="theme-text mt-1">Call, message, and manage parent communications</p>
       </motion.div>
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted" size={16} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by student or parent name..."
-            className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50"
+            className="w-full theme-input border theme-border rounded-lg pl-10 pr-3 py-2.5 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50"
           />
         </div>
         <select value={classFilter} onChange={e => setClassFilter(e.target.value)}
-          className="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50"
+          className="theme-input border theme-border rounded-lg px-3 py-2.5 text-sm theme-text focus:outline-none focus:border-indigo-500/50"
         >
           <option value="All">All Classes</option>
           <option value="9A">9A</option>
@@ -49,7 +49,7 @@ const CallModule = () => {
         <div className="lg:col-span-2 space-y-3">
           {filtered.map(p => (
             <motion.div key={p._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className={`glass rounded-xl p-4 border cursor-pointer transition-all ${selectedParent?._id === p._id ? 'border-indigo-500/30 bg-indigo-500/5' : 'border-white/10 hover:border-white/20'}`}
+              className={`glass rounded-xl p-4 border cursor-pointer transition-all ${selectedParent?._id === p._id ? 'border-indigo-500/30 bg-indigo-500/5' : 'theme-border hover:theme-border-light'}`}
               onClick={() => setSelectedParent(p)}
             >
               <div className="flex items-center justify-between">
@@ -58,8 +58,8 @@ const CallModule = () => {
                     <FiUser className="text-indigo-400" size={18} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white">{p.parentName}</h3>
-                    <p className="text-xs text-slate-500">Parent of {p.studentName} ({p.className})</p>
+                    <h3 className="text-sm font-semibold theme-text">{p.parentName}</h3>
+                    <p className="text-xs theme-text-muted">Parent of {p.studentName} ({p.className})</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -71,7 +71,7 @@ const CallModule = () => {
                   </button>
                 </div>
               </div>
-              <div className="flex gap-4 mt-3 text-xs text-slate-500">
+              <div className="flex gap-4 mt-3 text-xs theme-text-muted">
                 <span className="flex items-center gap-1"><FiMail size={12} /> {p.email}</span>
                 <span className="flex items-center gap-1"><FiClock size={12} /> Last: {p.lastContacted}</span>
               </div>
@@ -83,13 +83,13 @@ const CallModule = () => {
           {selectedParent ? (
             <>
               <div className="glass rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-white mb-3">Contact Details</h3>
+                <h3 className="text-sm font-semibold theme-text mb-3">Contact Details</h3>
                 <div className="space-y-3 text-sm">
-                  <div><span className="text-slate-400">Parent:</span> <span className="text-white">{selectedParent.parentName}</span></div>
-                  <div><span className="text-slate-400">Student:</span> <span className="text-white">{selectedParent.studentName}</span></div>
-                  <div><span className="text-slate-400">Class:</span> <span className="text-white">{selectedParent.className}</span></div>
-                  <div><span className="text-slate-400">Phone:</span> <a href={`tel:${selectedParent.phone}`} className="text-indigo-400 hover:text-indigo-300">{selectedParent.phone}</a></div>
-                  <div><span className="text-slate-400">Email:</span> <span className="text-white">{selectedParent.email}</span></div>
+                  <div><span className="theme-text-muted">Parent:</span> <span className="theme-text">{selectedParent.parentName}</span></div>
+                  <div><span className="theme-text-muted">Student:</span> <span className="theme-text">{selectedParent.studentName}</span></div>
+                  <div><span className="theme-text-muted">Class:</span> <span className="theme-text">{selectedParent.className}</span></div>
+                  <div><span className="theme-text-muted">Phone:</span> <a href={`tel:${selectedParent.phone}`} className="text-indigo-400 hover:text-indigo-300">{selectedParent.phone}</a></div>
+                  <div><span className="theme-text-muted">Email:</span> <span className="theme-text">{selectedParent.email}</span></div>
                 </div>
                 <div className="flex gap-2 mt-4">
                   <a href={`tel:${selectedParent.phone}`} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-sm hover:bg-emerald-500/30 transition-colors">
@@ -101,10 +101,10 @@ const CallModule = () => {
                 </div>
               </div>
               <div className="glass rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-white mb-3">Send Message</h3>
+                <h3 className="text-sm font-semibold theme-text mb-3">Send Message</h3>
                 <textarea value={message} onChange={e => setMessage(e.target.value)}
                   placeholder="Type your message..."
-                  className="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
+                  className="w-full h-24 theme-input border theme-border rounded-lg p-3 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
                 />
                 <button className="mt-2 w-full py-2.5 rounded-lg bg-indigo-500 text-white text-sm font-medium">
                   Send Message
@@ -112,7 +112,7 @@ const CallModule = () => {
               </div>
             </>
           ) : (
-            <div className="glass rounded-xl p-5 text-center text-slate-500">
+            <div className="glass rounded-xl p-5 text-center theme-text-muted">
               <FiUser className="mx-auto mb-2" size={24} />
               <p className="text-sm">Select a parent to view details</p>
             </div>

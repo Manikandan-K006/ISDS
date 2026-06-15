@@ -1,8 +1,9 @@
+import { motion } from 'framer-motion';
 import { FiAward, FiBookOpen, FiCalendar, FiTrendingUp, FiMail } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 import { useStudentData } from '../../hooks/useStudentData';
 import { getInitials, formatDate } from '../../utils/helpers';
-import { Card } from '../../components/ui';
+import { Card, KpiCard } from '../../components/ui';
 import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 
 const StudentProfile = () => {
@@ -27,18 +28,18 @@ const StudentProfile = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="space-y-6">
       <Card className="p-6 lg:p-8">
         <div className="flex flex-col sm:flex-row items-start gap-5">
-          <div className="w-20 h-20 rounded-full bg-indigo-500/10 border border-white/[0.06] flex items-center justify-center flex-shrink-0">
+          <div className="w-20 h-20 rounded-full bg-indigo-500/10 border theme-border flex items-center justify-center shrink-0">
             <span className="text-2xl text-indigo-400 font-bold">{getInitials(student.name)}</span>
           </div>
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-white">{student.name}</h1>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-slate-400">
+            <h1 className="text-xl font-bold theme-text">{student.name}</h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm theme-text-muted">
               <span className="flex items-center gap-1.5"><FiMail size={12} /> {student.email}</span>
               <span>Class {student.class}</span>
-              <span className="text-xs bg-white/[0.04] px-2 py-0.5 rounded-md">{user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Student'}</span>
+              <span className="text-xs theme-subtle px-2 py-0.5 rounded-md">{user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Student'}</span>
             </div>
           </div>
         </div>
@@ -46,29 +47,21 @@ const StudentProfile = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s, i) => (
-          <Card key={i} className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-              <s.icon className="text-indigo-400" size={18} />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500">{s.label}</p>
-              <p className="text-lg font-semibold text-white">{s.value}</p>
-            </div>
-          </Card>
+          <KpiCard key={i} icon={s.icon} label={s.label} value={String(s.value)} color={['indigo', 'emerald', 'amber', 'purple'][i]} />
         ))}
       </div>
 
       {(student.subjects && student.subjects.length > 0) && (
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Subjects</h2>
+          <h2 className="text-sm font-semibold theme-text mb-4">Subjects</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {student.subjects.map((s, i) => (
               <div key={s.name || i}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm text-slate-300">{s.name}</span>
-                  <span className="text-xs text-slate-500">{s.score}%</span>
+                  <span className="text-sm theme-text">{s.name}</span>
+                  <span className="text-xs theme-text-muted">{s.score}%</span>
                 </div>
-                <div className="w-full bg-white/[0.06] rounded-full h-1.5">
+                <div className="w-full theme-hover rounded-full h-1.5">
                   <div
                     className="h-1.5 rounded-full bg-indigo-500 transition-all"
                     style={{ width: `${s.score}%` }}
@@ -82,70 +75,70 @@ const StudentProfile = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+          <h2 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
             <FiAward className="text-indigo-400" size={14} /> Achievements
           </h2>
           <div className="flex flex-wrap gap-3">
             {(trophies || []).map(t => (
-              <div key={t._id} className="flex items-center gap-2 bg-white/[0.03] rounded-xl px-3 py-2 border border-white/[0.04]">
+              <div key={t._id} className="flex items-center gap-2 theme-subtle rounded-xl px-3 py-2 border border-white/[0.04]">
                 <span className="text-lg">{t.icon}</span>
                 <div>
-                  <p className="text-xs font-medium text-white">{t.title}</p>
-                  <p className="text-[10px] text-slate-500">{formatDate(t.earnedAt)}</p>
+                  <p className="text-xs font-medium theme-text">{t.title}</p>
+                  <p className="text-[10px] theme-text-muted">{formatDate(t.earnedAt)}</p>
                 </div>
               </div>
             ))}
             {(!trophies || trophies.length === 0) && (
-              <p className="text-xs text-slate-500">No achievements yet</p>
+              <p className="text-xs theme-text-muted">No achievements yet</p>
             )}
           </div>
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+          <h2 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
             <FiBookOpen className="text-indigo-400" size={14} /> Certificates
           </h2>
           <div className="space-y-2">
             {(certificates || []).slice(0, 5).map(c => (
-              <div key={c._id} className="flex items-center gap-3 bg-white/[0.03] rounded-xl p-3 border border-white/[0.04]">
+              <div key={c._id} className="flex items-center gap-3 theme-subtle rounded-xl p-3 border border-white/[0.04]">
                 <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
                   <FiAward className="text-indigo-400" size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{c.courseName}</p>
-                  <p className="text-xs text-slate-500">Grade {c.grade} &middot; {formatDate(c.issuedAt)}</p>
+                  <p className="text-sm font-medium theme-text truncate">{c.courseName}</p>
+                  <p className="text-xs theme-text-muted">Grade {c.grade} &middot; {formatDate(c.issuedAt)}</p>
                 </div>
               </div>
             ))}
             {(!certificates || certificates.length === 0) && (
-              <p className="text-xs text-slate-500">No certificates yet</p>
+              <p className="text-xs theme-text-muted">No certificates yet</p>
             )}
           </div>
         </Card>
       </div>
 
       <Card className="p-5">
-        <h2 className="text-sm font-semibold text-white mb-3">Profile Information</h2>
+        <h2 className="text-sm font-semibold theme-text mb-3">Profile Information</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Email</p>
-            <p className="text-white">{student.email}</p>
+            <p className="text-xs theme-text-muted mb-0.5">Email</p>
+            <p className="theme-text">{student.email}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Parent Contact</p>
-            <p className="text-white">{student.parentContact || '—'}</p>
+            <p className="text-xs theme-text-muted mb-0.5">Parent Contact</p>
+            <p className="theme-text">{student.parentContact || '—'}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Credits</p>
-            <p className="text-white">{student.credits || 0} / {student.graduationCredits || 0}</p>
+            <p className="text-xs theme-text-muted mb-0.5">Credits</p>
+            <p className="theme-text">{student.credits || 0} / {student.graduationCredits || 0}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 mb-0.5">Roll Number</p>
-            <p className="text-white">{student.rollNumber || '—'}</p>
+            <p className="text-xs theme-text-muted mb-0.5">Roll Number</p>
+            <p className="theme-text">{student.rollNumber || '—'}</p>
           </div>
         </div>
       </Card>
-    </div>
+    </motion.div>
   );
 };
 

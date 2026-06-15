@@ -73,14 +73,14 @@ const Analytics = () => {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-2xl p-6 lg:p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24" />
+        <div className="absolute top-0 right-0 w-64 h-64 theme-input rounded-full -translate-y-32 translate-x-32" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 theme-input rounded-full translate-y-24 -translate-x-24" />
         <div className="relative flex items-center justify-between">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-white font-heading">Analytics</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Analytics</h1>
             <p className="text-indigo-200 mt-1">Class-level performance insights and metrics</p>
           </div>
-          <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white text-sm hover:bg-white/20 transition-colors">
+          <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 theme-text text-sm hover:bg-white/20 transition-colors">
             <FiDownload size={16} /> Export Report
           </button>
         </div>
@@ -89,7 +89,7 @@ const Analytics = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-            className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5 hover:border-white/[0.12] transition-all"
+            className="theme-card border theme-border rounded-2xl p-5 hover:border-white/[0.12] transition-all"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2.5 rounded-xl bg-${s.color}-500/10`}>
@@ -100,19 +100,19 @@ const Analytics = () => {
                 {s.change}
               </div>
             </div>
-            <div className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">{s.label}</div>
-            <div className="text-2xl font-bold text-white font-heading">{s.value}</div>
+            <div className="theme-text-muted text-xs font-medium uppercase tracking-wider mb-1">{s.label}</div>
+            <div className="text-2xl font-bold theme-text font-heading">{s.value}</div>
           </motion.div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="theme-card border theme-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm font-semibold theme-text flex items-center gap-2">
               <FiBarChart2 className="text-indigo-400" size={16} /> Grade Distribution
             </h2>
-            <span className="text-xs text-slate-500">All classes</span>
+            <span className="text-xs theme-text-muted">All classes</span>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={gradeData} barSize={40}>
@@ -129,12 +129,12 @@ const Analytics = () => {
           </ResponsiveContainer>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="theme-card border theme-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm font-semibold theme-text flex items-center gap-2">
               <FiTrendingUp className="text-emerald-400" size={16} /> Attendance Trends
             </h2>
-            <span className="text-xs text-slate-500">Target: 83%</span>
+            <span className="text-xs theme-text-muted">Target: 83%</span>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={attendanceTrend}>
@@ -156,8 +156,8 @@ const Analytics = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-5 flex items-center gap-2">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="theme-card border theme-border rounded-2xl p-5">
+          <h2 className="text-sm font-semibold theme-text mb-5 flex items-center gap-2">
             <FiBarChart2 className="text-indigo-400" size={16} /> Subject-wise Performance
           </h2>
           <ResponsiveContainer width="100%" height={280}>
@@ -171,8 +171,8 @@ const Analytics = () => {
           </ResponsiveContainer>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-5 flex items-center gap-2">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="theme-card border theme-border rounded-2xl p-5">
+          <h2 className="text-sm font-semibold theme-text mb-5 flex items-center gap-2">
             <FiTrendingUp className="text-emerald-400" size={16} /> Course Performance
           </h2>
           <div className="space-y-4">
@@ -180,17 +180,17 @@ const Analytics = () => {
               <div key={i}>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500 w-5">{i + 1}</span>
-                    <span className="text-sm text-slate-300">{c.name}</span>
+                    <span className="text-xs theme-text-muted w-5">{i + 1}</span>
+                    <span className="text-sm theme-text">{c.name}</span>
                   </div>
                   <div className="flex items-center gap-3 text-xs">
-                    <span className="text-slate-500">{c.students} students</span>
+                    <span className="theme-text-muted">{c.students} students</span>
                     <span className={`font-medium ${c.score >= 80 ? 'text-emerald-400' : c.score >= 70 ? 'text-amber-400' : 'text-rose-400'}`}>
                       {c.score}%
                     </span>
                   </div>
                 </div>
-                <div className="w-full bg-white/[0.06] rounded-full h-1.5 ml-7">
+                <div className="w-full theme-hover rounded-full h-1.5 ml-7">
                   <div className={`h-1.5 rounded-full ${
                     c.score >= 80 ? 'bg-emerald-500' : c.score >= 70 ? 'bg-amber-500' : 'bg-rose-500'
                   }`} style={{ width: `${c.score}%` }} />
@@ -201,22 +201,22 @@ const Analytics = () => {
         </motion.div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-[#0F172A] border border-white/[0.06] rounded-2xl overflow-hidden">
-        <div className="p-5 border-b border-white/[0.06]">
-          <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="theme-card border theme-border rounded-2xl overflow-hidden">
+        <div className="p-5 border-b theme-border">
+          <h2 className="text-sm font-semibold theme-text flex items-center gap-2">
             <FiUsers className="text-indigo-400" size={16} /> Student Performance Overview
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/[0.06]">
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider pl-5">Student</th>
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">Class</th>
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">GPA</th>
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">Attendance</th>
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">Trend</th>
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">Status</th>
+              <tr className="border-b theme-border">
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider pl-5">Student</th>
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Class</th>
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">GPA</th>
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Attendance</th>
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Trend</th>
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -227,16 +227,16 @@ const Analytics = () => {
                       <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center">
                         <span className="text-xs text-indigo-400 font-bold">{s.name.split(' ').map(n => n[0]).join('')}</span>
                       </div>
-                      <span className="text-sm text-white">{s.name}</span>
+                      <span className="text-sm theme-text">{s.name}</span>
                     </div>
                   </td>
-                  <td className="p-3 text-sm text-slate-400">{s.class}</td>
+                  <td className="p-3 text-sm theme-text-muted">{s.class}</td>
                   <td className="p-3">
-                    <span className="text-sm font-medium text-white">{s.gpa}</span>
+                    <span className="text-sm font-medium theme-text">{s.gpa}</span>
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-16 bg-white/[0.06] rounded-full h-1.5">
+                      <div className="w-16 theme-hover rounded-full h-1.5">
                         <div className={`h-1.5 rounded-full ${s.attendance >= 80 ? 'bg-emerald-500' : s.attendance >= 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
                           style={{ width: `${s.attendance}%` }} />
                       </div>
@@ -251,7 +251,7 @@ const Analytics = () => {
                     ) : s.trend === 'down' ? (
                       <FiArrowDown className="text-rose-400" size={16} />
                     ) : (
-                      <FiTrendingUp className="text-slate-500" size={16} />
+                      <FiTrendingUp className="theme-text-muted" size={16} />
                     )}
                   </td>
                   <td className="p-3">

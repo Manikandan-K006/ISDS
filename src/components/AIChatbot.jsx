@@ -49,7 +49,7 @@ const AIChatbot = () => {
       <motion.button
         whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full gradient-accent shadow-lg shadow-indigo-500/30 flex items-center justify-center text-white z-50 hover:shadow-xl hover:shadow-indigo-500/40 transition-shadow"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full gradient-accent shadow-lg shadow-indigo-500/30 flex items-center justify-center theme-text z-50 hover:shadow-xl hover:shadow-indigo-500/40 transition-shadow"
       >
         <FiMessageSquare size={24} />
       </motion.button>
@@ -58,19 +58,19 @@ const AIChatbot = () => {
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 100, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] glass-dark border border-white/10 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+            className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] glass-dark border theme-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
           >
-            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-indigo-500/10">
+            <div className="flex items-center justify-between p-4 border-b theme-border bg-indigo-500/10">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center">
                   <FiCpu className="text-indigo-400" size={16} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">ISDS Assistant</h3>
+                  <h3 className="text-sm font-semibold theme-text">ISDS Assistant</h3>
                   <span className="text-xs text-emerald-400">Online</span>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400">
+              <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 theme-text-muted">
                 <FiX size={18} />
               </button>
             </div>
@@ -84,7 +84,7 @@ const AIChatbot = () => {
                   <div className={`max-w-[85%] p-3 rounded-xl text-sm ${
                     msg.role === 'user'
                       ? 'bg-indigo-500/20 text-indigo-200 border border-indigo-500/20'
-                      : 'bg-white/5 text-slate-300 border border-white/10'
+                      : 'theme-input theme-text border theme-border'
                   }`}>
                     {msg.content}
                   </div>
@@ -92,7 +92,7 @@ const AIChatbot = () => {
               ))}
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-white/5 text-slate-400 p-3 rounded-xl border border-white/10 text-sm">
+                  <div className="theme-input theme-text-muted p-3 rounded-xl border theme-border text-sm">
                     <div className="flex gap-1">
                       <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" />
                       <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
@@ -103,13 +103,13 @@ const AIChatbot = () => {
               )}
             </div>
 
-            <div className="p-3 border-t border-white/10">
+            <div className="p-3 border-t theme-border">
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {quickReplies.map(q => (
                   <button
                     key={q}
                     onClick={() => handleSend(q)}
-                    className="text-xs px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+                    className="text-xs px-2.5 py-1 rounded-full theme-input border theme-border theme-text-muted hover:bg-white/10 hover:theme-text transition-colors"
                   >
                     {q}
                   </button>
@@ -120,9 +120,9 @@ const AIChatbot = () => {
                   value={input} onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSend()}
                   placeholder="Ask me anything..."
-                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50"
+                  className="flex-1 theme-input border theme-border rounded-lg px-3 py-2 text-sm theme-text placeholder-slate-500 focus:outline-none focus:border-indigo-500/50"
                 />
-                <button onClick={() => handleSend()} className="p-2 rounded-lg gradient-accent text-white">
+                <button onClick={() => handleSend()} className="p-2 rounded-lg gradient-accent theme-text">
                   <FiSend size={16} />
                 </button>
               </div>

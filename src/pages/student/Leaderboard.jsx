@@ -53,17 +53,17 @@ const PodiumCard = ({ student, index }) => {
       <div
         className={`w-16 h-16 rounded-full bg-gradient-to-br ${podiumGradients[student.rank]} p-[2px] mb-3`}
       >
-        <div className="w-full h-full rounded-full bg-[#0B1120] flex items-center justify-center">
-          <span className="text-lg font-bold text-white">{student.avatar}</span>
+        <div className="w-full h-full rounded-full theme-bg flex items-center justify-center">
+          <span className="text-lg font-bold theme-text">{student.avatar}</span>
         </div>
       </div>
-      <p className="text-sm font-semibold text-white text-center">{student.name}</p>
-      <p className="text-xs text-slate-400">{student.class}</p>
+      <p className="text-sm font-semibold theme-text text-center">{student.name}</p>
+      <p className="text-xs theme-text-muted">{student.class}</p>
       <div className={`mt-2 px-4 py-1 rounded-full ${podiumBg[student.rank]} border ${podiumBorder[student.rank]}`}>
-        <span className="text-lg font-bold text-white">{student.score}</span>
+        <span className="text-lg font-bold theme-text">{student.score}</span>
       </div>
       <div className={`w-full max-w-[120px] ${heights[index]} mt-2 rounded-t-xl ${podiumBg[student.rank]} border-l border-r border-t ${podiumBorder[student.rank]} flex items-end justify-center pb-2`}>
-        <span className="text-2xl font-bold text-white/80">#{student.rank}</span>
+        <span className="text-2xl font-bold theme-text/80">#{student.rank}</span>
       </div>
     </motion.div>
   );
@@ -72,7 +72,7 @@ const PodiumCard = ({ student, index }) => {
 const TrendIcon = ({ trend }) => {
   if (trend === 'up') return <FiTrendingUp className="text-emerald-400" size={16} />;
   if (trend === 'down') return <FiTrendingDown className="text-rose-400" size={16} />;
-  return <FiMinus className="text-slate-400" size={16} />;
+  return <FiMinus className="theme-text-muted" size={16} />;
 };
 
 const Leaderboard = () => {
@@ -91,14 +91,14 @@ const Leaderboard = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[#0F172A] rounded-2xl p-6 lg:p-8 border border-white/[0.06]"
+        className="theme-card rounded-2xl p-6 lg:p-8 border theme-border"
       >
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">Leaderboard</h1>
-        <p className="text-slate-400 mt-1">Top performers this semester</p>
+        <h1 className="text-2xl lg:text-3xl font-bold theme-text">Leaderboard</h1>
+        <p className="theme-text-muted mt-1">Top performers this semester</p>
       </motion.div>
 
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <FiFilter className="text-slate-400 shrink-0" size={16} />
+        <FiFilter className="theme-text-muted shrink-0" size={16} />
         {CLASSES.map(cls => (
           <button
             key={cls}
@@ -106,7 +106,7 @@ const Leaderboard = () => {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
               activeClass === cls
                 ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                : 'bg-white/[0.04] text-slate-400 border border-white/[0.06] hover:bg-white/[0.08]'
+                : 'theme-subtle theme-text-muted border theme-border hover:bg-[var(--hover)]'
             }`}
           >
             {cls}
@@ -126,9 +126,9 @@ const Leaderboard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="bg-[#0F172A] rounded-2xl border border-white/[0.06] overflow-hidden"
+        className="theme-card rounded-2xl border theme-border overflow-hidden"
       >
-        <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 border-b border-white/[0.06] text-xs text-slate-500 uppercase tracking-wider">
+        <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 border-b theme-border text-xs theme-text-muted uppercase tracking-wider">
           <div className="col-span-1">Rank</div>
           <div className="col-span-4">Student</div>
           <div className="col-span-2">Class</div>
@@ -143,26 +143,26 @@ const Leaderboard = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 + i * 0.04, duration: 0.3 }}
-              className={`grid grid-cols-12 gap-4 items-center px-6 py-4 border-b border-white/[0.06] last:border-0 transition-colors ${
+              className={`grid grid-cols-12 gap-4 items-center px-6 py-4 border-b theme-border last:border-0 transition-colors ${
                 isCurrentUser ? 'bg-indigo-500/10' : 'hover:bg-white/[0.02]'
               }`}
             >
               <div className="col-span-1">
-                <span className="text-sm font-mono text-slate-400">#{student.rank}</span>
+                <span className="text-sm font-mono theme-text-muted">#{student.rank}</span>
               </div>
               <div className="col-span-4 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-xs font-bold text-white">
                   {student.avatar}
                 </div>
-                <span className={`text-sm font-medium ${isCurrentUser ? 'text-indigo-300' : 'text-white'}`}>
+                <span className={`text-sm font-medium ${isCurrentUser ? 'text-indigo-300' : 'theme-text'}`}>
                   {student.name}
                 </span>
               </div>
               <div className="col-span-2">
-                <span className="text-xs text-slate-400">{student.class}</span>
+                <span className="text-xs theme-text-muted">{student.class}</span>
               </div>
               <div className="col-span-2 text-right">
-                <span className="text-sm font-semibold text-white">{student.score}</span>
+                <span className="text-sm font-semibold theme-text">{student.score}</span>
               </div>
               <div className="col-span-1 flex justify-end">
                 <TrendIcon trend={student.trend} />

@@ -81,7 +81,7 @@ const StudentList = () => {
   };
 
   const SortHeader = ({ field, children }) => (
-    <th onClick={() => toggleSort(field)} className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider cursor-pointer hover:text-slate-300 transition-colors select-none">
+    <th onClick={() => toggleSort(field)} className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider cursor-pointer hover:theme-text transition-colors select-none">
       <div className="flex items-center gap-1">
         {children}
         {sortBy === field && (
@@ -94,77 +94,77 @@ const StudentList = () => {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-2xl p-6 lg:p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24" />
+        <div className="absolute top-0 right-0 w-64 h-64 theme-input rounded-full -translate-y-32 translate-x-32" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 theme-input rounded-full translate-y-24 -translate-x-24" />
         <div className="relative">
-          <h1 className="text-2xl lg:text-3xl font-bold text-white font-heading">Students</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Students</h1>
           <p className="text-indigo-200 mt-1">Manage all students across classes</p>
         </div>
       </motion.div>
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted" size={16} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search by name, email, or roll no..."
-            className="w-full bg-[#0F172A] border border-white/[0.06] rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 transition-colors"
+            className="w-full theme-card border theme-border rounded-xl pl-10 pr-10 py-2.5 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 transition-colors"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+            <button onClick={() => setSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 theme-text-muted hover:theme-text">
               <FiX size={16} />
             </button>
           )}
         </div>
         <div className="flex gap-2">
           <select value={classFilter} onChange={e => setClassFilter(e.target.value)}
-            className="bg-[#0F172A] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors"
+            className="theme-card border theme-border rounded-xl px-3.5 py-2.5 text-sm theme-text focus:outline-none focus:border-indigo-500/50 transition-colors"
           >
             {classes.map(c => <option key={c} value={c}>{c === 'All' ? 'All Classes' : c}</option>)}
           </select>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-            className="bg-[#0F172A] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors"
+            className="theme-card border theme-border rounded-xl px-3.5 py-2.5 text-sm theme-text focus:outline-none focus:border-indigo-500/50 transition-colors"
           >
             <option value="All">All Status</option>
             <option value="active">Active</option>
             <option value="at-risk">At Risk</option>
           </select>
           {hasFilters && (
-            <button onClick={clearFilters} className="px-3 py-2.5 rounded-xl bg-white/[0.06] text-slate-400 text-sm hover:bg-white/[0.1] transition-colors flex items-center gap-1.5">
+            <button onClick={clearFilters} className="px-3 py-2.5 rounded-xl theme-hover theme-text-muted text-sm hover:bg-white/[0.1] transition-colors flex items-center gap-1.5">
               <FiFilter size={14} /> Clear
             </button>
           )}
         </div>
         {selected.length > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">{selected.length} selected</span>
+            <span className="text-xs theme-text-muted">{selected.length} selected</span>
             <button className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/30 transition-colors">
               <FiMail size={16} />
             </button>
-            <button className="p-2.5 rounded-xl bg-[#0F172A] text-slate-400 border border-white/[0.06] hover:bg-white/[0.08] transition-colors">
+            <button className="p-2.5 rounded-xl theme-card theme-text-muted border theme-border hover:bg-[var(--hover)] transition-colors">
               <FiDownload size={16} />
             </button>
           </div>
         )}
       </div>
 
-      <div className="hidden lg:block bg-[#0F172A] border border-white/[0.06] rounded-2xl overflow-hidden">
+      <div className="hidden lg:block theme-card border theme-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/[0.06]">
+              <tr className="border-b theme-border">
                 <th className="p-3 pl-5 w-12">
                   <input type="checkbox"
                     checked={filtered.length > 0 && selected.length === filtered.length}
                     onChange={e => setSelected(e.target.checked ? filtered.map(s => s._id) : [])}
-                    className="rounded border-white/20 bg-white/5 text-indigo-500 focus:ring-indigo-500/30"
+                    className="rounded theme-border-light theme-input text-indigo-500 focus:ring-indigo-500/30"
                   />
                 </th>
                 <SortHeader field="name">Student</SortHeader>
                 <SortHeader field="class">Class</SortHeader>
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">Attendance</th>
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Attendance</th>
                 <SortHeader field="gpa">GPA</SortHeader>
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">Status</th>
-                <th className="p-3 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">Last Active</th>
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Status</th>
+                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Last Active</th>
                 <th className="p-3 w-16" />
               </tr>
             </thead>
@@ -175,7 +175,7 @@ const StudentList = () => {
                 >
                   <td className="p-3 pl-5">
                     <input type="checkbox" checked={selected.includes(s._id)} onChange={() => toggleSelect(s._id)}
-                      className="rounded border-white/20 bg-white/5 text-indigo-500 focus:ring-indigo-500/30"
+                      className="rounded theme-border-light theme-input text-indigo-500 focus:ring-indigo-500/30"
                     />
                   </td>
                   <td className="p-3">
@@ -184,18 +184,18 @@ const StudentList = () => {
                         <span className="text-xs font-bold text-indigo-400">{s.name.split(' ').map(n => n[0]).join('')}</span>
                       </div>
                       <div>
-                        <p className="text-sm text-white font-medium">{s.name}</p>
-                        <p className="text-xs text-slate-500">{s.email}</p>
+                        <p className="text-sm theme-text font-medium">{s.name}</p>
+                        <p className="text-xs theme-text-muted">{s.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-3">
-                    <span className="text-sm text-slate-300">{s.class}</span>
-                    <span className="text-xs text-slate-600 ml-2">Roll: {s.rollNo}</span>
+                    <span className="text-sm theme-text">{s.class}</span>
+                    <span className="text-xs text-slate-500 ml-2">Roll: {s.rollNo}</span>
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-16 bg-white/[0.06] rounded-full h-1.5">
+                      <div className="w-16 theme-hover rounded-full h-1.5">
                         <div className={`h-1.5 rounded-full ${s.attendance >= 80 ? 'bg-emerald-500' : s.attendance >= 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
                           style={{ width: `${s.attendance}%` }} />
                       </div>
@@ -213,10 +213,10 @@ const StudentList = () => {
                     </span>
                   </td>
                   <td className="p-3">
-                    <span className={`text-xs ${s.lastActive.includes('d') ? 'text-slate-600' : 'text-slate-400'}`}>{s.lastActive}</span>
+                    <span className={`text-xs ${s.lastActive.includes('d') ? 'text-slate-500' : 'theme-text-muted'}`}>{s.lastActive}</span>
                   </td>
                   <td className="p-3">
-                    <Link to={`/admin/students/${s._id}`} className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/[0.06] text-slate-500 hover:text-indigo-400 transition-colors">
+                    <Link to={`/admin/students/${s._id}`} className="flex items-center justify-center w-8 h-8 rounded-lg hover:theme-hover theme-text-muted hover:text-indigo-400 transition-colors">
                       <FiChevronRight size={16} />
                     </Link>
                   </td>
@@ -227,8 +227,8 @@ const StudentList = () => {
         </div>
         {filtered.length === 0 && (
           <div className="p-12 text-center">
-            <FiUser className="mx-auto text-slate-600 mb-3" size={32} />
-            <p className="text-slate-500 text-sm">No students match your filters</p>
+            <FiUser className="mx-auto text-slate-500 mb-3" size={32} />
+            <p className="theme-text-muted text-sm">No students match your filters</p>
             <button onClick={clearFilters} className="mt-2 text-xs text-indigo-400 hover:text-indigo-300">Clear filters</button>
           </div>
         )}
@@ -237,7 +237,7 @@ const StudentList = () => {
       <div className="lg:hidden space-y-3">
         {filtered.map((s, i) => (
           <motion.div key={s._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-            className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-4 hover:border-white/[0.1] transition-all"
+            className="theme-card border theme-border rounded-2xl p-4 hover:border-white/[0.1] transition-all"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
@@ -245,13 +245,13 @@ const StudentList = () => {
                   <span className="text-sm font-bold text-indigo-400">{s.name.split(' ').map(n => n[0]).join('')}</span>
                 </div>
                 <div>
-                  <p className="text-sm text-white font-medium">{s.name}</p>
-                  <p className="text-xs text-slate-500">{s.email}</p>
+                  <p className="text-sm theme-text font-medium">{s.name}</p>
+                  <p className="text-xs theme-text-muted">{s.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" checked={selected.includes(s._id)} onChange={() => toggleSelect(s._id)}
-                  className="rounded border-white/20 bg-white/5 text-indigo-500 focus:ring-indigo-500/30"
+                  className="rounded theme-border-light theme-input text-indigo-500 focus:ring-indigo-500/30"
                 />
                 <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusStyle(s.status)}`}>
                   {s.status === 'active' ? 'Active' : 'At Risk'}
@@ -259,21 +259,21 @@ const StudentList = () => {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3 mb-3 text-center">
-              <div className="bg-white/[0.03] rounded-xl p-2">
-                <p className="text-[10px] text-slate-500 mb-0.5">Class</p>
-                <p className="text-sm text-white font-medium">{s.class}</p>
+              <div className="theme-subtle rounded-xl p-2">
+                <p className="text-[10px] theme-text-muted mb-0.5">Class</p>
+                <p className="text-sm theme-text font-medium">{s.class}</p>
               </div>
-              <div className="bg-white/[0.03] rounded-xl p-2">
-                <p className="text-[10px] text-slate-500 mb-0.5">GPA</p>
+              <div className="theme-subtle rounded-xl p-2">
+                <p className="text-[10px] theme-text-muted mb-0.5">GPA</p>
                 <p className={`text-sm font-medium ${getGPAColor(s.gpa)}`}>{s.gpa}</p>
               </div>
-              <div className="bg-white/[0.03] rounded-xl p-2">
-                <p className="text-[10px] text-slate-500 mb-0.5">Attendance</p>
+              <div className="theme-subtle rounded-xl p-2">
+                <p className="text-[10px] theme-text-muted mb-0.5">Attendance</p>
                 <p className={`text-sm font-medium ${getAttendanceColor(s.attendance)}`}>{s.attendance}%</p>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-xs theme-text-muted">
                 {s.lastActive.includes('d') ? (
                   <FiAlertTriangle size={12} className="text-rose-400" />
                 ) : (
@@ -288,16 +288,16 @@ const StudentList = () => {
           </motion.div>
         ))}
         {filtered.length === 0 && (
-          <div className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-8 text-center">
-            <FiUser className="mx-auto text-slate-600 mb-3" size={28} />
-            <p className="text-slate-500 text-sm">No students match your filters</p>
+          <div className="theme-card border theme-border rounded-2xl p-8 text-center">
+            <FiUser className="mx-auto text-slate-500 mb-3" size={28} />
+            <p className="theme-text-muted text-sm">No students match your filters</p>
             <button onClick={clearFilters} className="mt-2 text-xs text-indigo-400 hover:text-indigo-300">Clear filters</button>
           </div>
         )}
       </div>
 
       {filtered.length > 0 && (
-        <div className="flex items-center justify-between text-xs text-slate-500">
+        <div className="flex items-center justify-between text-xs theme-text-muted">
           <span>Showing {filtered.length} of {mockStudents.length} students</span>
           <span>{selected.length > 0 ? `${selected.length} selected` : ''}</span>
         </div>

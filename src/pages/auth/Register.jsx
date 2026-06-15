@@ -44,20 +44,20 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1120] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen theme-bg flex items-center justify-center px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className="w-full max-w-[420px]"
       >
-        <div className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-8">
+        <div className="theme-card border theme-border rounded-2xl p-8">
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center mb-5">
-              <span className="text-white font-bold text-sm">IS</span>
+              <span className="theme-text font-bold text-sm">IS</span>
             </div>
-            <h1 className="text-xl font-semibold text-white">Create account</h1>
-            <p className="text-sm text-slate-400 mt-1">Sign up for a new account</p>
+            <h1 className="text-xl font-semibold theme-text">Create account</h1>
+            <p className="text-sm theme-text-muted mt-1">Sign up for a new account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,11 +90,11 @@ const Register = () => {
             />
 
             <div>
-              <label className="block text-sm text-slate-400 mb-1.5">Role</label>
+              <label className="block text-sm theme-text-muted mb-1.5">Role</label>
               <select
                 value={form.role}
                 onChange={e => setForm({...form, role: e.target.value})}
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/20 transition-colors"
+                className="w-full theme-subtle border border-white/[0.08] rounded-xl px-3 py-2.5 theme-text text-sm focus:outline-none focus:theme-border-light transition-colors"
               >
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
@@ -103,11 +103,11 @@ const Register = () => {
 
             {form.role === 'student' && (
               <div>
-                <label className="block text-sm text-slate-400 mb-1.5">Class</label>
+                <label className="block text-sm theme-text-muted mb-1.5">Class</label>
                 <select
                   value={form.class}
                   onChange={e => setForm({...form, class: e.target.value})}
-                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/20 transition-colors"
+                  className="w-full theme-subtle border border-white/[0.08] rounded-xl px-3 py-2.5 theme-text text-sm focus:outline-none focus:theme-border-light transition-colors"
                 >
                   <option value="">Select class</option>
                   {['9A','9B','10A','10B','11A','11B','12A','12B'].map(c => (
@@ -122,9 +122,9 @@ const Register = () => {
             </Button>
           </form>
 
-          <p className="text-center text-xs text-slate-500 mt-6">
+          <p className="text-center text-xs theme-text-muted mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-white hover:text-indigo-400 transition-colors font-medium">
+            <Link to="/login" className="theme-text hover:text-indigo-400 transition-colors font-medium">
               Sign in
             </Link>
           </p>

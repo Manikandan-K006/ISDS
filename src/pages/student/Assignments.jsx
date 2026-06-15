@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { FiClipboard, FiClock, FiSend, FiCheckCircle, FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
 import { useStudentData } from '../../hooks/useStudentData';
 import { formatDateTime, getDeadlineStatus } from '../../utils/helpers';
-import { Card, Badge } from '../../components/ui';
+import { Card, Badge, Button } from '../../components/ui';
 import { ListSkeleton } from '../../components/shared/LoadingSkeleton';
 
 const TABS = ['All', 'Pending', 'Submitted', 'Graded'];
@@ -25,12 +26,7 @@ const Assignments = () => {
         <FiAlertCircle className="mx-auto text-rose-400 mb-3" size={40} />
         <p className="text-rose-300 font-medium mb-2">Failed to load assignments</p>
         <p className="text-rose-400/70 text-sm mb-4">{error}</p>
-        <button
-          onClick={refetch}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm font-medium hover:bg-rose-500/20 transition-colors"
-        >
-          <FiRefreshCw size={14} /> Retry
-        </button>
+        <Button variant="secondary" icon={FiRefreshCw} onClick={refetch}>Retry</Button>
       </div>
     );
   }
@@ -59,20 +55,18 @@ const Assignments = () => {
               <Badge color="indigo">{a.type === 'file' ? 'File' : 'Text'}</Badge>
             )}
           </div>
-          <span className={`shrink-0 text-xs font-medium ${isOverdue ? 'text-rose-400' : deadlineColorMap[deadline.color] || 'text-slate-400'}`}>
+          <span className={`shrink-0 text-xs font-medium ${isOverdue ? 'text-rose-400' : deadlineColorMap[deadline.color] || 'theme-text-muted'}`}>
             {isOverdue ? 'Overdue' : deadline.label}
           </span>
         </div>
 
-        <h3 className="text-sm font-semibold text-white mb-1">{a.title}</h3>
-        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-3">{a.description}</p>
+        <h3 className="text-sm font-semibold theme-text mb-1">{a.title}</h3>
+        <p className="text-xs theme-text-muted leading-relaxed line-clamp-2 mb-3">{a.description}</p>
 
-        <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+        <div className="flex items-center justify-between pt-3 border-t theme-border">
           <div>
             {a.status === 'pending' && (
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-300 text-xs font-medium border border-indigo-500/20 hover:bg-indigo-500/20 transition-colors">
-                <FiSend size={12} /> Submit
-              </button>
+              <Button variant="secondary" size="sm" icon={FiSend}>Submit</Button>
             )}
             {a.status === 'submitted' && (
               <span className="text-xs text-indigo-400 flex items-center gap-1">
@@ -99,24 +93,21 @@ const Assignments = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-white">Assignments</h1>
-          <p className="text-sm text-slate-400">{stats.total} total</p>
+          <h1 className="text-lg font-semibold theme-text">Assignments</h1>
+          <p className="text-sm theme-text-muted">{stats.total} total</p>
         </div>
-        <span className="px-4 py-1.5 rounded-full bg-white/[0.06] text-sm text-slate-300 font-medium">
+        <span className="px-4 py-1.5 rounded-full theme-hover text-sm theme-text font-medium">
           {stats.total}
         </span>
       </div>
 
-      <div className="flex gap-1 p-1 bg-[#0F172A] rounded-xl border border-white/[0.06] w-fit">
+      <div className="flex gap-1 p-1 theme-card rounded-xl border theme-border w-fit">
         {TABS.map(tab => (
-          <button
+          <Button
             key={tab}
+            variant={activeTab === tab ? 'primary' : 'ghost'}
+            size="sm"
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab
-                ? 'bg-indigo-500/20 text-indigo-300'
-                : 'text-slate-400 hover:text-white'
-            }`}
           >
             {tab}
             {tab !== 'All' && (
@@ -124,19 +115,19 @@ const Assignments = () => {
                 {tab === 'Pending' ? stats.pending : tab === 'Submitted' ? stats.submitted : stats.graded}
               </span>
             )}
-          </button>
+          </Button>
         ))}
       </div>
 
       {filtered.length > 0 ? (
-        <div className="space-y-3">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="space-y-3">
           {filtered.map(a => renderCard(a))}
-        </div>
+        </motion.div>
       ) : (
-        <div className="bg-[#0F172A] rounded-2xl border border-white/[0.06] p-12 text-center">
-          <FiClipboard className="mx-auto text-slate-600 mb-4" size={48} />
-          <h3 className="text-base font-medium text-white mb-1">No assignments found</h3>
-          <p className="text-sm text-slate-400">All caught up! No {activeTab.toLowerCase()} assignments.</p>
+        <div className="theme-card rounded-2xl border theme-border p-12 text-center">
+          <FiClipboard className="mx-auto text-slate-500 mb-4" size={48} />
+          <h3 className="text-base font-medium theme-text mb-1">No assignments found</h3>
+          <p className="text-sm theme-text-muted">All caught up! No {activeTab.toLowerCase()} assignments.</p>
         </div>
       )}
     </div>

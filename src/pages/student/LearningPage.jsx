@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiChevronDown, FiPlay, FiCheckCircle, FiFileText, FiMessageSquare, FiBookOpen, FiDownload, FiAward, FiX, FiVideo, FiSend, FiMenu } from 'react-icons/fi';
 import { useStudentData } from '../../hooks/useStudentData';
-import { Card } from '../../components/ui';
+import { Card, Button, Input, Badge } from '../../components/ui';
 
 const getYoutubeEmbedUrl = (url) => {
   if (!url) return null;
@@ -34,7 +34,7 @@ const LearningPage = () => {
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      <span className="ml-3 text-slate-400">Loading...</span>
+      <span className="ml-3 theme-text-muted">Loading...</span>
     </div>
   );
 
@@ -46,14 +46,14 @@ const LearningPage = () => {
 
   if (!course) return (
     <div className="flex items-center justify-center h-64">
-      <p className="text-slate-400">Course not found.</p>
+      <p className="theme-text-muted">Course not found.</p>
     </div>
   );
 
   const hasModules = course?.modules?.length > 0 && course.modules[0]?.lessons;
   if (!hasModules) return (
     <div className="flex items-center justify-center h-64">
-      <p className="text-slate-400">No modules available for this course.</p>
+      <p className="theme-text-muted">No modules available for this course.</p>
     </div>
   );
 
@@ -93,14 +93,15 @@ const LearningPage = () => {
   const quizPassed = quizScore >= Math.ceil(quizQuestions.length * 0.5);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-5.5rem)]">
-      <div className="lg:w-72 flex-shrink-0">
+    <>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-5.5rem)]">
+      <div className="lg:w-72 shrink-0">
         <Card className="p-4 h-full overflow-y-auto">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-white/90">Course Content</h2>
-            <span className="text-xs text-slate-500 bg-white/[0.04] px-2 py-0.5 rounded-full">{completedLessons}/{totalLessons}</span>
+            <h2 className="text-sm font-semibold theme-text/90">Course Content</h2>
+            <span className="text-xs theme-text-muted theme-subtle px-2 py-0.5 rounded-full">{completedLessons}/{totalLessons}</span>
           </div>
-          <div className="w-full h-1 bg-white/[0.06] rounded-full mb-4 overflow-hidden">
+          <div className="w-full h-1 theme-hover rounded-full mb-4 overflow-hidden">
             <div className="h-full bg-indigo-400 rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
           <div className="space-y-0.5">
@@ -111,14 +112,14 @@ const LearningPage = () => {
                   <button
                     onClick={() => setExpandedChapters(prev => prev.includes(ci) ? prev.filter(i => i !== ci) : [...prev, ci])}
                     className={`flex items-center justify-between w-full px-3 py-2.5 text-left transition-colors ${
-                      isExpanded ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'
+                      isExpanded ? 'theme-subtle' : 'hover:bg-white/[0.02]'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <FiChevronDown size={14} className={`text-slate-500 flex-shrink-0 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
-                      <span className="text-xs text-slate-300 font-medium truncate">{ch.title}</span>
+                      <FiChevronDown size={14} className={`theme-text-muted shrink-0 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                      <span className="text-xs theme-text font-medium truncate">{ch.title}</span>
                     </div>
-                    <span className="text-[10px] text-slate-600 flex-shrink-0 ml-2">
+                    <span className="text-[10px] text-slate-500 shrink-0 ml-2">
                       {ch.completed.filter(Boolean).length}/{ch.lessons.length}
                     </span>
                   </button>
@@ -136,19 +137,19 @@ const LearningPage = () => {
                             className={`flex items-center gap-2.5 w-full pl-7 pr-3 py-2 text-xs transition-all ${
                               isActive
                                 ? 'text-indigo-300 bg-indigo-500/10'
-                                : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'
+                                : 'theme-text-muted hover:theme-text hover:theme-subtle'
                             }`}
                           >
                             {isDone ? (
-                              <FiCheckCircle className="text-emerald-400 flex-shrink-0" size={12} />
+                              <FiCheckCircle className="text-emerald-400 shrink-0" size={12} />
                             ) : lessonVideoUrl ? (
-                              <FiVideo size={12} className="text-green-500/60 flex-shrink-0" />
+                              <FiVideo size={12} className="text-green-500/60 shrink-0" />
                             ) : (
-                              <FiFileText size={12} className="text-slate-600 flex-shrink-0" />
+                              <FiFileText size={12} className="text-slate-500 shrink-0" />
                             )}
                             <span className="truncate flex-1">{lessonTitle}</span>
                             {lessonVideoUrl && (
-                              <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-green-500/60" />
+                              <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-green-500/60" />
                             )}
                           </button>
                         );
@@ -178,43 +179,31 @@ const LearningPage = () => {
                 <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-3">
                   <FiPlay className="text-indigo-400/60" size={28} />
                 </div>
-                <p className="text-slate-500 text-sm">No video content for this lesson</p>
-                <p className="text-xs text-slate-600 mt-1">Add a YouTube link in course settings</p>
+                <p className="theme-text-muted text-sm">No video content for this lesson</p>
+                <p className="text-xs text-slate-500 mt-1">Add a YouTube link in course settings</p>
               </div>
             )}
           </div>
-          <div className="p-4 border-t border-white/[0.06]">
-            <h1 className="text-base font-semibold text-white">{currentLessonTitle}</h1>
-            <p className="text-xs text-slate-500 mt-0.5">{moduleData.title} &middot; {currentChapter?.title}</p>
+          <div className="p-4 border-t theme-border">
+            <h1 className="text-base font-semibold theme-text">{currentLessonTitle}</h1>
+            <p className="text-xs theme-text-muted mt-0.5">{moduleData.title} &middot; {currentChapter?.title}</p>
           </div>
         </Card>
 
-        <div className="flex items-center justify-between bg-[#0F172A] border border-white/[0.06] rounded-2xl px-4 py-3">
-          <button
-            onClick={() => navigateLesson(-1)}
-            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04]"
-          >
-            <FiChevronLeft size={16} /> Previous
-          </button>
+        <div className="flex items-center justify-between theme-card border theme-border rounded-2xl px-4 py-3">
+          <Button variant="ghost" size="sm" icon={FiChevronLeft} onClick={() => navigateLesson(-1)}>
+            Previous
+          </Button>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500">{progress}% complete</span>
-            <div className="w-20 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+            <span className="text-xs theme-text-muted">{progress}% complete</span>
+            <div className="w-20 h-1 theme-hover rounded-full overflow-hidden">
               <div className="h-full bg-indigo-400 rounded-full" style={{ width: `${progress}%` }} />
             </div>
-            <button
-              onClick={() => setShowRightPanel(p => !p)}
-              className="p-2 rounded-lg hover:bg-white/[0.06] text-slate-400 hover:text-white transition-colors"
-              title="Toggle sidebar"
-            >
-              <FiMenu size={16} />
-            </button>
+            <Button variant="ghost" size="sm" icon={FiMenu} onClick={() => setShowRightPanel(p => !p)} title="Toggle sidebar" />
           </div>
-          <button
-            onClick={() => navigateLesson(1)}
-            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04]"
-          >
-            Next <FiChevronRight size={16} />
-          </button>
+          <Button variant="ghost" size="sm" icon={FiChevronRight} onClick={() => navigateLesson(1)}>
+            Next
+          </Button>
         </div>
 
         <AnimatePresence>
@@ -226,14 +215,9 @@ const LearningPage = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-semibold text-emerald-300">Course Complete!</h3>
-                  <p className="text-xs text-slate-400">Take the final quiz to earn your certificate.</p>
+                  <p className="text-xs theme-text-muted">Take the final quiz to earn your certificate.</p>
                 </div>
-                <button
-                  onClick={() => setShowQuiz(true)}
-                  className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 text-sm font-medium hover:bg-emerald-500/30 transition-colors border border-emerald-500/20"
-                >
-                  Take Quiz
-                </button>
+                <Button variant="secondary" size="sm" onClick={() => setShowQuiz(true)}>Take Quiz</Button> 
               </div>
             </div>
           )}
@@ -241,9 +225,9 @@ const LearningPage = () => {
       </div>
 
       {showRightPanel && (
-        <div className="lg:w-80 flex-shrink-0">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="lg:w-80 shrink-0">
           <Card className="flex flex-col h-full p-0">
-            <div className="flex border-b border-white/[0.06] px-1 pt-1">
+            <div className="flex border-b theme-border px-1 pt-1">
               {[
                 { key: 'notes', label: 'Notes', icon: FiFileText },
                 { key: 'qa', label: 'AI Q&A', icon: FiMessageSquare },
@@ -256,7 +240,7 @@ const LearningPage = () => {
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-all rounded-t-lg ${
                     activeTab === key
                       ? 'text-indigo-300 bg-indigo-500/10 border-b-2 border-indigo-400'
-                      : 'text-slate-500 hover:text-slate-300'
+                      : 'theme-text-muted hover:theme-text'
                   }`}
                 >
                   <Icon size={12} />
@@ -267,14 +251,14 @@ const LearningPage = () => {
             <div className="flex-1 overflow-y-auto p-4">
               {activeTab === 'notes' && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-white/90">Your Notes</h3>
+                  <h3 className="text-sm font-medium theme-text/90">Your Notes</h3>
                   <textarea
                     value={notes}
                     onChange={e => { setNotes(e.target.value); localStorage.setItem(notesKey, e.target.value); }}
                     placeholder="Take notes for this lesson..."
-                    className="w-full h-36 bg-white/[0.04] border border-white/[0.06] rounded-xl p-3 text-sm text-white/80 placeholder-slate-600 focus:outline-none focus:border-indigo-500/40 focus:bg-white/[0.06] transition-all resize-none"
+                    className="w-full h-36 theme-subtle border theme-border rounded-xl p-3 text-sm theme-text/80 placeholder-slate-600 focus:outline-none focus:theme-border-light focus:theme-hover transition-all resize-none"
                   />
-                  <p className="text-xs text-slate-600 flex items-center gap-1">
+                  <p className="text-xs text-slate-500 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60" />
                     Auto-saved to this lesson
                   </p>
@@ -282,81 +266,79 @@ const LearningPage = () => {
               )}
               {activeTab === 'qa' && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-white/90">Ask AI Assistant</h3>
-                  <p className="text-xs text-slate-500">Get help understanding this lesson.</p>
+                  <h3 className="text-sm font-medium theme-text/90">Ask AI Assistant</h3>
+                  <p className="text-xs theme-text-muted">Get help understanding this lesson.</p>
                   <div className="relative">
                     <textarea
                       value={qaInput}
                       onChange={e => setQaInput(e.target.value)}
                       placeholder="Type your question..."
-                      className="w-full h-24 bg-white/[0.04] border border-white/[0.06] rounded-xl p-3 text-sm text-white/80 placeholder-slate-600 focus:outline-none focus:border-indigo-500/40 focus:bg-white/[0.06] transition-all resize-none pr-10"
+                      className="w-full h-24 theme-subtle border theme-border rounded-xl p-3 text-sm theme-text/80 placeholder-slate-600 focus:outline-none focus:theme-border-light focus:theme-hover transition-all resize-none pr-10"
                     />
-                    <button
-                      className="absolute bottom-2 right-2 p-2 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition-colors"
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={FiSend}
+                      className="absolute bottom-2 right-2"
                       onClick={() => { if (qaInput.trim()) setQaInput(''); }}
-                    >
-                      <FiSend size={14} />
-                    </button>
+                    />
                   </div>
                 </div>
               )}
               {activeTab === 'resources' && (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-white/90 mb-3">Lesson Resources</h3>
+                  <h3 className="text-sm font-medium theme-text/90 mb-3">Lesson Resources</h3>
                   {['Lecture Slides.pdf', 'Practice Problems.pdf', 'Reference Material.pdf'].map(r => (
                     <div
                       key={r}
-                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] cursor-pointer group transition-colors border border-transparent hover:border-white/[0.06]"
+                      className="flex items-center gap-3 p-2.5 rounded-xl hover:theme-subtle cursor-pointer group transition-colors border border-transparent hover:theme-border"
                     >
                       <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                         <FiFileText className="text-indigo-400/60" size={14} />
                       </div>
-                      <span className="text-xs text-slate-400 flex-1 group-hover:text-slate-300 transition-colors">{r}</span>
-                      <FiDownload className="text-slate-600 group-hover:text-slate-400 transition-colors" size={12} />
+                      <span className="text-xs theme-text-muted flex-1 group-hover:theme-text transition-colors">{r}</span>
+                      <FiDownload className="text-slate-500 group-hover:theme-text-muted transition-colors" size={12} />
                     </div>
                   ))}
                 </div>
               )}
               {activeTab === 'discussion' && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-white/90">Discussion</h3>
+                  <h3 className="text-sm font-medium theme-text/90">Discussion</h3>
                   <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <div className="w-12 h-12 rounded-xl bg-white/[0.04] flex items-center justify-center mb-3">
-                      <FiMessageSquare className="text-slate-600" size={20} />
+                    <div className="w-12 h-12 rounded-xl theme-subtle flex items-center justify-center mb-3">
+                      <FiMessageSquare className="text-slate-500" size={20} />
                     </div>
-                    <p className="text-xs text-slate-500">No discussion threads yet.</p>
-                    <p className="text-xs text-slate-600 mt-1">Start a conversation with your classmates!</p>
+                    <p className="text-xs theme-text-muted">No discussion threads yet.</p>
+                    <p className="text-xs text-slate-500 mt-1">Start a conversation with your classmates!</p>
                   </div>
                 </div>
               )}
             </div>
           </Card>
-        </div>
+        </motion.div>
       )}
+
+    </motion.div>
 
       <AnimatePresence>
         {showQuiz && (
           <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={() => setShowQuiz(false)}>
             <div
-              className="w-full max-w-lg bg-[#0F172A] border border-white/[0.06] rounded-2xl p-6"
+              className="w-full max-w-lg theme-card border theme-border rounded-2xl p-6"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-white">Final Quiz</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Answer all questions to complete the course</p>
+                  <h2 className="text-lg font-semibold theme-text">Final Quiz</h2>
+                  <p className="text-xs theme-text-muted mt-0.5">Answer all questions to complete the course</p>
                 </div>
-                <button
-                  onClick={() => setShowQuiz(false)}
-                  className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center hover:bg-white/[0.08] transition-colors"
-                >
-                  <FiX className="text-slate-400" size={16} />
-                </button>
+                <Button variant="ghost" size="sm" icon={FiX} onClick={() => setShowQuiz(false)} />
               </div>
               <div className="space-y-4">
                 {quizQuestions.map((q, qi) => (
-                  <div key={q.id} className="bg-white/[0.03] rounded-xl p-4 border border-white/[0.06]">
-                    <p className="text-sm text-white/90 mb-2.5 flex items-start gap-2">
+                  <div key={q.id} className="theme-subtle rounded-xl p-4 border theme-border">
+                    <p className="text-sm theme-text/90 mb-2.5 flex items-start gap-2">
                       <span className="text-indigo-400 text-xs font-medium mt-0.5">Q{qi + 1}.</span>
                       <span>{q.question}</span>
                     </p>
@@ -368,7 +350,7 @@ const LearningPage = () => {
                           className={`block w-full text-left px-3 py-2 rounded-lg text-xs transition-all ${
                             quizAnswers[q.id] === oi
                               ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/25'
-                              : 'bg-white/[0.04] text-slate-400 hover:text-slate-300 hover:bg-white/[0.06] border border-transparent'
+                              : 'theme-subtle theme-text-muted hover:theme-text hover:theme-hover border border-transparent'
                           }`}
                         >
                           {opt}
@@ -400,7 +382,7 @@ const LearningPage = () => {
           </div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 };
 

@@ -38,27 +38,27 @@ const Navbar = ({ onToggleSidebar }) => {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-30 bg-[#0B1120]/80 backdrop-blur-xl border-b border-white/[0.06] h-14">
+    <nav className="sticky top-0 z-30 theme-bg/80 backdrop-blur-xl border-b theme-border h-14">
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
-            className="p-2 rounded-lg hover:bg-white/[0.06] text-slate-400 hover:text-white lg:hidden transition-colors"
+            className="p-2 rounded-lg hover:bg-[var(--hover)] theme-text-muted hover:theme-text lg:hidden transition-colors"
           >
             <FiMenu size={18} />
           </button>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
-              <span className="text-white font-bold text-xs">IS</span>
+              <span className="theme-text font-bold text-xs">IS</span>
             </div>
-            <span className="text-sm font-semibold text-white hidden sm:block">ISDS</span>
+            <span className="text-sm font-semibold theme-text hidden sm:block">ISDS</span>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg hover:bg-white/[0.06] text-slate-400 hover:text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-[var(--hover)] theme-text-muted hover:theme-text transition-colors"
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           >
             {theme === 'dark' ? <FiSun size={16} /> : <FiMoon size={16} />}
@@ -67,11 +67,11 @@ const Navbar = ({ onToggleSidebar }) => {
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 rounded-lg hover:bg-white/[0.06] text-slate-400 hover:text-white transition-colors"
+              className="relative p-2 rounded-lg hover:bg-[var(--hover)] theme-text-muted hover:theme-text transition-colors"
             >
               <FiBell size={16} />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#0B1120]" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full ring-2 theme-bg" />
               )}
             </button>
             <AnimatePresence>
@@ -81,12 +81,12 @@ const Navbar = ({ onToggleSidebar }) => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.96 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-80 bg-[#0F172A] border border-white/[0.06] rounded-xl shadow-lg overflow-hidden"
+                  className="absolute right-0 mt-2 w-80 theme-card border theme-border rounded-xl shadow-lg overflow-hidden"
                 >
-                  <div className="p-4 border-b border-white/[0.06]">
+                  <div className="p-4 border-b theme-border">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-white">Notifications</h3>
-                      <button className="text-xs text-slate-400 hover:text-white transition-colors">
+                      <h3 className="text-sm font-semibold theme-text">Notifications</h3>
+                      <button className="text-xs theme-text-muted hover:theme-text transition-colors">
                         Mark all read
                       </button>
                     </div>
@@ -96,23 +96,23 @@ const Navbar = ({ onToggleSidebar }) => {
                       notifications.map(n => (
                         <div
                           key={n.id}
-                          className={`p-4 border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer transition-colors ${
-                            !n.read ? 'bg-white/[0.02]' : ''
+                          className={`p-4 border-b border-[var(--border-light)] hover:bg-[var(--subtle)] cursor-pointer transition-colors ${
+                            !n.read ? 'bg-[var(--subtle)]' : ''
                           }`}
                         >
-                          <p className="text-sm text-slate-300 leading-snug">{n.text}</p>
-                          <span className="text-xs text-slate-600 mt-1 block">{n.time}</span>
+                          <p className="text-sm theme-text leading-snug">{n.text}</p>
+                          <span className="text-xs theme-text-muted mt-1 block">{n.time}</span>
                         </div>
                       ))
                     ) : (
                       <div className="flex flex-col items-center justify-center py-10 px-4">
-                        <FiBell size={28} className="text-slate-600 mb-3" />
-                        <p className="text-sm text-slate-500">No notifications yet</p>
+                        <FiBell size={28} className="theme-text-muted mb-3" />
+                          <p className="text-sm theme-text-muted">No notifications yet</p>
                       </div>
                     )}
                   </div>
-                  <div className="p-3 border-t border-white/[0.06] text-center">
-                    <span className="text-xs text-slate-400 cursor-pointer hover:text-white transition-colors">
+                  <div className="p-3 border-t theme-border text-center">
+                    <span className="text-xs theme-text-muted cursor-pointer hover:theme-text transition-colors">
                       View all notifications
                     </span>
                   </div>
@@ -124,10 +124,10 @@ const Navbar = ({ onToggleSidebar }) => {
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setShowProfile(!showProfile)}
-              className="p-1 rounded-lg hover:bg-white/[0.06] transition-colors"
+              className="p-1 rounded-lg hover:bg-[var(--hover)] transition-colors"
             >
               <div className="w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center">
-                <span className="text-slate-400 text-xs font-medium">{getInitials(user?.name)}</span>
+                <span className="theme-text-muted text-xs font-medium">{getInitials(user?.name)}</span>
               </div>
             </button>
             <AnimatePresence>
@@ -137,12 +137,12 @@ const Navbar = ({ onToggleSidebar }) => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.96 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-56 bg-[#0F172A] border border-white/[0.06] rounded-xl shadow-lg overflow-hidden"
+                  className="absolute right-0 mt-2 w-56 theme-card border theme-border rounded-xl shadow-lg overflow-hidden"
                 >
-                  <div className="p-4 border-b border-white/[0.06]">
-                    <p className="text-sm font-semibold text-white">{user?.name}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{user?.email || 'user@isds.edu'}</p>
-                    <span className="inline-block mt-2 px-2 py-0.5 rounded-md bg-white/[0.06] text-slate-400 text-[10px] font-medium uppercase tracking-wider">
+                  <div className="p-4 border-b theme-border">
+                    <p className="text-sm font-semibold theme-text">{user?.name}</p>
+                    <p className="text-xs theme-text-muted mt-0.5">{user?.email || 'user@isds.edu'}</p>
+                    <span className="inline-block mt-2 px-2 py-0.5 rounded-md bg-[var(--hover)] theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                       {user?.role || 'student'}
                     </span>
                   </div>
@@ -160,7 +160,7 @@ const Navbar = ({ onToggleSidebar }) => {
                       <FiSettings size={14} /> Settings
                     </button>
                   </div>
-                  <div className="border-t border-white/[0.06] p-1.5">
+                  <div className="border-t theme-border p-1.5">
                     <button
                       onClick={handleLogout}
                       className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"

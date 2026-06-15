@@ -23,12 +23,12 @@ const StatCard = ({ icon: Icon, label, value, trend, trendValue, color = 'indigo
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-700" />
         <div className="relative">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-white/70 text-xs font-medium uppercase tracking-wider">{label}</span>
-            {Icon && <Icon className="text-white/60" size={20} />}
+            <span className="theme-text/70 text-xs font-medium uppercase tracking-wider">{label}</span>
+            {Icon && <Icon className="theme-text/60" size={20} />}
           </div>
           <div className="text-3xl font-bold mb-1 font-heading">{value}</div>
           {trend && (
-            <div className="flex items-center gap-1 text-sm text-white/60">
+            <div className="flex items-center gap-1 text-sm theme-text/60">
               {trend === 'up' ? <FiArrowUp size={14} /> : <FiArrowDown size={14} />}
               <span>{trendValue}</span>
             </div>
@@ -43,7 +43,7 @@ const StatCard = ({ icon: Icon, label, value, trend, trendValue, color = 'indigo
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5 hover:border-white/[0.12] transition-all group cursor-pointer"
+      className="theme-card border theme-border rounded-2xl p-5 hover:border-[var(--border-light)] transition-all group cursor-pointer"
     >
       <div className="flex items-center justify-between mb-3">
         <div className={`p-2.5 rounded-xl ${c.bg}`}>
@@ -56,8 +56,8 @@ const StatCard = ({ icon: Icon, label, value, trend, trendValue, color = 'indigo
           </div>
         )}
       </div>
-      <div className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">{label}</div>
-      <div className="text-2xl font-bold text-white font-heading">{value}</div>
+      <div className="theme-text-muted text-xs font-medium uppercase tracking-wider mb-1">{label}</div>
+      <div className="text-2xl font-bold theme-text font-heading">{value}</div>
     </motion.div>
   );
 };

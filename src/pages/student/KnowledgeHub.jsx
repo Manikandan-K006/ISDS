@@ -46,26 +46,26 @@ const KnowledgeHub = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[#0F172A] rounded-2xl p-6 lg:p-8 border border-white/[0.06]"
+        className="theme-card rounded-2xl p-6 lg:p-8 border theme-border"
       >
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">Knowledge Hub</h1>
-        <p className="text-slate-400 mt-1">Explore learning resources curated for you</p>
+        <h1 className="text-2xl lg:text-3xl font-bold theme-text">Knowledge Hub</h1>
+        <p className="theme-text-muted mt-1">Explore learning resources curated for you</p>
       </motion.div>
 
       <div className="flex flex-col sm:flex-row gap-4">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-[#0F172A] rounded-2xl p-4 border border-white/[0.06] flex-1"
+          className="theme-card rounded-2xl p-4 border theme-border flex-1"
         >
           <div className="relative">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted" size={16} />
             <input
               type="text"
               placeholder="Search resources..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full bg-white/5 border border-white/[0.06] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors"
+              className="w-full theme-input border theme-border rounded-xl pl-10 pr-4 py-2.5 text-sm theme-text placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors"
             />
           </div>
         </motion.div>
@@ -79,7 +79,7 @@ const KnowledgeHub = () => {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               activeCategory === cat
                 ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                : 'bg-white/[0.04] text-slate-400 border border-white/[0.06] hover:bg-white/[0.08]'
+                : 'theme-subtle theme-text-muted border theme-border hover:bg-[var(--hover)]'
             }`}
           >
             {cat}
@@ -105,7 +105,7 @@ const KnowledgeHub = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.4 }}
-                  className="bg-[#0F172A] rounded-2xl border border-white/[0.06] p-5 hover:border-white/[0.12] transition-all group flex flex-col"
+                  className="theme-card rounded-2xl border theme-border p-5 hover:border-white/[0.12] transition-all group flex flex-col"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className={`w-12 h-12 rounded-xl ${colors.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
@@ -115,12 +115,12 @@ const KnowledgeHub = () => {
                       {resource.type}
                     </span>
                   </div>
-                  <h3 className="text-sm font-semibold text-white mb-1">{resource.title}</h3>
-                  <p className="text-xs text-slate-400 mb-3 flex-1">{resource.description}</p>
+                  <h3 className="text-sm font-semibold theme-text mb-1">{resource.title}</h3>
+                  <p className="text-xs theme-text-muted mb-3 flex-1">{resource.description}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex gap-1 flex-wrap">
                       {resource.tags.map(tag => (
-                        <span key={tag} className="text-[10px] text-slate-500 bg-white/[0.04] px-2 py-0.5 rounded-full">
+                        <span key={tag} className="text-[10px] theme-text-muted theme-subtle px-2 py-0.5 rounded-full">
                           {tag}
                         </span>
                       ))}
@@ -142,11 +142,11 @@ const KnowledgeHub = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-[#0F172A] rounded-2xl border border-white/[0.06] p-12 text-center"
+            className="theme-card rounded-2xl border theme-border p-12 text-center"
           >
-            <FiBookOpen className="mx-auto text-slate-600 mb-4" size={48} />
-            <h3 className="text-lg font-medium text-white mb-1">No resources found</h3>
-            <p className="text-sm text-slate-400">Try adjusting your search or filter</p>
+            <FiBookOpen className="mx-auto text-slate-500 mb-4" size={48} />
+            <h3 className="text-lg font-medium theme-text mb-1">No resources found</h3>
+            <p className="text-sm theme-text-muted">Try adjusting your search or filter</p>
           </motion.div>
         )}
       </AnimatePresence>

@@ -10,7 +10,7 @@ const AdminLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0B1120] text-white">
+    <div className="min-h-screen theme-bg theme-text">
       <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
       <div className="flex">
         <Sidebar

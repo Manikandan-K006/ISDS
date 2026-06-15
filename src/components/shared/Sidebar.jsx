@@ -63,18 +63,18 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
       <motion.aside
         initial={false}
         animate={{ width: collapsed ? 64 : 256 }}
-        className={`fixed top-0 left-0 h-full z-40 bg-[#0B1120] border-r border-white/[0.06] overflow-hidden
+        className={`fixed top-0 left-0 h-full z-40 theme-sidebar border-r theme-border overflow-hidden
           lg:relative
           ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         <div className="flex flex-col h-full">
-          <div className="p-[10px] border-b border-white/[0.06]">
+          <div className="p-[10px] border-b theme-border">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-sm">IS</span>
+                <span className="theme-text font-bold text-sm">IS</span>
               </div>
               {!collapsed && (
-                <span className="text-sm font-semibold text-white">ISDS</span>
+                <span className="text-sm font-semibold theme-text">ISDS</span>
               )}
             </div>
           </div>
@@ -89,8 +89,8 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
                   onClick={onClose}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative ${
                     active
-                      ? 'bg-white/[0.08] text-white'
-                      : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                      ?                       'bg-[var(--hover)] theme-text'
+                      : 'theme-text-muted hover:theme-text hover:bg-[var(--subtle)]'
                   }`}
                   title={collapsed ? link.label : undefined}
                 >
@@ -106,10 +106,10 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
             })}
           </nav>
 
-          <div className="border-t border-white/[0.06] py-3 px-2 space-y-1">
+          <div className="border-t theme-border py-3 px-2 space-y-1">
             <button
               onClick={() => { logout(); navigate('/login'); }}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-red-400 hover:bg-white/[0.04] transition-colors"
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium theme-text-muted hover:text-red-400 hover:bg-[var(--subtle)] transition-colors"
               title={collapsed ? 'Sign Out' : undefined}
             >
               <FiLogOut size={18} className="flex-shrink-0" />
@@ -118,7 +118,7 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
 
             <button
               onClick={onToggleCollapse}
-              className="flex items-center justify-center w-full p-2 rounded-lg text-slate-500 hover:text-white hover:bg-white/[0.04] transition-colors"
+              className="flex items-center justify-center w-full p-2 rounded-lg theme-text-muted hover:theme-text hover:bg-[var(--subtle)] transition-colors"
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               <FiChevronLeft size={16} className={`transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`} />

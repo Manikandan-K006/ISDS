@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { FiUsers, FiLayers, FiTrendingUp, FiCheckCircle, FiActivity, FiArrowRight } from 'react-icons/fi';
 import {
   AreaChart, Area, BarChart, Bar,
   ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip
 } from 'recharts';
 import API from '../../api/client';
-import { KpiCard } from '../../components/ui';
+import { KpiCard, Card, Button } from '../../components/ui';
 import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 
 const enrollmentTrend = [
@@ -64,8 +65,8 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Admin</h1>
-        <p className="text-sm text-slate-500 mt-1">Dashboard overview</p>
+        <h1 className="text-2xl font-bold theme-text">Admin</h1>
+        <p className="text-sm theme-text-muted mt-1">Dashboard overview</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -75,11 +76,11 @@ const AdminDashboard = () => {
         <KpiCard icon={FiCheckCircle} label="Completion Rate" value={`${completionRate}%`} color="purple" trend={completionRate >= 50 ? 10 : -5} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-5">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold text-white">Enrollment Trend</h2>
-            <span className="text-xs text-slate-500">Jan - Dec</span>
+            <h2 className="text-sm font-semibold theme-text">Enrollment Trend</h2>
+            <span className="text-xs theme-text-muted">Jan - Dec</span>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={enrollmentTrend} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
@@ -96,12 +97,12 @@ const AdminDashboard = () => {
               <Area type="monotone" dataKey="students" stroke="#6366F1" strokeWidth={2} fill="url(#enrollmentGrad)" />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+        </Card>
 
-        <div className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5">
+        <Card className="p-5">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold text-white">Course Distribution</h2>
-            <span className="text-xs text-slate-500">{courseDist.length} domains</span>
+            <h2 className="text-sm font-semibold theme-text">Course Distribution</h2>
+            <span className="text-xs theme-text-muted">{courseDist.length} domains</span>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={courseDist} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
@@ -112,30 +113,30 @@ const AdminDashboard = () => {
               <Bar dataKey="count" fill="#6366F1" radius={[4, 4, 0, 0]} barSize={32} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-      </div>
+        </Card>
+      </motion.div>
 
-      <div className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-5">
+      <Card className="p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+          <h2 className="text-sm font-semibold theme-text flex items-center gap-2">
             <FiActivity className="text-indigo-400" size={16} /> Recent Activity
           </h2>
-          <button className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
-            View All <FiArrowRight size={12} />
-          </button>
+          <Button variant="ghost" size="sm" icon={FiArrowRight}>
+            View All
+          </Button>
         </div>
         <div className="space-y-1">
           {recentActivity.map(a => (
             <div key={a.id} className="flex items-center gap-3 py-3 border-b border-white/[0.04] last:border-0">
-              <div className="w-7 h-7 rounded-lg bg-white/[0.05] flex items-center justify-center flex-shrink-0">
-                <FiActivity size={13} className="text-slate-500" />
+              <div className="w-7 h-7 rounded-lg bg-white/[0.05] flex items-center justify-center shrink-0">
+                <FiActivity size={13} className="theme-text-muted" />
               </div>
-              <p className="text-sm text-slate-300 flex-1 truncate">{a.action}</p>
-              <span className="text-xs text-slate-500 flex-shrink-0">{a.time}</span>
+              <p className="text-sm theme-text flex-1 truncate">{a.action}</p>
+              <span className="text-xs theme-text-muted shrink-0">{a.time}</span>
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

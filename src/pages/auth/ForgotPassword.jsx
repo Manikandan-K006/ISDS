@@ -36,10 +36,10 @@ const ForgotPassword = () => {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
       <div className="text-center mb-8">
         <div className="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center mx-auto mb-4">
-          <FiMail className="text-white" size={20} />
+          <FiMail className="theme-text" size={20} />
         </div>
-        <h1 className="text-xl font-semibold text-white">Reset Password</h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <h1 className="text-xl font-semibold theme-text">Reset Password</h1>
+        <p className="text-sm theme-text-muted mt-1">
           {sent ? 'Check your email for the reset link' : 'Enter your email to receive a reset link'}
         </p>
       </div>
@@ -64,15 +64,15 @@ const ForgotPassword = () => {
           <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
             <FiCheck className="text-emerald-400" size={24} />
           </div>
-          <p className="text-sm text-slate-400">A password reset link has been sent to <span className="text-white font-medium">{email}</span></p>
+          <p className="text-sm theme-text-muted">A password reset link has been sent to <span className="theme-text font-medium">{email}</span></p>
           <button onClick={() => setSent(false)} className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
             Send to a different email
           </button>
         </div>
       )}
 
-      <p className="text-center text-xs text-slate-500 mt-6">
-        <Link to="/login" className="flex items-center justify-center gap-1 text-slate-400 hover:text-white transition-colors">
+      <p className="text-center text-xs theme-text-muted mt-6">
+        <Link to="/login" className="flex items-center justify-center gap-1 theme-text-muted hover:theme-text transition-colors">
           <FiArrowLeft size={14} /> Back to Login
         </Link>
       </p>

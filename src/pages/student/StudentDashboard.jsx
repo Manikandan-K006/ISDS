@@ -1,7 +1,8 @@
 import { getHours } from 'date-fns';
+import { motion } from 'framer-motion';
 import { FiCalendar, FiBookOpen, FiClipboard, FiAward, FiActivity, FiClock, FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { Card, KpiCard } from '../../components/ui';
+import { Card, KpiCard, Button } from '../../components/ui';
 import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 import { useStudentData } from '../../hooks/useStudentData';
 import { useAuth } from '../../hooks/useAuth';
@@ -50,18 +51,18 @@ const StudentDashboard = () => {
         <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center">
           <FiActivity className="text-rose-400" size={28} />
         </div>
-        <p className="text-slate-400 text-sm">Failed to load dashboard data</p>
-        <p className="text-slate-600 text-xs">{error}</p>
-        <button onClick={refetch} className="px-5 py-2 rounded-xl bg-indigo-500/10 text-indigo-400 text-sm hover:bg-indigo-500/20 transition-colors">Try Again</button>
+        <p className="theme-text-muted text-sm">Failed to load dashboard data</p>
+        <p className="text-slate-500 text-xs">{error}</p>
+        <Button variant="secondary" onClick={refetch}>Try Again</Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 pb-8">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="space-y-6 pb-8">
       <div>
-        <h1 className="text-lg font-semibold text-white">Dashboard</h1>
-        <p className="text-sm text-slate-400">{getGreeting()}, {student?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Student'}</p>
+        <h1 className="text-lg font-semibold theme-text">Dashboard</h1>
+        <p className="text-sm theme-text-muted">{getGreeting()}, {student?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'Student'}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -73,27 +74,27 @@ const StudentDashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+          <h2 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
             <FiActivity className="text-indigo-400" size={16} /> Recent Activity
           </h2>
           <div className="space-y-0.5 max-h-80 overflow-y-auto">
             {recentActivity.length > 0 ? recentActivity.map((a, i) => (
-              <div key={i} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-white/[0.03] transition-colors">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0" />
+              <div key={i} className="flex items-start gap-3 p-2.5 rounded-lg hover:theme-subtle transition-colors">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-300">{a.action}</p>
-                  <p className="text-xs text-slate-500">{a.time}</p>
+                  <p className="text-sm theme-text">{a.action}</p>
+                  <p className="text-xs theme-text-muted">{a.time}</p>
                 </div>
               </div>
             )) : (
-              <p className="text-sm text-slate-500 text-center py-8">No recent activity.</p>
+              <p className="text-sm theme-text-muted text-center py-8">No recent activity.</p>
             )}
           </div>
         </Card>
 
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <h2 className="text-sm font-semibold theme-text flex items-center gap-2">
               <FiClock className="text-indigo-400" size={16} /> Upcoming
             </h2>
             <Link to="/assignments" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">View All</Link>
@@ -102,16 +103,16 @@ const StudentDashboard = () => {
             {deadlineItems.length > 0 ? deadlineItems.map((d, i) => {
               const status = getDeadlineStatus(d.dueDate);
               return (
-                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03]">
+                <div key={i} className="flex items-center justify-between p-3 rounded-lg theme-subtle">
                   <div>
-                    <p className="text-sm text-white">{d.title}</p>
-                    <p className="text-xs text-slate-500">{d.course || d.courseName}</p>
+                    <p className="text-sm theme-text">{d.title}</p>
+                    <p className="text-xs theme-text-muted">{d.course || d.courseName}</p>
                   </div>
-                  <span className={`text-xs font-medium ${deadlineColorMap[status.color] || 'text-slate-400'}`}>{status.label}</span>
+                  <span className={`text-xs font-medium ${deadlineColorMap[status.color] || 'theme-text-muted'}`}>{status.label}</span>
                 </div>
               );
             }) : (
-              <p className="text-sm text-slate-500 text-center py-8">No upcoming deadlines.</p>
+              <p className="text-sm theme-text-muted text-center py-8">No upcoming deadlines.</p>
             )}
           </div>
         </Card>
@@ -119,7 +120,7 @@ const StudentDashboard = () => {
 
       <Card>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-white">My Courses</h2>
+          <h2 className="text-sm font-semibold theme-text">My Courses</h2>
           <Link to="/courses" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">View All</Link>
         </div>
         {enrolledCourses.length > 0 ? (
@@ -134,15 +135,15 @@ const StudentDashboard = () => {
                         <FiBookOpen className="text-indigo-400" size={18} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white group-hover:text-indigo-300 transition-colors truncate">{course.title}</p>
-                        <p className="text-xs text-slate-500">{course.instructor || ''}</p>
+                        <p className="text-sm theme-text group-hover:text-indigo-300 transition-colors truncate">{course.title}</p>
+                        <p className="text-xs theme-text-muted">{course.instructor || ''}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400">{course.progress || 0}%</span>
+                      <span className="theme-text-muted">{course.progress || 0}%</span>
                       <span className="text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">Continue <FiChevronRight size={12} /></span>
                     </div>
-                    <div className="mt-2 w-full h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="mt-2 w-full h-1 theme-hover rounded-full overflow-hidden">
                       <div className="h-full bg-indigo-400 rounded-full transition-all" style={{ width: `${course.progress || 0}%` }} />
                     </div>
                   </Card>
@@ -151,14 +152,14 @@ const StudentDashboard = () => {
             })}
           </div>
         ) : (
-          <div className="text-sm text-slate-500 text-center py-12">
-            <FiBookOpen className="mx-auto mb-2 text-slate-600" size={24} />
+          <div className="text-sm theme-text-muted text-center py-12">
+            <FiBookOpen className="mx-auto mb-2 text-slate-500" size={24} />
             <p>No courses enrolled yet.</p>
             <Link to="/courses" className="text-indigo-400 hover:text-indigo-300 transition-colors">Browse Courses</Link>
           </div>
         )}
       </Card>
-    </div>
+    </motion.div>
   );
 };
 

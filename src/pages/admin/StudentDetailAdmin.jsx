@@ -66,7 +66,7 @@ const StudentDetailAdmin = () => {
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      <span className="ml-3 text-slate-400">Loading...</span>
+      <span className="ml-3 theme-text-muted">Loading...</span>
     </div>
   );
 
@@ -92,24 +92,24 @@ const StudentDetailAdmin = () => {
       case 'academic':
         return (
           <div className="space-y-4">
-            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-white mb-3">Subject-wise Marks</h3>
+            <div className="theme-card border theme-border rounded-xl p-5">
+              <h3 className="text-sm font-semibold theme-text mb-3">Subject-wise Marks</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-2 text-slate-400 font-medium">Subject</th>
-                      <th className="text-center py-2 text-slate-400 font-medium">Term 1</th>
-                      <th className="text-center py-2 text-slate-400 font-medium">Term 2</th>
-                      <th className="text-center py-2 text-slate-400 font-medium">Overall</th>
+                    <tr className="border-b theme-border">
+                      <th className="text-left py-2 theme-text-muted font-medium">Subject</th>
+                      <th className="text-center py-2 theme-text-muted font-medium">Term 1</th>
+                      <th className="text-center py-2 theme-text-muted font-medium">Term 2</th>
+                      <th className="text-center py-2 theme-text-muted font-medium">Overall</th>
                     </tr>
                   </thead>
                   <tbody>
                     {student.subjects && student.subjects.map(s => (
                       <tr key={s.name} className="border-b border-white/5">
-                        <td className="py-2 text-white">{s.name}</td>
-                        <td className="text-center text-slate-300">{s.term1}</td>
-                        <td className="text-center text-slate-300">{s.term2}</td>
+                        <td className="py-2 theme-text">{s.name}</td>
+                        <td className="text-center theme-text">{s.term1}</td>
+                        <td className="text-center theme-text">{s.term2}</td>
                         <td className={`text-center font-medium ${s.score >= 90 ? 'text-emerald-400' : s.score >= 75 ? 'text-amber-400' : 'text-rose-400'}`}>{s.score}%</td>
                       </tr>
                     ))}
@@ -117,12 +117,12 @@ const StudentDetailAdmin = () => {
                 </table>
               </div>
             </div>
-            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-white mb-3">GPA Trend</h3>
+            <div className="theme-card border theme-border rounded-xl p-5">
+              <h3 className="text-sm font-semibold theme-text mb-3">GPA Trend</h3>
               <GradeTrendLine data={gpaData} />
             </div>
-            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-white mb-3">Performance Radar</h3>
+            <div className="theme-card border theme-border rounded-xl p-5">
+              <h3 className="text-sm font-semibold theme-text mb-3">Performance Radar</h3>
               <PerformanceRadar />
             </div>
           </div>
@@ -135,21 +135,21 @@ const StudentDetailAdmin = () => {
                 { label: 'Present', value: presentCount, color: 'text-emerald-400' },
                 { label: 'Absent', value: absentCount, color: 'text-rose-400' },
                 { label: 'Leave', value: leaveCount, color: 'text-amber-400' },
-                { label: 'Holiday', value: holidayCount, color: 'text-slate-400' }
+                { label: 'Holiday', value: holidayCount, color: 'theme-text-muted' }
               ].map(d => (
-                <div key={d.label} className="bg-[#0F172A] border border-white/[0.06] rounded-lg p-3 text-center">
+                <div key={d.label} className="theme-card border theme-border rounded-lg p-3 text-center">
                   <div className={`text-lg font-bold ${d.color}`}>{d.value}</div>
-                  <div className="text-xs text-slate-500">{d.label}</div>
+                  <div className="text-xs theme-text-muted">{d.label}</div>
                 </div>
               ))}
             </div>
             <AttendanceCalendar attendanceData={attendanceData} />
-            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-white mb-3">Absent Reasons</h3>
+            <div className="theme-card border theme-border rounded-xl p-5">
+              <h3 className="text-sm font-semibold theme-text mb-3">Absent Reasons</h3>
               {attendanceData.filter(a => a.status === 'absent').map(a => (
                 <div key={a.date || a._id} className="flex items-center justify-between py-2 border-b border-white/5">
-                  <span className="text-sm text-slate-300">{a.date}</span>
-                  <span className="text-xs text-slate-500">{a.reason || 'No reason provided'}</span>
+                  <span className="text-sm theme-text">{a.date}</span>
+                  <span className="text-xs theme-text-muted">{a.reason || 'No reason provided'}</span>
                 </div>
               ))}
             </div>
@@ -159,17 +159,17 @@ const StudentDetailAdmin = () => {
         return (
           <div className="space-y-3">
             {student.enrolledCourses && student.enrolledCourses.map(c => (
-              <div key={c._id} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4">
+              <div key={c._id} className="theme-card border theme-border rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h4 className="text-sm font-semibold text-white">{c.title}</h4>
-                    <p className="text-xs text-slate-500">{c.instructor}</p>
+                    <h4 className="text-sm font-semibold theme-text">{c.title}</h4>
+                    <p className="text-xs theme-text-muted">{c.instructor}</p>
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full ${c.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
                     {c.status}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-xs theme-text-muted">
                   <span>Progress: {c.progress}%</span>
                   {c.creditPoints > 0 && <span>· {c.creditPoints} Credits</span>}
                 </div>
@@ -184,14 +184,14 @@ const StudentDetailAdmin = () => {
         return (
           <div className="space-y-3">
             {(student.cocurricular || []).map((c, i) => (
-              <div key={i} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4">
+              <div key={i} className="theme-card border theme-border rounded-xl p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="text-sm font-semibold text-white">{c.activity}</h4>
-                    <p className="text-xs text-slate-500">{c.role} · {c.date}</p>
+                    <h4 className="text-sm font-semibold theme-text">{c.activity}</h4>
+                    <p className="text-xs theme-text-muted">{c.role} · {c.date}</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs text-slate-400">{c.outcome}</span>
+                    <span className="text-xs theme-text-muted">{c.outcome}</span>
                     {c.award && <p className="text-xs text-amber-400 mt-1">{c.award}</p>}
                   </div>
                 </div>
@@ -203,11 +203,11 @@ const StudentDetailAdmin = () => {
         return (
           <div className="space-y-3">
             {assignments.map(a => (
-              <div key={a._id} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4">
+              <div key={a._id} className="theme-card border theme-border rounded-xl p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-semibold text-white">{a.title}</h4>
-                    <p className="text-xs text-slate-500">{a.courseName || ''}</p>
+                    <h4 className="text-sm font-semibold theme-text">{a.title}</h4>
+                    <p className="text-xs theme-text-muted">{a.courseName || ''}</p>
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full ${
                     a.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
@@ -219,7 +219,7 @@ const StudentDetailAdmin = () => {
                 {a.grade !== undefined && (
                   <div className="mt-2 text-xs">
                     <span className="text-emerald-400">Grade: {a.grade}/{a.maxMarks}</span>
-                    {a.feedback && <p className="text-slate-400 mt-1">Feedback: {a.feedback}</p>}
+                    {a.feedback && <p className="theme-text-muted mt-1">Feedback: {a.feedback}</p>}
                   </div>
                 )}
               </div>
@@ -230,12 +230,12 @@ const StudentDetailAdmin = () => {
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {certificates.map(c => (
-              <div key={c._id} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4 border border-indigo-500/10">
+              <div key={c._id} className="theme-card border theme-border rounded-xl p-4 border border-indigo-500/10">
                 <div className="flex items-center gap-2 mb-2">
                   <FiAward className="text-indigo-400" size={20} />
-                  <h4 className="text-sm font-semibold text-white">{c.courseName}</h4>
+                  <h4 className="text-sm font-semibold theme-text">{c.courseName}</h4>
                 </div>
-                <div className="text-xs text-slate-400 space-y-1">
+                <div className="text-xs theme-text-muted space-y-1">
                   <p>Grade: {c.grade}</p>
                   <p>Issued: {c.issuedAt}</p>
                   {c.creditPoints > 0 && <p>Credits: {c.creditPoints}</p>}
@@ -248,13 +248,13 @@ const StudentDetailAdmin = () => {
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {trophies.map(t => (
-              <div key={t._id} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-4 border border-amber-500/10">
+              <div key={t._id} className="theme-card border theme-border rounded-xl p-4 border border-amber-500/10">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{t.icon}</span>
                   <div>
-                    <h4 className="text-sm font-semibold text-white">{t.title}</h4>
-                    <p className="text-xs text-slate-400">{t.description}</p>
-                    <p className="text-xs text-slate-500 mt-1">Earned: {t.earnedAt}</p>
+                    <h4 className="text-sm font-semibold theme-text">{t.title}</h4>
+                    <p className="text-xs theme-text-muted">{t.description}</p>
+                    <p className="text-xs theme-text-muted mt-1">Earned: {t.earnedAt}</p>
                   </div>
                 </div>
               </div>
@@ -264,11 +264,11 @@ const StudentDetailAdmin = () => {
       case 'notes':
         return (
           <div className="space-y-4">
-            <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-white mb-3">Add Teacher Note</h3>
+            <div className="theme-card border theme-border rounded-xl p-5">
+              <h3 className="text-sm font-semibold theme-text mb-3">Add Teacher Note</h3>
               <textarea value={teacherNote} onChange={e => setTeacherNote(e.target.value)}
                 placeholder="Write a private note about this student..."
-                className="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
+                className="w-full h-24 theme-input border theme-border rounded-lg p-3 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
               />
               <button onClick={() => { if (teacherNote.trim()) { setNotes([...notes, `${teacherNote} - Teacher`]); setTeacherNote(''); } }}
                 className="mt-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium">
@@ -277,8 +277,8 @@ const StudentDetailAdmin = () => {
             </div>
             <div className="space-y-2">
               {notes.map((n, i) => (
-                <div key={i} className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-3">
-                  <p className="text-sm text-slate-300">{n}</p>
+                <div key={i} className="theme-card border theme-border rounded-xl p-3">
+                  <p className="text-sm theme-text">{n}</p>
                 </div>
               ))}
             </div>
@@ -293,8 +293,8 @@ const StudentDetailAdmin = () => {
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0B1120] rounded-2xl p-6 lg:p-8">
-        <Link to="/admin/students" className="flex items-center gap-1 text-sm text-slate-400 hover:text-white mb-4 transition-colors">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="theme-bg rounded-2xl p-6 lg:p-8">
+        <Link to="/admin/students" className="flex items-center gap-1 text-sm theme-text-muted hover:theme-text mb-4 transition-colors">
           <FiChevronLeft size={16} /> Back to Students
         </Link>
         <div className="flex items-start gap-4">
@@ -304,12 +304,12 @@ const StudentDetailAdmin = () => {
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-white">{student.name}</h1>
-                <p className="text-slate-300">Class {student.class} · Roll No. {student.rollNumber}</p>
-                <p className="text-xs text-slate-500 mt-1">Parent: {student.parentContact}</p>
+                <h1 className="text-2xl font-bold theme-text">{student.name}</h1>
+                <p className="theme-text">Class {student.class} · Roll No. {student.rollNumber}</p>
+                <p className="text-xs theme-text-muted mt-1">Parent: {student.parentContact}</p>
               </div>
               <button onClick={() => setEditMode(!editMode)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20 transition-colors">
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 theme-text text-sm hover:bg-white/20 transition-colors">
                 {editMode ? <FiSave size={16} /> : <FiEdit2 size={16} />}
                 {editMode ? 'Save' : 'Edit Profile'}
               </button>
@@ -320,11 +320,11 @@ const StudentDetailAdmin = () => {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-48 flex-shrink-0">
-          <div className="bg-[#0F172A] border border-white/[0.06] rounded-xl p-3 sticky top-20 space-y-1">
+          <div className="theme-card border theme-border rounded-xl p-3 sticky top-20 space-y-1">
             {tabs.map(tab => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                  activeTab === tab.key ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  activeTab === tab.key ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20' : 'theme-text-muted hover:theme-text hover:theme-input'
                 }`}
               >
                 <tab.icon size={14} /> {tab.label}
@@ -334,7 +334,7 @@ const StudentDetailAdmin = () => {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">{tabs.find(t => t.key === activeTab)?.label}</h2>
+            <h2 className="text-lg font-semibold theme-text">{tabs.find(t => t.key === activeTab)?.label}</h2>
             {editMode && <button className="text-xs text-indigo-400 hover:text-indigo-300">Update Section</button>}
           </div>
           {renderTabContent()}

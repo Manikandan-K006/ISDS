@@ -39,13 +39,13 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.error) {
       return (
-        <div className="min-h-screen bg-[#0B1120] flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] border border-red-500/20 rounded-2xl p-8 max-w-lg w-full text-center">
+        <div className="min-h-screen theme-bg flex items-center justify-center p-4">
+          <div className="theme-card border border-red-500/20 rounded-2xl p-8 max-w-lg w-full text-center">
             <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center mx-auto mb-4">
               <span className="text-red-400 text-xl">!</span>
             </div>
-            <h1 className="text-lg font-semibold text-white mb-2">Something went wrong</h1>
-            <p className="text-sm text-slate-400 mb-4 font-mono break-all">{this.state.error.message}</p>
+            <h1 className="text-lg font-semibold theme-text mb-2">Something went wrong</h1>
+            <p className="text-sm theme-text-muted mb-4 font-mono break-all">{this.state.error.message}</p>
             <button onClick={() => { this.setState({ error: null }); window.location.href = '/login'; }} className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors">Reload</button>
           </div>
         </div>

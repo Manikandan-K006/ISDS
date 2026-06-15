@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { FiCalendar, FiAlertCircle, FiRefreshCw, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { useStudentData } from '../../hooks/useStudentData';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, parseISO } from 'date-fns';
-import { Card } from '../../components/ui';
+import { Card, Button } from '../../components/ui';
 import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 
 const dotColors = {
@@ -56,12 +57,7 @@ const Attendance = () => {
         <FiAlertCircle className="mx-auto text-rose-400 mb-3" size={40} />
         <p className="text-rose-300 font-medium mb-2">Failed to load attendance</p>
         <p className="text-rose-400/70 text-sm mb-4">{error}</p>
-        <button
-          onClick={refetch}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm font-medium hover:bg-rose-500/20 transition-colors"
-        >
-          <FiRefreshCw size={14} /> Retry
-        </button>
+        <Button variant="secondary" icon={FiRefreshCw} onClick={refetch}>Retry</Button>
       </div>
     );
   }
@@ -69,16 +65,16 @@ const Attendance = () => {
   const percentageColor = percentage >= 85 ? 'text-emerald-400' : percentage >= 75 ? 'text-indigo-400' : percentage >= 60 ? 'text-amber-400' : 'text-rose-400';
 
   return (
-    <div className="space-y-6">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-white">Attendance</h1>
-        <p className="text-sm text-slate-400">Track your attendance record</p>
+        <h1 className="text-lg font-semibold theme-text">Attendance</h1>
+        <p className="text-sm theme-text-muted">Track your attendance record</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5 flex flex-col items-center justify-center">
           <p className={`text-4xl font-bold ${percentageColor}`}>{percentage}%</p>
-          <p className="text-xs text-slate-400 mt-1">This Month</p>
+          <p className="text-xs theme-text-muted mt-1">This Month</p>
         </Card>
         {[
           { label: 'Present', value: present, color: 'text-emerald-400', dot: 'bg-emerald-400' },
@@ -89,7 +85,7 @@ const Attendance = () => {
             <span className={`w-3 h-3 rounded-full ${stat.dot}`} />
             <div>
               <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
-              <p className="text-xs text-slate-400">{stat.label}</p>
+              <p className="text-xs theme-text-muted">{stat.label}</p>
             </div>
           </Card>
         ))}
@@ -97,18 +93,14 @@ const Attendance = () => {
 
       <Card className="p-4 lg:p-6">
         <div className="flex items-center justify-between mb-4">
-          <button onClick={prevMonth} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center hover:bg-white/[0.08] transition-colors">
-            <FiChevronLeft className="text-slate-400" size={16} />
-          </button>
-          <h2 className="text-sm font-semibold text-white">{format(currentMonth, 'MMMM yyyy')}</h2>
-          <button onClick={nextMonth} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center hover:bg-white/[0.08] transition-colors">
-            <FiChevronRight className="text-slate-400" size={16} />
-          </button>
+          <Button variant="ghost" size="sm" icon={FiChevronLeft} onClick={prevMonth} />
+          <h2 className="text-sm font-semibold theme-text">{format(currentMonth, 'MMMM yyyy')}</h2>
+          <Button variant="ghost" size="sm" icon={FiChevronRight} onClick={nextMonth} />
         </div>
 
         <div className="grid grid-cols-7 mb-2">
           {DAY_ABBR.map(d => (
-            <div key={d} className="text-center text-[11px] text-slate-500 py-1 font-medium">{d}</div>
+            <div key={d} className="text-center text-[11px] theme-text-muted py-1 font-medium">{d}</div>
           ))}
         </div>
 
@@ -123,7 +115,7 @@ const Attendance = () => {
               <div
                 key={i}
                 className={`aspect-square rounded-xl text-xs font-medium flex flex-col items-center justify-center relative
-                  ${!isCurrentMonth ? 'opacity-20' : 'text-slate-400'}
+                  ${!isCurrentMonth ? 'opacity-20' : 'theme-text-muted'}
                   ${today ? 'ring-1 ring-indigo-500' : ''}`}
               >
                 <span>{format(day, 'd')}</span>
@@ -141,13 +133,13 @@ const Attendance = () => {
           { label: 'Leave', dot: 'bg-amber-400' },
           { label: 'Holiday', dot: 'bg-slate-600' },
         ].map(item => (
-          <div key={item.label} className="flex items-center gap-2 text-xs text-slate-400">
+          <div key={item.label} className="flex items-center gap-2 text-xs theme-text-muted">
             <span className={`w-2 h-2 rounded-full ${item.dot}`} />
             {item.label}
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

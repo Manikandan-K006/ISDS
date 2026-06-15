@@ -75,36 +75,34 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1120] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen theme-bg flex items-center justify-center px-4 py-12">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className="w-full max-w-[420px]"
       >
-        <div className="bg-[#0F172A] border border-white/[0.06] rounded-2xl p-8">
+        <div className="theme-card border theme-border rounded-2xl p-8">
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center mb-5">
-              <span className="text-white font-bold text-sm">IS</span>
+              <span className="theme-text font-bold text-sm">IS</span>
             </div>
-            <h1 className="text-xl font-semibold text-white">Welcome back</h1>
-            <p className="text-sm text-slate-400 mt-1">Sign in to your account to continue</p>
+            <h1 className="text-xl font-semibold theme-text">Welcome back</h1>
+            <p className="text-sm theme-text-muted mt-1">Sign in to your account to continue</p>
           </div>
 
           <div className="flex gap-2 mb-6">
             {roles.map(r => (
-              <button
+              <Button
                 key={r.id}
                 type="button"
+                variant={role === r.id ? 'secondary' : 'ghost'}
+                size="sm"
+                className="flex-1"
                 onClick={() => setRole(r.id)}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  role === r.id
-                    ? 'bg-white/[0.10] text-white'
-                    : 'text-slate-400 hover:text-white'
-                }`}
               >
                 <span className="mr-1">{r.icon}</span> {r.label}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -119,32 +117,27 @@ const Login = () => {
               error={errors.email}
             />
 
-            <div>
-              <label className="block text-sm text-slate-400 mb-1.5">Password</label>
-              <div className="relative">
-                <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className={`w-full bg-white/[0.04] border rounded-xl pl-10 pr-10 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-white/20 transition-colors ${
-                    errors.password ? 'border-red-500/50' : 'border-white/[0.08]'
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-                >
-                  {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
-                </button>
-              </div>
-              {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password}</p>}
+            <div className="relative">
+              <Input
+                icon={FiLock}
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                error={errors.password}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-[38px] -translate-y-1/2 theme-text-muted hover:theme-text transition-colors"
+              >
+                {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+              </button>
             </div>
 
             <div className="flex justify-end">
-              <Link to="/forgot-password" className="text-xs text-slate-400 hover:text-white transition-colors">
+              <Link to="/forgot-password" className="text-xs theme-text-muted hover:theme-text transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -156,7 +149,7 @@ const Login = () => {
 
           <div className="flex items-center gap-3 my-6">
             <Divider className="flex-1" />
-            <span className="text-xs text-slate-500">or</span>
+            <span className="text-xs theme-text-muted">or</span>
             <Divider className="flex-1" />
           </div>
 
@@ -170,9 +163,9 @@ const Login = () => {
             Continue with Google
           </Button>
 
-          <p className="text-center text-xs text-slate-500 mt-6">
+          <p className="text-center text-xs theme-text-muted mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-white hover:text-indigo-400 transition-colors font-medium">
+            <Link to="/register" className="theme-text hover:text-indigo-400 transition-colors font-medium">
               Create Account
             </Link>
           </p>

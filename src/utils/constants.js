@@ -18,4 +18,16 @@ export const COLORS = {
   slate: '#64748B',
 };
 
+export const RESOURCE_TYPES = [
+  'PDF', 'DOC', 'DOCX', 'PPT', 'PPTX', 'XLS', 'XLSX', 'ZIP',
+  'Image', 'Video', 'Audio',
+  'YouTube', 'GoogleDrive', 'OneDrive', 'GitHub', 'Website', 'ResearchPaper', 'Docs',
+];
+
+export const VISIBILITY_OPTIONS = [
+  { value: 'public', label: 'Public' },
+  { value: 'students', label: 'Students Only' },
+  { value: 'draft', label: 'Draft' },
+];
+
 export const API_BASE = import.meta.env.VITE_API_URL || '';
