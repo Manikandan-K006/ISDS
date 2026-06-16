@@ -8,7 +8,7 @@ const StatCard = ({ icon: Icon, label, value, trend, trendValue, color = 'indigo
     amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', icon: 'text-amber-400', gradient: 'from-amber-500 to-amber-600' },
     rose: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20', icon: 'text-rose-400', gradient: 'from-rose-500 to-rose-600' },
     purple: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/20', icon: 'text-purple-400', gradient: 'from-purple-500 to-purple-600' },
-    slate: { bg: 'bg-slate-500/10', text: 'text-slate-400', border: 'border-slate-500/20', icon: 'text-slate-400', gradient: 'from-slate-500 to-slate-600' },
+    slate: { bg: 'bg-slate-500/10', text: 'theme-text-muted', border: 'border-slate-500/20', icon: 'theme-text-muted', gradient: 'from-slate-500 to-slate-600' },
   };
   const c = colorMap[color] || colorMap.indigo;
 

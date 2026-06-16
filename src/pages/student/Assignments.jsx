@@ -125,7 +125,7 @@ const Assignments = () => {
         </motion.div>
       ) : (
         <div className="theme-card rounded-2xl border theme-border p-12 text-center">
-          <FiClipboard className="mx-auto text-slate-500 mb-4" size={48} />
+          <FiClipboard className="mx-auto theme-text-muted mb-4" size={48} />
           <h3 className="text-base font-medium theme-text mb-1">No assignments found</h3>
           <p className="text-sm theme-text-muted">All caught up! No {activeTab.toLowerCase()} assignments.</p>
         </div>

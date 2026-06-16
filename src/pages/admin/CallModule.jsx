@@ -1,24 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiSearch, FiPhone, FiMessageSquare, FiCalendar, FiUser, FiMail, FiClock } from 'react-icons/fi';
-
-const mockParents = [
-  { _id: 'p1', studentName: 'Arjun Sharma', className: '10A', parentName: 'Mr. Sharma', phone: '+91 98765 43210', email: 'sharma@email.com', lastContacted: '2026-05-20' },
-  { _id: 'p2', studentName: 'Priya Patel', className: '10A', parentName: 'Mrs. Patel', phone: '+91 98765 43211', email: 'patel@email.com', lastContacted: '2026-05-15' },
-  { _id: 'p3', studentName: 'Rahul Singh', className: '10B', parentName: 'Mr. Singh', phone: '+91 98765 43212', email: 'singh@email.com', lastContacted: '2026-05-22' },
-];
+import { FiSearch, FiPhone, FiMessageSquare, FiCalendar, FiUser, FiMail, FiClock, FiSend } from 'react-icons/fi';
+import API from '../../api/client';
+import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
+import toast from 'react-hot-toast';
 
 const CallModule = () => {
+  const [logs, setLogs] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [classFilter, setClassFilter] = useState('All');
   const [selectedParent, setSelectedParent] = useState(null);
   const [message, setMessage] = useState('');
 
-  const filtered = mockParents.filter(p => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [logsRes, studentsRes] = await Promise.all([
+          API.get('/calls').catch(() => ({ data: [] })),
+          API.get('/students').catch(() => ({ data: [] })),
+        ]);
+        setLogs(Array.isArray(logsRes.data) ? logsRes.data : []);
+        setStudents(Array.isArray(studentsRes.data) ? studentsRes.data : []);
+      } catch (e) {
+        setLogs([]);
+        setStudents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const parentList = students.map(s => ({
+    _id: s._id,
+    studentName: s.name || 'Unknown',
+    className: s.class || 'N/A',
+    parentName: s.parentContact || s.name || 'Unknown',
+    phone: s.parentContact || '',
+    email: s.email || '',
+    lastContacted: s.updatedAt ? new Date(s.updatedAt).toLocaleDateString() : 'N/A',
+  }));
+
+  const classes = ['All', ...new Set(parentList.map(p => p.className).filter(Boolean))];
+
+  const filtered = parentList.filter(p => {
     if (classFilter !== 'All' && p.className !== classFilter) return false;
     if (search && !p.studentName.toLowerCase().includes(search.toLowerCase()) && !p.parentName.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  if (loading) return <PageSkeleton />;
 
   return (
     <div className="space-y-6">
@@ -37,19 +70,15 @@ const CallModule = () => {
         <select value={classFilter} onChange={e => setClassFilter(e.target.value)}
           className="theme-input border theme-border rounded-lg px-3 py-2.5 text-sm theme-text focus:outline-none focus:border-indigo-500/50"
         >
-          <option value="All">All Classes</option>
-          <option value="9A">9A</option>
-          <option value="9B">9B</option>
-          <option value="10A">10A</option>
-          <option value="10B">10B</option>
+          {classes.map(c => <option key={c} value={c}>{c === 'All' ? 'All Classes' : c}</option>)}
         </select>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
-          {filtered.map(p => (
+          {filtered.length > 0 ? filtered.map(p => (
             <motion.div key={p._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className={`glass rounded-xl p-4 border cursor-pointer transition-all ${selectedParent?._id === p._id ? 'border-indigo-500/30 bg-indigo-500/5' : 'theme-border hover:theme-border-light'}`}
+              className={`theme-card border rounded-xl p-4 cursor-pointer transition-all ${selectedParent?._id === p._id ? 'border-indigo-500/30 bg-indigo-500/5' : 'theme-border hover:theme-border-light'}`}
               onClick={() => setSelectedParent(p)}
             >
               <div className="flex items-center justify-between">
@@ -72,24 +101,29 @@ const CallModule = () => {
                 </div>
               </div>
               <div className="flex gap-4 mt-3 text-xs theme-text-muted">
-                <span className="flex items-center gap-1"><FiMail size={12} /> {p.email}</span>
+                {p.email && <span className="flex items-center gap-1"><FiMail size={12} /> {p.email}</span>}
                 <span className="flex items-center gap-1"><FiClock size={12} /> Last: {p.lastContacted}</span>
               </div>
             </motion.div>
-          ))}
+          )) : (
+            <div className="theme-card border theme-border rounded-xl p-8 text-center">
+              <FiUser className="mx-auto theme-text-muted mb-2" size={32} />
+              <p className="theme-text-muted text-sm">No students found</p>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">
           {selectedParent ? (
             <>
-              <div className="glass rounded-xl p-5">
+              <div className="theme-card border theme-border rounded-xl p-5">
                 <h3 className="text-sm font-semibold theme-text mb-3">Contact Details</h3>
                 <div className="space-y-3 text-sm">
                   <div><span className="theme-text-muted">Parent:</span> <span className="theme-text">{selectedParent.parentName}</span></div>
                   <div><span className="theme-text-muted">Student:</span> <span className="theme-text">{selectedParent.studentName}</span></div>
                   <div><span className="theme-text-muted">Class:</span> <span className="theme-text">{selectedParent.className}</span></div>
-                  <div><span className="theme-text-muted">Phone:</span> <a href={`tel:${selectedParent.phone}`} className="text-indigo-400 hover:text-indigo-300">{selectedParent.phone}</a></div>
-                  <div><span className="theme-text-muted">Email:</span> <span className="theme-text">{selectedParent.email}</span></div>
+                  {selectedParent.phone && <div><span className="theme-text-muted">Phone:</span> <a href={`tel:${selectedParent.phone}`} className="text-indigo-400 hover:text-indigo-300">{selectedParent.phone}</a></div>}
+                  {selectedParent.email && <div><span className="theme-text-muted">Email:</span> <span className="theme-text">{selectedParent.email}</span></div>}
                 </div>
                 <div className="flex gap-2 mt-4">
                   <a href={`tel:${selectedParent.phone}`} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-sm hover:bg-emerald-500/30 transition-colors">
@@ -100,19 +134,33 @@ const CallModule = () => {
                   </button>
                 </div>
               </div>
-              <div className="glass rounded-xl p-5">
+              <div className="theme-card border theme-border rounded-xl p-5">
                 <h3 className="text-sm font-semibold theme-text mb-3">Send Message</h3>
                 <textarea value={message} onChange={e => setMessage(e.target.value)}
                   placeholder="Type your message..."
                   className="w-full h-24 theme-input border theme-border rounded-lg p-3 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
                 />
-                <button className="mt-2 w-full py-2.5 rounded-lg bg-indigo-500 text-white text-sm font-medium">
-                  Send Message
+                <button onClick={async () => {
+                  if (!message.trim()) return;
+                  try {
+                    await API.post('/calls', {
+                      studentId: selectedParent._id,
+                      parentContact: selectedParent.phone,
+                      type: 'message',
+                      notes: message,
+                    });
+                    toast.success('Message sent');
+                    setMessage('');
+                  } catch {
+                    toast.error('Failed to send message');
+                  }
+                }} className="mt-2 w-full py-2.5 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors">
+                  <FiSend size={14} className="inline mr-1" /> Send Message
                 </button>
               </div>
             </>
           ) : (
-            <div className="glass rounded-xl p-5 text-center theme-text-muted">
+            <div className="theme-card border theme-border rounded-xl p-5 text-center theme-text-muted">
               <FiUser className="mx-auto mb-2" size={24} />
               <p className="text-sm">Select a parent to view details</p>
             </div>

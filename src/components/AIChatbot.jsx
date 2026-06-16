@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMessageSquare, FiX, FiSend, FiCpu } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
+import { sendMessage } from '../api/chatbot';
 
 const quickReplies = [
-  "What's my homework?",
+  "What courses are available?",
   "Explain this topic",
   "When is my exam?",
   "How to improve my grade?",
@@ -30,18 +31,15 @@ const AIChatbot = () => {
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
     setInput('');
     setLoading(true);
-    setTimeout(() => {
-      const responses = {
-        "what's my homework?": "Your pending assignments: 1) Calculus Problem Set (due Jun 15), 2) Physics Lab Report (due Jun 20). Check the Assignments page for details!",
-        "explain this topic": "Sure! Which topic would you like me to explain? You can mention the subject and chapter name.",
-        "when is my exam?": "Your upcoming exams: Mathematics - Jun 20, Physics - Jun 25, Chemistry - Jun 28. Check the schedule for dates!",
-        "how to improve my grade?": "Great question! Based on your performance: 1) Focus on Chemistry (78%) - practice numerical problems. 2) Submit assignments on time. 3) Attend all classes. I can help with specific topics too!",
-      };
-      const key = msg.toLowerCase().trim();
-      const reply = responses[key] || "I'm here to help with your academic questions! You can ask me about courses, assignments, exam schedules, or any study-related topics. For specific course content, please mention the course name and topic.";
+    try {
+      const res = await sendMessage({ message: msg, userId: user?._id });
+      const reply = res.reply || res.message || "I'm here to help! Please ask me something.";
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: "I'm here to help with your academic questions! You can ask me about courses, assignments, exam schedules, or any study-related topics." }]);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -94,9 +92,9 @@ const AIChatbot = () => {
                 <div className="flex justify-start">
                   <div className="theme-input theme-text-muted p-3 rounded-xl border theme-border text-sm">
                     <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" />
-                      <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                      <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                      <span className="w-2 h-2 theme-text-muted rounded-full animate-bounce" />
+                      <span className="w-2 h-2 theme-text-muted rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                      <span className="w-2 h-2 theme-text-muted rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                     </div>
                   </div>
                 </div>

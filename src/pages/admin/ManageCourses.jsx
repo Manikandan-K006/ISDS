@@ -496,7 +496,7 @@ const ManageCourses = () => {
                   <FiUpload className="theme-text-muted" size={20} />
                 </div>
                 <p className="text-sm theme-text-muted">No resources added yet</p>
-                <p className="text-xs text-slate-500 mt-1">Upload files or add external links for students</p>
+                <p className="text-xs theme-text-muted mt-1">Upload files or add external links for students</p>
               </div>
             )}
           </div>
@@ -574,7 +574,7 @@ const ManageCourses = () => {
                 <div className="flex flex-col items-center gap-1">
                   <FiUpload className="theme-text-muted" size={20} />
                   <p className="text-xs theme-text-muted">Drag & drop a file here, or click to browse</p>
-                  <p className="text-[10px] text-slate-500">PDF, DOC, PPT, XLS, ZIP, Images, Video, Audio (max 100MB)</p>
+                  <p className="text-[10px] theme-text-muted">PDF, DOC, PPT, XLS, ZIP, Images, Video, Audio (max 100MB)</p>
                 </div>
               )}
             </div>
@@ -595,7 +595,7 @@ const ManageCourses = () => {
                 placeholder="https://youtube.com/... or https://drive.google.com/..."
                 className="w-full theme-subtle border border-white/[0.08] rounded-xl pl-9 pr-3 py-2 text-sm theme-text placeholder-slate-600 focus:outline-none focus:theme-border-light transition-colors" />
             </div>
-            <p className="text-[10px] text-slate-500 mt-1">Supported: YouTube, Google Drive, OneDrive, GitHub, websites, research papers, docs</p>
+            <p className="text-[10px] theme-text-muted mt-1">Supported: YouTube, Google Drive, OneDrive, GitHub, websites, research papers, docs</p>
           </div>
 
           <div className="flex gap-3 pt-2">

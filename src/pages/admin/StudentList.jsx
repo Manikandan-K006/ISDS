@@ -1,26 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiSearch, FiMail, FiDownload, FiChevronRight, FiFilter, FiX, FiUser, FiTrendingUp, FiTrendingDown, FiCheckCircle, FiAlertTriangle } from 'react-icons/fi';
-
-const mockStudents = [
-  { _id: '1', name: 'Arjun Sharma', email: 'arjun@school.com', class: '10A', rollNo: '1012', attendance: 87, gpa: 3.6, credits: 28, lastActive: '2h ago', status: 'active' },
-  { _id: '2', name: 'Priya Patel', email: 'priya@school.com', class: '10A', rollNo: '1015', attendance: 92, gpa: 3.7, credits: 35, lastActive: '1h ago', status: 'active' },
-  { _id: '3', name: 'Rahul Singh', email: 'rahul@school.com', class: '10B', rollNo: '1020', attendance: 90, gpa: 3.6, credits: 30, lastActive: '3h ago', status: 'active' },
-  { _id: '4', name: 'Ananya Gupta', email: 'ananya@school.com', class: '9A', rollNo: '901', attendance: 98, gpa: 3.9, credits: 42, lastActive: '30m ago', status: 'active' },
-  { _id: '5', name: 'Vikram Joshi', email: 'vikram@school.com', class: '10B', rollNo: '1025', attendance: 62, gpa: 2.1, credits: 12, lastActive: '2d ago', status: 'at-risk' },
-  { _id: '6', name: 'Neha Kapoor', email: 'neha@school.com', class: '9A', rollNo: '905', attendance: 68, gpa: 2.5, credits: 15, lastActive: '1d ago', status: 'at-risk' },
-  { _id: '7', name: 'Rohit Kumar', email: 'rohit@school.com', class: '11A', rollNo: '1101', attendance: 58, gpa: 1.8, credits: 8, lastActive: '5d ago', status: 'at-risk' },
-  { _id: '8', name: 'Sneha Reddy', email: 'sneha@school.com', class: '10A', rollNo: '1018', attendance: 95, gpa: 3.8, credits: 38, lastActive: '1h ago', status: 'active' },
-  { _id: '9', name: 'Amit Verma', email: 'amit@school.com', class: '9B', rollNo: '910', attendance: 85, gpa: 3.2, credits: 22, lastActive: '4h ago', status: 'active' },
-  { _id: '10', name: 'Kavita Sharma', email: 'kavita@school.com', class: '11B', rollNo: '1110', attendance: 78, gpa: 3.0, credits: 20, lastActive: '1d ago', status: 'active' },
-  { _id: '11', name: 'Ravi Deshmukh', email: 'ravi@school.com', class: '11A', rollNo: '1105', attendance: 82, gpa: 3.3, credits: 25, lastActive: '6h ago', status: 'active' },
-  { _id: '12', name: 'Meera Nair', email: 'meera@school.com', class: '9B', rollNo: '915', attendance: 91, gpa: 3.5, credits: 32, lastActive: '3h ago', status: 'active' },
-];
-
-const classes = ['All', '9A', '9B', '10A', '10B', '11A', '11B'];
+import API from '../../api/client';
+import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 
 const StudentList = () => {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [classFilter, setClassFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -28,23 +15,37 @@ const StudentList = () => {
   const [sortBy, setSortBy] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
 
+  useEffect(() => {
+    API.get('/students')
+      .then(res => setStudents(res.data))
+      .catch(() => setStudents([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const classes = useMemo(() => {
+    const unique = [...new Set(students.map(s => s.class).filter(Boolean))];
+    return ['All', ...unique.sort()];
+  }, [students]);
+
   const filtered = useMemo(() => {
-    let result = mockStudents.filter(s => {
+    let result = students.filter(s => {
       if (classFilter !== 'All' && s.class !== classFilter) return false;
       if (statusFilter !== 'All' && s.status !== statusFilter) return false;
-      if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.rollNo.includes(search) && !s.email.toLowerCase().includes(search.toLowerCase())) return false;
+      if (search && !s.name?.toLowerCase().includes(search.toLowerCase()) && !s.rollNumber?.includes(search) && !s.email?.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
     result.sort((a, b) => {
       let cmp = 0;
-      if (sortBy === 'name') cmp = a.name.localeCompare(b.name);
-      else if (sortBy === 'gpa') cmp = a.gpa - b.gpa;
-      else if (sortBy === 'attendance') cmp = a.attendance - b.attendance;
-      else if (sortBy === 'class') cmp = a.class.localeCompare(b.class);
+      if (sortBy === 'name') cmp = (a.name || '').localeCompare(b.name || '');
+      else if (sortBy === 'gpa') cmp = (a.gpa || 0) - (b.gpa || 0);
+      else if (sortBy === 'attendance') cmp = (a.attendance || 0) - (b.attendance || 0);
+      else if (sortBy === 'class') cmp = (a.class || '').localeCompare(b.class || '');
       return sortDir === 'asc' ? cmp : -cmp;
     });
     return result;
-  }, [search, classFilter, statusFilter, sortBy, sortDir]);
+  }, [students, search, classFilter, statusFilter, sortBy, sortDir]);
+
+  if (loading) return <PageSkeleton />;
 
   const toggleSelect = (id) => {
     setSelected(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -85,7 +86,7 @@ const StudentList = () => {
       <div className="flex items-center gap-1">
         {children}
         {sortBy === field && (
-          <span className="text-indigo-400">{sortDir === 'asc' ? '↑' : '↓'}</span>
+          <span className="text-indigo-400">{sortDir === 'asc' ? '\u2191' : '\u2193'}</span>
         )}
       </div>
     </th>
@@ -147,160 +148,170 @@ const StudentList = () => {
         )}
       </div>
 
-      <div className="hidden lg:block theme-card border theme-border rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b theme-border">
-                <th className="p-3 pl-5 w-12">
-                  <input type="checkbox"
-                    checked={filtered.length > 0 && selected.length === filtered.length}
-                    onChange={e => setSelected(e.target.checked ? filtered.map(s => s._id) : [])}
-                    className="rounded theme-border-light theme-input text-indigo-500 focus:ring-indigo-500/30"
-                  />
-                </th>
-                <SortHeader field="name">Student</SortHeader>
-                <SortHeader field="class">Class</SortHeader>
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Attendance</th>
-                <SortHeader field="gpa">GPA</SortHeader>
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Status</th>
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Last Active</th>
-                <th className="p-3 w-16" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((s, i) => (
-                <motion.tr key={s._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
-                  className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
-                >
-                  <td className="p-3 pl-5">
+      {students.length === 0 ? (
+        <div className="theme-card border theme-border rounded-2xl p-12 text-center">
+          <FiUser className="mx-auto theme-text-muted mb-3" size={40} />
+          <p className="theme-text-muted text-lg">No students found</p>
+          <p className="theme-text-muted text-sm mt-1">Students will appear here once they register.</p>
+        </div>
+      ) : (
+        <>
+          <div className="hidden lg:block theme-card border theme-border rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b theme-border">
+                    <th className="p-3 pl-5 w-12">
+                      <input type="checkbox"
+                        checked={filtered.length > 0 && selected.length === filtered.length}
+                        onChange={e => setSelected(e.target.checked ? filtered.map(s => s._id) : [])}
+                        className="rounded theme-border-light theme-input text-indigo-500 focus:ring-indigo-500/30"
+                      />
+                    </th>
+                    <SortHeader field="name">Student</SortHeader>
+                    <SortHeader field="class">Class</SortHeader>
+                    <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Attendance</th>
+                    <SortHeader field="gpa">GPA</SortHeader>
+                    <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Status</th>
+                    <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Last Active</th>
+                    <th className="p-3 w-16" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((s, i) => (
+                    <motion.tr key={s._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
+                      className="border-b theme-border hover:theme-subtle transition-colors"
+                    >
+                      <td className="p-3 pl-5">
+                        <input type="checkbox" checked={selected.includes(s._id)} onChange={() => toggleSelect(s._id)}
+                          className="rounded theme-border-light theme-input text-indigo-500 focus:ring-indigo-500/30"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-bold text-indigo-400">{s.name?.split(' ').map(n => n[0]).join('')}</span>
+                          </div>
+                          <div>
+                            <p className="text-sm theme-text font-medium">{s.name}</p>
+                            <p className="text-xs theme-text-muted">{s.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <span className="text-sm theme-text">{s.class}</span>
+                        {s.rollNumber && <span className="text-xs theme-text-muted ml-2">Roll: {s.rollNumber}</span>}
+                      </td>
+                      <td className="p-3">
+                        {s.attendance != null ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 theme-hover rounded-full h-1.5">
+                              <div className={`h-1.5 rounded-full ${s.attendance >= 80 ? 'bg-emerald-500' : s.attendance >= 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                                style={{ width: `${s.attendance}%` }} />
+                            </div>
+                            <span className={`text-sm font-medium ${getAttendanceColor(s.attendance)}`}>{s.attendance}%</span>
+                          </div>
+                        ) : <span className="text-xs theme-text-muted">N/A</span>}
+                      </td>
+                      <td className="p-3">
+                        <span className={`text-sm font-medium ${getGPAColor(s.gpa || 0)}`}>{s.gpa || 'N/A'}</span>
+                      </td>
+                      <td className="p-3">
+                        <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${getStatusStyle(s.status || 'active')}`}>
+                          {s.status === 'active' ? 'Active' : s.status === 'at-risk' ? 'At Risk' : 'Active'}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <span className={`text-xs ${s.lastActive ? (s.lastActive.includes('d') ? 'theme-text-muted' : 'theme-text-muted') : 'theme-text-muted'}`}>{s.lastActive || 'N/A'}</span>
+                      </td>
+                      <td className="p-3">
+                        <Link to={`/admin/students/${s._id}`} className="flex items-center justify-center w-8 h-8 rounded-lg hover:theme-hover theme-text-muted hover:text-indigo-400 transition-colors">
+                          <FiChevronRight size={16} />
+                        </Link>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {filtered.length === 0 && (
+              <div className="p-12 text-center">
+                <FiUser className="mx-auto theme-text-muted mb-3" size={32} />
+                <p className="theme-text-muted text-sm">No students match your filters</p>
+                <button onClick={clearFilters} className="mt-2 text-xs text-indigo-400 hover:text-indigo-300">Clear filters</button>
+              </div>
+            )}
+          </div>
+
+          <div className="lg:hidden space-y-3">
+            {filtered.map((s, i) => (
+              <motion.div key={s._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+                className="theme-card border theme-border rounded-2xl p-4 hover:theme-border-light transition-all"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-indigo-400">{s.name?.split(' ').map(n => n[0]).join('')}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm theme-text font-medium">{s.name}</p>
+                      <p className="text-xs theme-text-muted">{s.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <input type="checkbox" checked={selected.includes(s._id)} onChange={() => toggleSelect(s._id)}
                       className="rounded theme-border-light theme-input text-indigo-500 focus:ring-indigo-500/30"
                     />
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-indigo-400">{s.name.split(' ').map(n => n[0]).join('')}</span>
-                      </div>
-                      <div>
-                        <p className="text-sm theme-text font-medium">{s.name}</p>
-                        <p className="text-xs theme-text-muted">{s.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <span className="text-sm theme-text">{s.class}</span>
-                    <span className="text-xs text-slate-500 ml-2">Roll: {s.rollNo}</span>
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 theme-hover rounded-full h-1.5">
-                        <div className={`h-1.5 rounded-full ${s.attendance >= 80 ? 'bg-emerald-500' : s.attendance >= 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
-                          style={{ width: `${s.attendance}%` }} />
-                      </div>
-                      <span className={`text-sm font-medium ${getAttendanceColor(s.attendance)}`}>
-                        {s.attendance}%
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <span className={`text-sm font-medium ${getGPAColor(s.gpa)}`}>{s.gpa}</span>
-                  </td>
-                  <td className="p-3">
-                    <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${getStatusStyle(s.status)}`}>
-                      {s.status === 'active' ? 'Active' : 'At Risk'}
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusStyle(s.status || 'active')}`}>
+                      {s.status === 'active' ? 'Active' : s.status === 'at-risk' ? 'At Risk' : 'Active'}
                     </span>
-                  </td>
-                  <td className="p-3">
-                    <span className={`text-xs ${s.lastActive.includes('d') ? 'text-slate-500' : 'theme-text-muted'}`}>{s.lastActive}</span>
-                  </td>
-                  <td className="p-3">
-                    <Link to={`/admin/students/${s._id}`} className="flex items-center justify-center w-8 h-8 rounded-lg hover:theme-hover theme-text-muted hover:text-indigo-400 transition-colors">
-                      <FiChevronRight size={16} />
-                    </Link>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {filtered.length === 0 && (
-          <div className="p-12 text-center">
-            <FiUser className="mx-auto text-slate-500 mb-3" size={32} />
-            <p className="theme-text-muted text-sm">No students match your filters</p>
-            <button onClick={clearFilters} className="mt-2 text-xs text-indigo-400 hover:text-indigo-300">Clear filters</button>
-          </div>
-        )}
-      </div>
-
-      <div className="lg:hidden space-y-3">
-        {filtered.map((s, i) => (
-          <motion.div key={s._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-            className="theme-card border theme-border rounded-2xl p-4 hover:border-white/[0.1] transition-all"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-bold text-indigo-400">{s.name.split(' ').map(n => n[0]).join('')}</span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm theme-text font-medium">{s.name}</p>
-                  <p className="text-xs theme-text-muted">{s.email}</p>
+                <div className="grid grid-cols-3 gap-3 mb-3 text-center">
+                  <div className="theme-subtle rounded-xl p-2">
+                    <p className="text-[10px] theme-text-muted mb-0.5">Class</p>
+                    <p className="text-sm theme-text font-medium">{s.class || 'N/A'}</p>
+                  </div>
+                  <div className="theme-subtle rounded-xl p-2">
+                    <p className="text-[10px] theme-text-muted mb-0.5">GPA</p>
+                    <p className={`text-sm font-medium ${getGPAColor(s.gpa || 0)}`}>{s.gpa || 'N/A'}</p>
+                  </div>
+                  <div className="theme-subtle rounded-xl p-2">
+                    <p className="text-[10px] theme-text-muted mb-0.5">Attendance</p>
+                    <p className={`text-sm font-medium ${getAttendanceColor(s.attendance || 0)}`}>{s.attendance != null ? `${s.attendance}%` : 'N/A'}</p>
+                  </div>
                 </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs theme-text-muted">
+                    {s.lastActive?.includes('d') ? (
+                      <FiAlertTriangle size={12} className="text-rose-400" />
+                    ) : (
+                      <FiCheckCircle size={12} className="text-emerald-400" />
+                    )}
+                    Active {s.lastActive || 'N/A'}
+                  </div>
+                  <Link to={`/admin/students/${s._id}`} className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300">
+                    View <FiChevronRight size={12} />
+                  </Link>
+                </div>
+              </motion.div>
+            ))}
+            {filtered.length === 0 && (
+              <div className="theme-card border theme-border rounded-2xl p-8 text-center">
+                <FiUser className="mx-auto theme-text-muted mb-3" size={28} />
+                <p className="theme-text-muted text-sm">No students match your filters</p>
+                <button onClick={clearFilters} className="mt-2 text-xs text-indigo-400 hover:text-indigo-300">Clear filters</button>
               </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" checked={selected.includes(s._id)} onChange={() => toggleSelect(s._id)}
-                  className="rounded theme-border-light theme-input text-indigo-500 focus:ring-indigo-500/30"
-                />
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusStyle(s.status)}`}>
-                  {s.status === 'active' ? 'Active' : 'At Risk'}
-                </span>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3 mb-3 text-center">
-              <div className="theme-subtle rounded-xl p-2">
-                <p className="text-[10px] theme-text-muted mb-0.5">Class</p>
-                <p className="text-sm theme-text font-medium">{s.class}</p>
-              </div>
-              <div className="theme-subtle rounded-xl p-2">
-                <p className="text-[10px] theme-text-muted mb-0.5">GPA</p>
-                <p className={`text-sm font-medium ${getGPAColor(s.gpa)}`}>{s.gpa}</p>
-              </div>
-              <div className="theme-subtle rounded-xl p-2">
-                <p className="text-[10px] theme-text-muted mb-0.5">Attendance</p>
-                <p className={`text-sm font-medium ${getAttendanceColor(s.attendance)}`}>{s.attendance}%</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs theme-text-muted">
-                {s.lastActive.includes('d') ? (
-                  <FiAlertTriangle size={12} className="text-rose-400" />
-                ) : (
-                  <FiCheckCircle size={12} className="text-emerald-400" />
-                )}
-                Active {s.lastActive}
-              </div>
-              <Link to={`/admin/students/${s._id}`} className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300">
-                View <FiChevronRight size={12} />
-              </Link>
-            </div>
-          </motion.div>
-        ))}
-        {filtered.length === 0 && (
-          <div className="theme-card border theme-border rounded-2xl p-8 text-center">
-            <FiUser className="mx-auto text-slate-500 mb-3" size={28} />
-            <p className="theme-text-muted text-sm">No students match your filters</p>
-            <button onClick={clearFilters} className="mt-2 text-xs text-indigo-400 hover:text-indigo-300">Clear filters</button>
+            )}
           </div>
-        )}
-      </div>
 
-      {filtered.length > 0 && (
-        <div className="flex items-center justify-between text-xs theme-text-muted">
-          <span>Showing {filtered.length} of {mockStudents.length} students</span>
-          <span>{selected.length > 0 ? `${selected.length} selected` : ''}</span>
-        </div>
+          {filtered.length > 0 && (
+            <div className="flex items-center justify-between text-xs theme-text-muted">
+              <span>Showing {filtered.length} of {students.length} students</span>
+              <span>{selected.length > 0 ? `${selected.length} selected` : ''}</span>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

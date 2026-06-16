@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Attendance = require('../models/Attendance');
+const Notification = require('../models/Notification');
 
 router.get('/', async (req, res) => {
   try {
@@ -26,6 +27,16 @@ router.post('/', async (req, res) => {
       { status, reason },
       { upsert: true, new: true }
     );
+    if (record.status === 'absent') {
+      await Notification.create({
+        userId: record.studentId,
+        title: 'Attendance Alert',
+        message: `You were marked absent on ${record.date.toISOString().split('T')[0]}`,
+        type: 'attendance_alert',
+        relatedId: record._id,
+        link: '/attendance',
+      });
+    }
     res.status(201).json(record);
   } catch (err) {
     res.status(500).json({ error: err.message });

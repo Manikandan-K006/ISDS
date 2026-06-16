@@ -5,6 +5,7 @@ const fs = require('fs');
 const Course = require('../models/Course');
 const Enrollment = require('../models/Enrollment');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 const uploadDir = path.join(__dirname, '..', 'uploads', 'courses');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -114,6 +115,15 @@ router.post('/:id/enroll', async (req, res) => {
     const existing = await Enrollment.findOne({ userId, courseId: req.params.id });
     if (existing) return res.status(400).json({ error: 'Already enrolled' });
     const enrollment = await Enrollment.create({ userId, courseId: req.params.id });
+    const course = await Course.findById(req.params.id);
+    await Notification.create({
+      userId: enrollment.userId,
+      title: 'Course Enrolled',
+      message: `You have successfully enrolled in "${course.title}"`,
+      type: 'course_enrolled',
+      relatedId: course._id,
+      link: `/courses/${course._id}`,
+    });
     res.status(201).json(enrollment);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -133,6 +143,14 @@ router.put('/:id/progress', async (req, res) => {
       if (course.creditPoints > 0) {
         await User.findByIdAndUpdate(userId, { $inc: { credits: course.creditPoints } });
       }
+      await Notification.create({
+        userId,
+        title: 'Course Completed',
+        message: `Congratulations! You have completed the course "${course.title}"`,
+        type: 'course_completed',
+        relatedId: course._id,
+        link: `/courses/${course._id}`,
+      });
     }
     res.json(enrollment);
   } catch (err) {

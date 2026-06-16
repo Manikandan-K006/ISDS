@@ -2,7 +2,7 @@ import { FiDownload, FiShare2, FiAward } from 'react-icons/fi';
 import { useRef } from 'react';
 import { formatDate } from '../utils/helpers';
 
-const CertificateCard = ({ certificate, onDownload }) => {
+const CertificateCard = ({ certificate, onDownload, student }) => {
   const cardRef = useRef(null);
 
   return (
@@ -28,7 +28,7 @@ const CertificateCard = ({ certificate, onDownload }) => {
         <div className="text-center py-4">
           <div className="text-2xl font-bold theme-text mb-1">Certificate of Completion</div>
           <div className="theme-text-muted text-sm mb-4">This certifies that</div>
-          <div className="text-xl font-semibold text-indigo-400 mb-4">Arjun Sharma</div>
+          <div className="text-xl font-semibold text-indigo-400 mb-4">{student?.name || certificate?.studentName || 'Student'}</div>
           <div className="theme-text text-sm mb-1">has successfully completed the course</div>
           <div className="text-lg font-semibold theme-text mb-4">{certificate.courseName}</div>
           <div className="flex justify-center gap-6 text-xs theme-text-muted mb-4">

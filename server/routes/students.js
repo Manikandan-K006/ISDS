@@ -36,11 +36,7 @@ router.put('/:id', async (req, res) => {
 });
 
 router.get('/:id/analytics', async (req, res) => {
-  try {
-    res.json({ gpa: 3.6, attendance: 87, credits: 28, rank: 3 });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.redirect(`/api/analytics/student/${req.params.id}`);
 });
 
 module.exports = router;

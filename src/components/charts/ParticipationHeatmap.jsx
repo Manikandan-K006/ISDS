@@ -17,10 +17,10 @@ const ParticipationHeatmap = ({ data }) => {
       <h3 className="text-white font-semibold mb-4">Class Participation Heatmap</h3>
       <div className="grid grid-cols-[auto_repeat(8,1fr)] gap-1 min-w-[400px]">
         <div />
-        {periods.map(p => <div key={p} className="text-xs text-slate-500 text-center py-1">{p}</div>)}
+        {periods.map(p => <div key={p} className="text-xs theme-text-muted text-center py-1">{p}</div>)}
         {days.map(day => (
           <>
-            <div key={day} className="text-xs text-slate-400 py-1 pr-2">{day}</div>
+            <div key={day} className="text-xs theme-text-muted py-1 pr-2">{day}</div>
             {periods.map((_, i) => {
               const val = data?.[day]?.[i] || 0;
               return (

@@ -56,7 +56,7 @@ const badgeColors = {
   amber: 'bg-amber-500/10 text-amber-400',
   rose: 'bg-rose-500/10 text-rose-400',
   purple: 'bg-purple-500/10 text-purple-400',
-  slate: 'bg-slate-500/10 text-slate-400',
+  slate: 'bg-slate-500/10 theme-text-muted',
 };
 
 export const Badge = ({ children, color = 'slate', className = '' }) => (

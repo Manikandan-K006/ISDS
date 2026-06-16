@@ -7,6 +7,8 @@ import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 import { useStudentData } from '../../hooks/useStudentData';
 import { DOMAINS } from '../../utils/constants';
 import { getDifficultyColor, getDomainColor } from '../../utils/helpers';
+import { enrollCourse } from '../../api/courses';
+import toast from 'react-hot-toast';
 
 const domainStripColors = {
   Engineering: 'bg-indigo-500',
@@ -83,7 +85,7 @@ const CourseCatalog = () => {
           const enrolled = enrolledIds.includes(course._id);
           const progress = getEnrolledProgress(course._id);
           const diffColor = getDifficultyColor(course.difficulty);
-          const stripColor = domainStripColors[course.domain] || 'bg-slate-500';
+          const stripColor = domainStripColors[course.domain] || 'bg-indigo-500/30';
 
           return (
             <Card key={course._id} hover className="overflow-hidden p-0">
@@ -103,10 +105,10 @@ const CourseCatalog = () => {
 
                 <div className="flex items-center gap-3 text-xs theme-text-muted mb-3">
                   <span className="flex items-center gap-1">
-                    <FiClock size={12} className="text-slate-500" /> {course.duration}
+                    <FiClock size={12} className="theme-text-muted" /> {course.duration}
                   </span>
                   <span className="flex items-center gap-1">
-                    <FiUsers size={12} className="text-slate-500" /> {course.enrolledCount}
+                    <FiUsers size={12} className="theme-text-muted" /> {course.enrolledCount}
                   </span>
                 </div>
 
@@ -126,7 +128,15 @@ const CourseCatalog = () => {
                   variant={enrolled ? 'secondary' : 'ghost'}
                   className="w-full"
                   icon={enrolled ? FiArrowRight : FiChevronRight}
-                  onClick={() => { if (!enrolled) alert('Enrolling... ' + course.title); }}
+                  onClick={async () => {
+                    if (enrolled) return;
+                    try {
+                      await enrollCourse(course._id);
+                      toast.success(`Enrolled in "${course.title}"`);
+                    } catch (err) {
+                      toast.error(err.response?.data?.error || 'Enrollment failed');
+                    }
+                  }}
                 >
                   {enrolled ? 'Continue' : 'Enroll'}
                 </Button>
@@ -139,7 +149,7 @@ const CourseCatalog = () => {
       {filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="w-16 h-16 rounded-2xl theme-subtle flex items-center justify-center mb-4">
-            <FiBookOpen className="text-slate-500" size={28} />
+            <FiBookOpen className="theme-text-muted" size={28} />
           </div>
           <p className="theme-text-muted text-sm">No courses found matching your filters.</p>
           <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setSelectedDomain('All'); }}>

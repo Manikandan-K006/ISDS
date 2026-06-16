@@ -2,13 +2,23 @@ import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip,
 
 const PerformanceRadar = ({ studentData, averageData }) => {
   const data = [
-    { dimension: 'Academics', student: studentData?.academics || 85, average: averageData?.academics || 72 },
-    { dimension: 'Attendance', student: studentData?.attendance || 90, average: averageData?.attendance || 80 },
-    { dimension: 'Co-curricular', student: studentData?.cocurricular || 70, average: averageData?.cocurricular || 55 },
-    { dimension: 'Discipline', student: studentData?.discipline || 95, average: averageData?.discipline || 85 },
-    { dimension: 'Assignments', student: studentData?.assignments || 80, average: averageData?.assignments || 68 },
-    { dimension: 'Certificates', student: studentData?.certificates || 75, average: averageData?.certificates || 50 },
+    { dimension: 'Academics', student: studentData?.academics || 0, average: averageData?.academics || 0 },
+    { dimension: 'Attendance', student: studentData?.attendance || 0, average: averageData?.attendance || 0 },
+    { dimension: 'Co-curricular', student: studentData?.cocurricular || 0, average: averageData?.cocurricular || 0 },
+    { dimension: 'Discipline', student: studentData?.discipline || 0, average: averageData?.discipline || 0 },
+    { dimension: 'Assignments', student: studentData?.assignments || 0, average: averageData?.assignments || 0 },
+    { dimension: 'Certificates', student: studentData?.certificates || 0, average: averageData?.certificates || 0 },
   ];
+
+  const allZero = data.every(d => d.student === 0 && d.average === 0);
+
+  if (allZero) {
+    return (
+      <div className="flex items-center justify-center h-[350px] theme-text-muted text-sm">
+        No performance data available yet
+      </div>
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={350}>

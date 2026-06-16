@@ -1,74 +1,61 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiBarChart2, FiDownload, FiTrendingUp, FiTrendingDown, FiUsers, FiBookOpen, FiAward, FiClock, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
-
-const gradeData = [
-  { grade: 'A', count: 45, fill: '#6366F1' },
-  { grade: 'B+', count: 62, fill: '#10B981' },
-  { grade: 'B', count: 55, fill: '#F59E0B' },
-  { grade: 'C+', count: 38, fill: '#F43F5E' },
-  { grade: 'C', count: 20, fill: '#8B5CF6' },
-  { grade: 'D', count: 12, fill: '#EC4899' },
-];
-
-const attendanceTrend = [
-  { month: 'Jan', rate: 85, target: 80 },
-  { month: 'Feb', rate: 88, target: 80 },
-  { month: 'Mar', rate: 82, target: 80 },
-  { month: 'Apr', rate: 90, target: 82 },
-  { month: 'May', rate: 87, target: 82 },
-  { month: 'Jun', rate: 84, target: 83 },
-];
-
-const subjectData = [
-  { subject: 'Math', average: 78, max: 98 },
-  { subject: 'Physics', average: 72, max: 95 },
-  { subject: 'Chemistry', average: 68, max: 92 },
-  { subject: 'English', average: 82, max: 96 },
-  { subject: 'CS', average: 85, max: 99 },
-  { subject: 'History', average: 74, max: 93 },
-];
-
-const coursePerformance = [
-  { name: 'Adv. Mathematics', score: 82, students: 120 },
-  { name: 'Quantum Physics', score: 76, students: 85 },
-  { name: 'English Literature', score: 88, students: 95 },
-  { name: 'Environmental Sci.', score: 79, students: 110 },
-  { name: 'Debate & Comm.', score: 91, students: 70 },
-];
-
-const cocurricularData = [
-  { name: 'Sports', value: 35 }, { name: 'Arts', value: 25 }, { name: 'Music', value: 15 },
-  { name: 'Debate', value: 15 }, { name: 'Other', value: 10 },
-];
-
-const COLORS = ['#6366F1', '#10B981', '#F59E0B', '#F43F5E', '#64748B'];
-
-const studentPerformance = [
-  { name: 'Ananya Gupta', class: '9A', gpa: 3.9, attendance: 98, trend: 'up' },
-  { name: 'Sneha Reddy', class: '10A', gpa: 3.8, attendance: 95, trend: 'up' },
-  { name: 'Priya Patel', class: '10A', gpa: 3.7, attendance: 92, trend: 'up' },
-  { name: 'Arjun Sharma', class: '10A', gpa: 3.6, attendance: 87, trend: 'stable' },
-  { name: 'Rahul Singh', class: '10B', gpa: 3.6, attendance: 90, trend: 'up' },
-  { name: 'Amit Verma', class: '9B', gpa: 3.2, attendance: 85, trend: 'stable' },
-  { name: 'Kavita Sharma', class: '11B', gpa: 3.0, attendance: 78, trend: 'down' },
-  { name: 'Neha Kapoor', class: '9A', gpa: 2.5, attendance: 68, trend: 'down' },
-  { name: 'Vikram Joshi', class: '10B', gpa: 2.1, attendance: 62, trend: 'down' },
-  { name: 'Rohit Kumar', class: '11A', gpa: 1.8, attendance: 58, trend: 'down' },
-];
-
-const chartTooltipStyle = {
-  contentStyle: { background: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '13px' },
-  labelStyle: { color: '#94A3B8' },
-};
+import { getDashboardAnalytics, getCourseAnalytics } from '../../api/analytics';
+import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
+import { Card, Badge } from '../../components/ui';
 
 const Analytics = () => {
+  const [analytics, setAnalytics] = useState(null);
+  const [courseAnalytics, setCourseAnalytics] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [dashRes, courseRes] = await Promise.all([
+          getDashboardAnalytics(),
+          getCourseAnalytics(),
+        ]);
+        setAnalytics(dashRes.data);
+        setCourseAnalytics(courseRes.data || []);
+      } catch (err) {
+        console.error('Failed to fetch analytics:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return <PageSkeleton />;
+
   const statCards = [
-    { icon: FiUsers, label: 'Total Students', value: '428', change: '+12', changeType: 'up', color: 'indigo' },
-    { icon: FiBookOpen, label: 'Active Courses', value: '24', change: '+3', changeType: 'up', color: 'emerald' },
-    { icon: FiAward, label: 'Avg GPA', value: '3.2', change: '+0.15', changeType: 'up', color: 'amber' },
-    { icon: FiClock, label: 'Avg Attendance', value: '86%', change: '+2.1%', changeType: 'up', color: 'purple' },
+    { label: 'Total Students', value: analytics?.totalStudents ?? 0, icon: FiUsers, color: 'indigo' },
+    { label: 'Total Courses', value: analytics?.totalCourses ?? 0, icon: FiBookOpen, color: 'emerald' },
+    { label: 'Enrollments', value: analytics?.totalEnrollments ?? 0, icon: FiTrendingUp, color: 'purple' },
+    { label: 'Completion Rate', value: analytics ? `${analytics.completionRate}%` : '0%', icon: FiAward, color: 'amber' },
+    { label: 'Submissions', value: analytics?.totalSubmissions ?? 0, icon: FiClock, color: 'rose' },
+    { label: 'Certificates', value: analytics?.totalCertificates ?? 0, icon: FiAward, color: 'indigo' },
   ];
+
+  const gradeData = analytics?.gradeDistribution
+    ? Object.entries(analytics.gradeDistribution).map(([grade, count]) => ({
+        grade,
+        count,
+        fill: grade === 'A' ? '#10b981' : grade === 'B' ? '#6366f1' : grade === 'C' ? '#f59e0b' : grade === 'D' ? '#f97316' : '#ef4444',
+      }))
+    : [];
+
+  const courseData = courseAnalytics || [];
+
+  const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+  const chartTooltipStyle = {
+    contentStyle: { background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text)', fontSize: '13px' },
+    labelStyle: { color: 'var(--text-muted)' },
+  };
 
   return (
     <div className="space-y-6">
@@ -77,8 +64,8 @@ const Analytics = () => {
         <div className="absolute bottom-0 left-0 w-48 h-48 theme-input rounded-full translate-y-24 -translate-x-24" />
         <div className="relative flex items-center justify-between">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Analytics</h1>
-            <p className="text-indigo-200 mt-1">Class-level performance insights and metrics</p>
+            <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Analytics Dashboard</h1>
+            <p className="text-indigo-200 mt-1">Real-time insights from platform data</p>
           </div>
           <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 theme-text text-sm hover:bg-white/20 transition-colors">
             <FiDownload size={16} /> Export Report
@@ -86,18 +73,14 @@ const Analytics = () => {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {statCards.map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-            className="theme-card border theme-border rounded-2xl p-5 hover:border-white/[0.12] transition-all"
+            className="theme-card border theme-border rounded-2xl p-5"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className={`p-2.5 rounded-xl bg-${s.color}-500/10`}>
-                <s.icon className={`text-${s.color}-400`} size={20} />
-              </div>
-              <div className={`flex items-center gap-0.5 text-xs font-medium ${s.changeType === 'up' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {s.changeType === 'up' ? <FiArrowUp size={12} /> : <FiArrowDown size={12} />}
-                {s.change}
+              <div className={`p-2.5 rounded-xl ${s.color === 'indigo' ? 'bg-indigo-500/10' : s.color === 'emerald' ? 'bg-emerald-500/10' : s.color === 'purple' ? 'bg-purple-500/10' : s.color === 'amber' ? 'bg-amber-500/10' : 'bg-rose-500/10'}`}>
+                <s.icon className={s.color === 'indigo' ? 'text-indigo-400' : s.color === 'emerald' ? 'text-emerald-400' : s.color === 'purple' ? 'text-purple-400' : s.color === 'amber' ? 'text-amber-400' : 'text-rose-400'} size={20} />
               </div>
             </div>
             <div className="theme-text-muted text-xs font-medium uppercase tracking-wider mb-1">{s.label}</div>
@@ -107,168 +90,88 @@ const Analytics = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="theme-card border theme-border rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold theme-text flex items-center gap-2">
-              <FiBarChart2 className="text-indigo-400" size={16} /> Grade Distribution
-            </h2>
-            <span className="text-xs theme-text-muted">All classes</span>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={gradeData} barSize={40}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis dataKey="grade" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={{ stroke: 'rgba(255,255,255,0.05)' }} tickLine={false} />
-              <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip {...chartTooltipStyle} />
-              <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                {gradeData.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
+        <Card>
+          <h3 className="text-sm font-semibold theme-text mb-4">Enrollment Trend</h3>
+          {analytics?.enrollmentsByMonth?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={analytics.enrollmentsByMonth}>
+                <defs>
+                  <linearGradient id="enrollGrad2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={12} tickLine={false} />
+                <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} />
+                <Tooltip {...chartTooltipStyle} />
+                <Area type="monotone" dataKey="count" stroke="#6366f1" fill="url(#enrollGrad2)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : <p className="theme-text-muted text-sm py-8 text-center">No data available</p>}
+        </Card>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="theme-card border theme-border rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold theme-text flex items-center gap-2">
-              <FiTrendingUp className="text-emerald-400" size={16} /> Attendance Trends
-            </h2>
-            <span className="text-xs theme-text-muted">Target: 83%</span>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={attendanceTrend}>
-              <defs>
-                <linearGradient id="attendanceGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="month" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={{ stroke: 'rgba(255,255,255,0.05)' }} tickLine={false} />
-              <YAxis domain={[70, 100]} tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip {...chartTooltipStyle} />
-              <Area type="monotone" dataKey="target" stroke="#64748B" strokeWidth={1.5} strokeDasharray="6 3" fill="none" />
-              <Area type="monotone" dataKey="rate" stroke="#10B981" strokeWidth={2.5} fill="url(#attendanceGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </motion.div>
+        <Card>
+          <h3 className="text-sm font-semibold theme-text mb-4">Course Distribution</h3>
+          {analytics?.coursesByDomain?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={analytics.coursesByDomain} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="count" nameKey="name" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  {analytics.coursesByDomain.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip {...chartTooltipStyle} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : <p className="theme-text-muted text-sm py-8 text-center">No data available</p>}
+        </Card>
+
+        <Card>
+          <h3 className="text-sm font-semibold theme-text mb-4">Grade Distribution</h3>
+          {gradeData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={gradeData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="grade" stroke="var(--text-muted)" fontSize={12} tickLine={false} />
+                <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} />
+                <Tooltip {...chartTooltipStyle} />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {gradeData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : <p className="theme-text-muted text-sm py-8 text-center">No data available</p>}
+        </Card>
+
+        <Card>
+          <h3 className="text-sm font-semibold theme-text mb-4">Course Performance</h3>
+          {courseData.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b theme-border">
+                    <th className="text-left py-2 pr-2 theme-text-muted font-medium">Course</th>
+                    <th className="text-center py-2 px-2 theme-text-muted font-medium">Enrolled</th>
+                    <th className="text-center py-2 px-2 theme-text-muted font-medium">Complete</th>
+                    <th className="text-center py-2 pl-2 theme-text-muted font-medium">Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {courseData.map((c, i) => (
+                    <tr key={c.id || i} className="border-t theme-border">
+                      <td className="py-2 pr-2 theme-text">{c.title}</td>
+                      <td className="text-center py-2 px-2 theme-text">{c.enrollments}</td>
+                      <td className="text-center py-2 px-2 theme-text">{c.completed}</td>
+                      <td className="text-center py-2 pl-2">
+                        <Badge color={c.completionRate >= 50 ? 'emerald' : 'amber'}>{c.completionRate}%</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : <p className="theme-text-muted text-sm py-8 text-center">No courses available</p>}
+        </Card>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="theme-card border theme-border rounded-2xl p-5">
-          <h2 className="text-sm font-semibold theme-text mb-5 flex items-center gap-2">
-            <FiBarChart2 className="text-indigo-400" size={16} /> Subject-wise Performance
-          </h2>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={subjectData} layout="vertical" barSize={20}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
-              <XAxis type="number" domain={[0, 100]} tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="subject" tick={{ fill: '#94A3B8', fontSize: 12 }} axisLine={false} tickLine={false} width={80} />
-              <Tooltip {...chartTooltipStyle} />
-              <Bar dataKey="average" fill="#6366F1" radius={[0, 6, 6, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="theme-card border theme-border rounded-2xl p-5">
-          <h2 className="text-sm font-semibold theme-text mb-5 flex items-center gap-2">
-            <FiTrendingUp className="text-emerald-400" size={16} /> Course Performance
-          </h2>
-          <div className="space-y-4">
-            {coursePerformance.map((c, i) => (
-              <div key={i}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs theme-text-muted w-5">{i + 1}</span>
-                    <span className="text-sm theme-text">{c.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="theme-text-muted">{c.students} students</span>
-                    <span className={`font-medium ${c.score >= 80 ? 'text-emerald-400' : c.score >= 70 ? 'text-amber-400' : 'text-rose-400'}`}>
-                      {c.score}%
-                    </span>
-                  </div>
-                </div>
-                <div className="w-full theme-hover rounded-full h-1.5 ml-7">
-                  <div className={`h-1.5 rounded-full ${
-                    c.score >= 80 ? 'bg-emerald-500' : c.score >= 70 ? 'bg-amber-500' : 'bg-rose-500'
-                  }`} style={{ width: `${c.score}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="theme-card border theme-border rounded-2xl overflow-hidden">
-        <div className="p-5 border-b theme-border">
-          <h2 className="text-sm font-semibold theme-text flex items-center gap-2">
-            <FiUsers className="text-indigo-400" size={16} /> Student Performance Overview
-          </h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b theme-border">
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider pl-5">Student</th>
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Class</th>
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">GPA</th>
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Attendance</th>
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Trend</th>
-                <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {studentPerformance.map((s, i) => (
-                <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="p-3 pl-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                        <span className="text-xs text-indigo-400 font-bold">{s.name.split(' ').map(n => n[0]).join('')}</span>
-                      </div>
-                      <span className="text-sm theme-text">{s.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-3 text-sm theme-text-muted">{s.class}</td>
-                  <td className="p-3">
-                    <span className="text-sm font-medium theme-text">{s.gpa}</span>
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 theme-hover rounded-full h-1.5">
-                        <div className={`h-1.5 rounded-full ${s.attendance >= 80 ? 'bg-emerald-500' : s.attendance >= 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
-                          style={{ width: `${s.attendance}%` }} />
-                      </div>
-                      <span className={`text-xs font-medium ${s.attendance >= 80 ? 'text-emerald-400' : s.attendance >= 70 ? 'text-amber-400' : 'text-rose-400'}`}>
-                        {s.attendance}%
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    {s.trend === 'up' ? (
-                      <FiArrowUp className="text-emerald-400" size={16} />
-                    ) : s.trend === 'down' ? (
-                      <FiArrowDown className="text-rose-400" size={16} />
-                    ) : (
-                      <FiTrendingUp className="theme-text-muted" size={16} />
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                      s.gpa >= 3.5 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' :
-                      s.gpa >= 2.5 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' :
-                      'bg-rose-500/15 text-rose-400 border border-rose-500/20'
-                    }`}>
-                      {s.gpa >= 3.5 ? 'Excellent' : s.gpa >= 2.5 ? 'Average' : 'At Risk'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </motion.div>
     </div>
   );
 };

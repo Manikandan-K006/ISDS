@@ -74,7 +74,7 @@ const TrophySession = () => {
         </motion.div>
       ) : (
         <Card className="p-12 text-center">
-          <FiAward className="mx-auto text-slate-500 mb-4" size={48} />
+          <FiAward className="mx-auto theme-text-muted mb-4" size={48} />
           <h3 className="text-lg font-medium theme-text mb-1">No achievements yet</h3>
           <p className="text-sm theme-text-muted">Keep learning to earn more badges!</p>
         </Card>

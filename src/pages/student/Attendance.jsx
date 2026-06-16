@@ -17,7 +17,7 @@ const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const Attendance = () => {
   const { attendance, loading, error, refetch } = useStudentData();
-  const [currentMonth, setCurrentMonth] = useState(() => new Date(2026, 4, 1));
+  const [currentMonth, setCurrentMonth] = useState(() => new Date());
 
   const monthStart = useMemo(() => startOfMonth(currentMonth), [currentMonth]);
   const monthEnd = useMemo(() => endOfMonth(currentMonth), [currentMonth]);
@@ -44,7 +44,7 @@ const Attendance = () => {
     return record ? record.status : null;
   };
 
-  const isToday = (day) => format(day, 'yyyy-MM-dd') === format(new Date(2026, 5, 9), 'yyyy-MM-dd');
+  const isToday = (day) => format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
 
   const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));

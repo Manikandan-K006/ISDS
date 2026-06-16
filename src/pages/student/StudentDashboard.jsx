@@ -33,15 +33,9 @@ const StudentDashboard = () => {
 
   const deadlineItems = Array.isArray(assignments) && assignments.length > 0
     ? assignments.filter(a => a.dueDate).slice(0, 4)
-    : [
-        { title: 'Calculus Problem Set', course: 'Mathematics', dueDate: '2026-06-15' },
-        { title: 'Physics Lab Report', course: 'Physics', dueDate: '2026-06-20' },
-      ];
+    : [];
 
-  const recentActivity = student?.recentActivity || [
-    { action: 'Started Data Structures module', time: '2 hours ago' },
-    { action: 'Submitted Physics Lab Report', time: '2 days ago' },
-  ];
+  const recentActivity = student?.recentActivity || [];
 
   if (loading) return <PageSkeleton />;
 
@@ -52,7 +46,7 @@ const StudentDashboard = () => {
           <FiActivity className="text-rose-400" size={28} />
         </div>
         <p className="theme-text-muted text-sm">Failed to load dashboard data</p>
-        <p className="text-slate-500 text-xs">{error}</p>
+        <p className="theme-text-muted text-xs">{error}</p>
         <Button variant="secondary" onClick={refetch}>Try Again</Button>
       </div>
     );
@@ -153,7 +147,7 @@ const StudentDashboard = () => {
           </div>
         ) : (
           <div className="text-sm theme-text-muted text-center py-12">
-            <FiBookOpen className="mx-auto mb-2 text-slate-500" size={24} />
+            <FiBookOpen className="mx-auto mb-2 theme-text-muted" size={24} />
             <p>No courses enrolled yet.</p>
             <Link to="/courses" className="text-indigo-400 hover:text-indigo-300 transition-colors">Browse Courses</Link>
           </div>

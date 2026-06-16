@@ -1,23 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiTrendingUp, FiTrendingDown, FiMinus, FiFilter } from 'react-icons/fi';
+import { FiTrendingUp, FiTrendingDown, FiMinus, FiFilter, FiUsers, FiLoader } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 import { getInitials } from '../../utils/helpers';
-
-const leaderboardData = [
-  { rank: 1, name: 'Arjun Sharma', class: '10A', score: 98, avatar: 'AS', trend: 'up' },
-  { rank: 2, name: 'Priya Verma', class: '10B', score: 95, avatar: 'PV', trend: 'up' },
-  { rank: 3, name: 'Rahul Kumar', class: '10B', score: 92, avatar: 'RK', trend: 'stable' },
-  { rank: 4, name: 'Sneha Patel', class: '10A', score: 89, avatar: 'SP', trend: 'up' },
-  { rank: 5, name: 'Amit Singh', class: '10A', score: 87, avatar: 'AS', trend: 'down' },
-  { rank: 6, name: 'Neha Gupta', class: '10B', score: 85, avatar: 'NG', trend: 'up' },
-  { rank: 7, name: 'Vikram Joshi', class: '9A', score: 83, avatar: 'VJ', trend: 'stable' },
-  { rank: 8, name: 'Ananya Reddy', class: '9B', score: 80, avatar: 'AR', trend: 'down' },
-  { rank: 9, name: 'Karan Mehta', class: '9A', score: 78, avatar: 'KM', trend: 'up' },
-  { rank: 10, name: 'Divya Nair', class: '9B', score: 75, avatar: 'DN', trend: 'stable' },
-];
-
-const CLASSES = ['All', '10A', '10B', '9A', '9B'];
+import API from '../../api/client';
 
 const podiumGradients = {
   1: 'from-yellow-400 via-yellow-500 to-yellow-600',
@@ -75,16 +61,77 @@ const TrendIcon = ({ trend }) => {
   return <FiMinus className="theme-text-muted" size={16} />;
 };
 
+const StudentTrend = ({ rank, len }) => {
+  if (rank <= Math.ceil(len * 0.33)) return <FiTrendingUp className="text-emerald-400" size={16} />;
+  if (rank >= len - Math.floor(len * 0.33)) return <FiTrendingDown className="text-rose-400" size={16} />;
+  return <FiMinus className="theme-text-muted" size={16} />;
+};
+
 const Leaderboard = () => {
   const { user } = useAuth();
   const [activeClass, setActiveClass] = useState('All');
+  const [leaders, setLeaders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    API.get('/students')
+      .then(res => {
+        const students = res.data || res || [];
+        const sorted = students
+          .sort((a, b) => (b.credits || 0) - (a.credits || 0))
+          .map((s, i) => ({
+            rank: i + 1,
+            name: s.name,
+            class: s.class || '',
+            score: s.credits || 0,
+            avatar: s.profilePhoto || getInitials(s.name),
+          }));
+        setLeaders(sorted);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const CLASSES = ['All', ...new Set(leaders.map(s => s.class).filter(Boolean))];
 
   const filtered = activeClass === 'All'
-    ? leaderboardData
-    : leaderboardData.filter(s => s.class === activeClass);
+    ? leaders
+    : leaders.filter(s => s.class === activeClass);
 
   const top3 = filtered.slice(0, 3);
   const rest = filtered.slice(3);
+
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="animate-pulse theme-card rounded-2xl p-6 lg:p-8 border theme-border">
+        <div className="h-7 w-48 theme-subtle rounded mb-2" />
+        <div className="h-4 w-64 theme-subtle rounded" />
+      </div>
+      <div className="animate-pulse grid grid-cols-1 md:grid-cols-3 gap-4 px-4">
+        {[1,2,3].map(i => (
+          <div key={i} className="theme-card rounded-2xl border theme-border p-6 flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full theme-subtle mb-3" />
+            <div className="h-4 w-24 theme-subtle rounded mb-2" />
+            <div className="h-3 w-16 theme-subtle rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  if (!loading && leaders.length === 0) return (
+    <div className="space-y-6">
+      <div className="theme-card rounded-2xl p-6 lg:p-8 border theme-border">
+        <h1 className="text-2xl lg:text-3xl font-bold theme-text">Leaderboard</h1>
+        <p className="theme-text-muted mt-1">Top performers this semester</p>
+      </div>
+      <div className="theme-card rounded-2xl border theme-border p-12 text-center">
+        <FiUsers className="mx-auto theme-text-muted mb-4" size={48} />
+        <h3 className="text-lg font-medium theme-text mb-1">No leaderboard data available yet</h3>
+        <p className="text-sm theme-text-muted">Student rankings will appear here once data is available.</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -165,7 +212,7 @@ const Leaderboard = () => {
                 <span className="text-sm font-semibold theme-text">{student.score}</span>
               </div>
               <div className="col-span-1 flex justify-end">
-                <TrendIcon trend={student.trend} />
+                <StudentTrend rank={student.rank} len={filtered.length} />
               </div>
             </motion.div>
           );

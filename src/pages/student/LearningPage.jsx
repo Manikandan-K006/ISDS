@@ -83,12 +83,7 @@ const LearningPage = () => {
     setCurrentLesson({ chapterIdx: ci, lessonIdx: li });
   };
 
-  const quizQuestions = [
-    { id: 1, question: 'What is the derivative of x²?', options: ['x', '2x', 'x²', '2'], correct: 1 },
-    { id: 2, question: 'What is ∫ sin(x) dx?', options: ['cos(x)', '-cos(x)', 'sin(x)', '-sin(x)'], correct: 1 },
-    { id: 3, question: 'What is the limit of 1/x as x→∞?', options: ['∞', '1', '0', '-∞'], correct: 2 },
-  ];
-
+  const quizQuestions = course?.quizQuestions || [];
   const quizScore = quizQuestions.filter(q => quizAnswers[q.id] === q.correct).length;
   const quizPassed = quizScore >= Math.ceil(quizQuestions.length * 0.5);
 
@@ -119,7 +114,7 @@ const LearningPage = () => {
                       <FiChevronDown size={14} className={`theme-text-muted shrink-0 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
                       <span className="text-xs theme-text font-medium truncate">{ch.title}</span>
                     </div>
-                    <span className="text-[10px] text-slate-500 shrink-0 ml-2">
+                    <span className="text-[10px] theme-text-muted shrink-0 ml-2">
                       {ch.completed.filter(Boolean).length}/{ch.lessons.length}
                     </span>
                   </button>
@@ -145,7 +140,7 @@ const LearningPage = () => {
                             ) : lessonVideoUrl ? (
                               <FiVideo size={12} className="text-green-500/60 shrink-0" />
                             ) : (
-                              <FiFileText size={12} className="text-slate-500 shrink-0" />
+                              <FiFileText size={12} className="theme-text-muted shrink-0" />
                             )}
                             <span className="truncate flex-1">{lessonTitle}</span>
                             {lessonVideoUrl && (
@@ -180,7 +175,7 @@ const LearningPage = () => {
                   <FiPlay className="text-indigo-400/60" size={28} />
                 </div>
                 <p className="theme-text-muted text-sm">No video content for this lesson</p>
-                <p className="text-xs text-slate-500 mt-1">Add a YouTube link in course settings</p>
+                <p className="text-xs theme-text-muted mt-1">Add a YouTube link in course settings</p>
               </div>
             )}
           </div>
@@ -258,7 +253,7 @@ const LearningPage = () => {
                     placeholder="Take notes for this lesson..."
                     className="w-full h-36 theme-subtle border theme-border rounded-xl p-3 text-sm theme-text/80 placeholder-slate-600 focus:outline-none focus:theme-border-light focus:theme-hover transition-all resize-none"
                   />
-                  <p className="text-xs text-slate-500 flex items-center gap-1">
+                  <p className="text-xs theme-text-muted flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60" />
                     Auto-saved to this lesson
                   </p>
@@ -287,19 +282,53 @@ const LearningPage = () => {
               )}
               {activeTab === 'resources' && (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium theme-text/90 mb-3">Lesson Resources</h3>
-                  {['Lecture Slides.pdf', 'Practice Problems.pdf', 'Reference Material.pdf'].map(r => (
-                    <div
-                      key={r}
-                      className="flex items-center gap-3 p-2.5 rounded-xl hover:theme-subtle cursor-pointer group transition-colors border border-transparent hover:theme-border"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                        <FiFileText className="text-indigo-400/60" size={14} />
-                      </div>
-                      <span className="text-xs theme-text-muted flex-1 group-hover:theme-text transition-colors">{r}</span>
-                      <FiDownload className="text-slate-500 group-hover:theme-text-muted transition-colors" size={12} />
-                    </div>
-                  ))}
+                  <h3 className="text-sm font-medium theme-text/90 mb-3">Course Resources</h3>
+                  {(course?.resources?.filter(r => r.visibility !== 'draft') || []).length > 0 ? (
+                    <>
+                      {[
+                        { key: 'documents', label: 'Documents', types: ['PDF', 'DOC', 'DOCX', 'PPT', 'PPTX', 'XLS', 'XLSX', 'TXT'] },
+                        { key: 'media', label: 'Media', types: ['Video', 'Audio', 'MP4', 'AVI', 'MOV', 'MKV', 'WEBM', 'MP3', 'WAV', 'AAC'] },
+                        { key: 'links', label: 'Links', types: ['YouTube', 'GoogleDrive', 'OneDrive', 'GitHub', 'Website', 'ResearchPaper', 'Docs'] },
+                        { key: 'other', label: 'Other', types: [] },
+                      ].map(category => {
+                        const items = (course?.resources || []).filter(r =>
+                          r.visibility !== 'draft' && (category.types.length === 0 || category.types.includes(r.type))
+                        );
+                        if (items.length === 0) return null;
+                        return (
+                          <div key={category.key} className="mb-3">
+                            <p className="text-[10px] uppercase tracking-wider theme-text-muted font-medium mb-1.5">{category.label}</p>
+                            {items.map((r, ri) => {
+                              const isExternal = r.externalUrl && !r.fileUrl;
+                              const linkUrl = isExternal ? r.externalUrl : (r.fileUrl ? r.fileUrl : '#');
+                              const isVideo = r.type === 'Video' || r.type === 'MP4' || r.type === 'WEBM';
+                              const isAudio = r.type === 'Audio' || r.type === 'MP3' || r.type === 'WAV';
+                              return (
+                                <a
+                                  key={ri}
+                                  href={linkUrl}
+                                  target={isExternal ? '_blank' : undefined}
+                                  rel={isExternal ? 'noopener noreferrer' : undefined}
+                                  className="flex items-center gap-2.5 p-2 rounded-xl hover:theme-subtle group transition-colors border border-transparent hover:theme-border"
+                                >
+                                  <div className="w-7 h-7 rounded-lg theme-subtle flex items-center justify-center shrink-0">
+                                    {isVideo ? <FiPlay className="text-indigo-400/60" size={13} /> :
+                                     isAudio ? <FiFileText className="text-rose-400/60" size={13} /> :
+                                     isExternal ? <FiDownload className="text-emerald-400/60" size={13} /> :
+                                     <FiFileText className="text-indigo-400/60" size={13} />}
+                                  </div>
+                                  <span className="text-xs theme-text-muted flex-1 group-hover:theme-text transition-colors truncate">{r.title}</span>
+                                  <FiDownload className="theme-text-muted group-hover:theme-text shrink-0" size={11} />
+                                </a>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <p className="text-xs theme-text-muted text-center py-6">No resources available for this course</p>
+                  )}
                 </div>
               )}
               {activeTab === 'discussion' && (
@@ -307,10 +336,10 @@ const LearningPage = () => {
                   <h3 className="text-sm font-medium theme-text/90">Discussion</h3>
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <div className="w-12 h-12 rounded-xl theme-subtle flex items-center justify-center mb-3">
-                      <FiMessageSquare className="text-slate-500" size={20} />
+                      <FiMessageSquare className="theme-text-muted" size={20} />
                     </div>
                     <p className="text-xs theme-text-muted">No discussion threads yet.</p>
-                    <p className="text-xs text-slate-500 mt-1">Start a conversation with your classmates!</p>
+                    <p className="text-xs theme-text-muted mt-1">Start a conversation with your classmates!</p>
                   </div>
                 </div>
               )}
@@ -335,31 +364,35 @@ const LearningPage = () => {
                 </div>
                 <Button variant="ghost" size="sm" icon={FiX} onClick={() => setShowQuiz(false)} />
               </div>
-              <div className="space-y-4">
-                {quizQuestions.map((q, qi) => (
-                  <div key={q.id} className="theme-subtle rounded-xl p-4 border theme-border">
-                    <p className="text-sm theme-text/90 mb-2.5 flex items-start gap-2">
-                      <span className="text-indigo-400 text-xs font-medium mt-0.5">Q{qi + 1}.</span>
-                      <span>{q.question}</span>
-                    </p>
-                    <div className="space-y-1.5 ml-5">
-                      {q.options.map((opt, oi) => (
-                        <button
-                          key={oi}
-                          onClick={() => setQuizAnswers(prev => ({...prev, [q.id]: oi}))}
-                          className={`block w-full text-left px-3 py-2 rounded-lg text-xs transition-all ${
-                            quizAnswers[q.id] === oi
-                              ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/25'
-                              : 'theme-subtle theme-text-muted hover:theme-text hover:theme-hover border border-transparent'
-                          }`}
-                        >
-                          {opt}
-                        </button>
-                      ))}
+              {quizQuestions.length > 0 ? (
+                <div className="space-y-4">
+                  {quizQuestions.map((q, qi) => (
+                    <div key={q.id} className="theme-subtle rounded-xl p-4 border theme-border">
+                      <p className="text-sm theme-text/90 mb-2.5 flex items-start gap-2">
+                        <span className="text-indigo-400 text-xs font-medium mt-0.5">Q{qi + 1}.</span>
+                        <span>{q.question}</span>
+                      </p>
+                      <div className="space-y-1.5 ml-5">
+                        {q.options.map((opt, oi) => (
+                          <button
+                            key={oi}
+                            onClick={() => setQuizAnswers(prev => ({...prev, [q.id]: oi}))}
+                            className={`block w-full text-left px-3 py-2 rounded-lg text-xs transition-all ${
+                              quizAnswers[q.id] === oi
+                                ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/25'
+                                : 'theme-subtle theme-text-muted hover:theme-text hover:theme-hover border border-transparent'
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm theme-text-muted text-center py-8">Quiz feature coming soon</p>
+              )}
               {Object.keys(quizAnswers).length === quizQuestions.length && (
                 <div className={`mt-4 p-3 rounded-xl text-sm ${
                   quizPassed

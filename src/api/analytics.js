@@ -1,7 +1,5 @@
-import axios from 'axios';
-import { API_BASE } from '../utils/constants';
+import API from './client';
 
-const api = axios.create({ baseURL: `${API_BASE}/api/analytics` });
-
-export const getClassAnalytics = (className) => api.get('/', { params: { class: className } }).then(r => r.data);
-export const getStudentAnalytics = (id) => api.get(`/student/${id}`).then(r => r.data);
+export const getDashboardAnalytics = () => API.get('/analytics/dashboard').then(r => r.data);
+export const getCourseAnalytics = () => API.get('/analytics/courses').then(r => r.data);
+export const getStudentAnalytics = (id) => API.get(`/analytics/student/${id}`).then(r => r.data);

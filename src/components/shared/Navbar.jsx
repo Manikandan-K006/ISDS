@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiBell, FiMenu, FiLogOut, FiUser, FiSettings,
-  FiSun, FiMoon
+  FiSun, FiMoon, FiTrash2
 } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 import { getInitials } from '../../utils/helpers';
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification } from '../../api/notifications';
 
 const Navbar = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
@@ -15,16 +16,63 @@ const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const profileRef = useRef(null);
   const notifRef = useRef(null);
 
-  const notifications = [
-    { id: 1, text: 'New assignment: Calculus Problem Set', time: '2m ago', read: false },
-    { id: 2, text: 'Certificate earned: English Literature', time: '1h ago', read: false },
-    { id: 3, text: 'Quiz score: 88/100 in Math', time: '3h ago', read: true },
-  ];
+  const fetchNotifications = async () => {
+    try {
+      const res = await getNotifications({ limit: 20 });
+      setNotifications(res.data.notifications || []);
+      setUnreadCount(res.data.unreadCount || 0);
+    } catch {
+      // silently fail
+    }
+  };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  useEffect(() => {
+    if (showNotifications) fetchNotifications();
+  }, [showNotifications]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getUnreadCount();
+        setUnreadCount(res.data?.count || 0);
+      } catch { /* silent */ }
+    })();
+  }, []);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch {
+      // silently fail
+    }
+  };
+
+  const handleMarkRead = async (id) => {
+    try {
+      await markAsRead(id);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch {
+      // silently fail
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteNotification(id);
+      setNotifications(prev => prev.filter(n => n._id !== id));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch {
+      // silently fail
+    }
+  };
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -36,6 +84,21 @@ const Navbar = ({ onToggleSidebar }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const formatTime = (dateStr) => {
+    if (!dateStr) return '';
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
 
   return (
     <nav className="sticky top-0 z-30 theme-bg/80 backdrop-blur-xl border-b theme-border h-14">
@@ -71,7 +134,9 @@ const Navbar = ({ onToggleSidebar }) => {
             >
               <FiBell size={16} />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full ring-2 theme-bg" />
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-2 theme-bg">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
               )}
             </button>
             <AnimatePresence>
@@ -86,22 +151,36 @@ const Navbar = ({ onToggleSidebar }) => {
                   <div className="p-4 border-b theme-border">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold theme-text">Notifications</h3>
-                      <button className="text-xs theme-text-muted hover:theme-text transition-colors">
-                        Mark all read
-                      </button>
+                      {unreadCount > 0 && (
+                        <button onClick={handleMarkAllRead} className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                          Mark all read
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div className="max-h-72 overflow-y-auto">
                     {notifications.length > 0 ? (
                       notifications.map(n => (
                         <div
-                          key={n.id}
-                          className={`p-4 border-b border-[var(--border-light)] hover:bg-[var(--subtle)] cursor-pointer transition-colors ${
-                            !n.read ? 'bg-[var(--subtle)]' : ''
+                          key={n._id}
+                          onClick={() => { if (!n.isRead) handleMarkRead(n._id); }}
+                          className={`p-4 border-b theme-border-light hover:theme-subtle cursor-pointer transition-colors group ${
+                            !n.isRead ? 'theme-subtle' : ''
                           }`}
                         >
-                          <p className="text-sm theme-text leading-snug">{n.text}</p>
-                          <span className="text-xs theme-text-muted mt-1 block">{n.time}</span>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm theme-text font-medium">{n.title}</p>
+                              <p className="text-xs theme-text-muted mt-0.5 line-clamp-2">{n.message}</p>
+                              <span className="text-[10px] theme-text-muted mt-1 block">{formatTime(n.createdAt)}</span>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDelete(n._id); }}
+                              className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/10 theme-text-muted hover:text-red-400 transition-all shrink-0"
+                            >
+                              <FiTrash2 size={12} />
+                            </button>
+                          </div>
                         </div>
                       ))
                     ) : (
@@ -110,11 +189,6 @@ const Navbar = ({ onToggleSidebar }) => {
                           <p className="text-sm theme-text-muted">No notifications yet</p>
                       </div>
                     )}
-                  </div>
-                  <div className="p-3 border-t theme-border text-center">
-                    <span className="text-xs theme-text-muted cursor-pointer hover:theme-text transition-colors">
-                      View all notifications
-                    </span>
                   </div>
                 </motion.div>
               )}
@@ -142,20 +216,20 @@ const Navbar = ({ onToggleSidebar }) => {
                   <div className="p-4 border-b theme-border">
                     <p className="text-sm font-semibold theme-text">{user?.name}</p>
                     <p className="text-xs theme-text-muted mt-0.5">{user?.email || 'user@isds.edu'}</p>
-                    <span className="inline-block mt-2 px-2 py-0.5 rounded-md bg-[var(--hover)] theme-text-muted text-[10px] font-medium uppercase tracking-wider">
+                    <span className="inline-block mt-2 px-2 py-0.5 rounded-md theme-hover theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                       {user?.role || 'student'}
                     </span>
                   </div>
                   <div className="p-1.5">
                     <button
                       onClick={() => { navigate('/profile'); setShowProfile(false); }}
-                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-slate-300 hover:bg-white/[0.04] rounded-lg transition-colors"
+                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm theme-text hover:theme-hover rounded-lg transition-colors"
                     >
                       <FiUser size={14} /> Profile
                     </button>
                     <button
                       onClick={() => { navigate('/settings'); setShowProfile(false); }}
-                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-slate-300 hover:bg-white/[0.04] rounded-lg transition-colors"
+                      className="flex items-center gap-2.5 w-full px-3 py-2 text-sm theme-text hover:theme-hover rounded-lg transition-colors"
                     >
                       <FiSettings size={14} /> Settings
                     </button>

@@ -75,7 +75,7 @@ const Certificates = () => {
         </motion.div>
       ) : (
         <Card className="p-12 text-center">
-          <FiFileText className="mx-auto text-slate-500 mb-4" size={48} />
+          <FiFileText className="mx-auto theme-text-muted mb-4" size={48} />
           <h3 className="text-lg font-medium theme-text mb-1">No certificates found</h3>
           <p className="text-sm theme-text-muted">Try adjusting your search</p>
         </Card>
