@@ -24,14 +24,14 @@ const PerformanceRadar = ({ studentData, averageData }) => {
     <ResponsiveContainer width="100%" height={350}>
       <RadarChart data={data}>
         <PolarGrid stroke="rgba(255,255,255,0.1)" />
-        <PolarAngleAxis dataKey="dimension" tick={{ fill: '#94A3B8', fontSize: 12 }} />
-        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#64748B', fontSize: 10 }} />
+        <PolarAngleAxis dataKey="dimension" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
         <Radar name="Student" dataKey="student" stroke="#6366F1" fill="#6366F1" fillOpacity={0.3} strokeWidth={2} />
         <Radar name="Class Average" dataKey="average" stroke="#64748B" fill="#64748B" fillOpacity={0.2} strokeWidth={2} />
         <Tooltip
-          contentStyle={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
+          contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)' }}
         />
-        <Legend wrapperStyle={{ color: '#94A3B8' }} />
+        <Legend wrapperStyle={{ color: 'var(--text-muted)' }} />
       </RadarChart>
     </ResponsiveContainer>
   );

@@ -59,13 +59,13 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-2xl p-6 lg:p-8 relative overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="gradient-hero rounded-2xl p-6 lg:p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 theme-input rounded-full -translate-y-32 translate-x-32" />
         <div className="absolute bottom-0 left-0 w-48 h-48 theme-input rounded-full translate-y-24 -translate-x-24" />
         <div className="relative flex items-center justify-between">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Analytics Dashboard</h1>
-            <p className="text-indigo-200 mt-1">Real-time insights from platform data</p>
+            <p className="theme-text mt-1">Real-time insights from platform data</p>
           </div>
           <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 theme-text text-sm hover:bg-white/20 transition-colors">
             <FiDownload size={16} /> Export Report

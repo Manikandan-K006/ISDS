@@ -31,6 +31,9 @@
   --success: #10b981;
   --scrollbar-thumb: #4B5563;
   --scrollbar-thumb-hover: #6B7280;
+  --hero-from: #0f172a;
+  --hero-via: #1e293b;
+  --hero-to: #312e81;
 }
 
 [data-theme="light"] {
@@ -50,6 +53,9 @@
   --success: #059669;
   --scrollbar-thumb: #cbd5e1;
   --scrollbar-thumb-hover: #94a3b8;
+  --hero-from: #eef2ff;
+  --hero-via: #e0e7ff;
+  --hero-to: #c7d2fe;
 }
 
 *, *::before, *::after {
@@ -90,7 +96,7 @@ body {
 }
 
 .gradient-hero {
-  background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #312E81 100%);
+  background: linear-gradient(135deg, var(--hero-from, #0F172A) 0%, var(--hero-via, #1E293B) 50%, var(--hero-to, #312E81) 100%);
 }
 
 .gradient-accent {

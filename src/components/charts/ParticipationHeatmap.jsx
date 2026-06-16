@@ -14,7 +14,7 @@ const ParticipationHeatmap = ({ data }) => {
 
   return (
     <div className="glass rounded-xl p-5 overflow-x-auto">
-      <h3 className="text-white font-semibold mb-4">Class Participation Heatmap</h3>
+      <h3 className="theme-text font-semibold mb-4">Class Participation Heatmap</h3>
       <div className="grid grid-cols-[auto_repeat(8,1fr)] gap-1 min-w-[400px]">
         <div />
         {periods.map(p => <div key={p} className="text-xs theme-text-muted text-center py-1">{p}</div>)}

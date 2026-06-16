@@ -26,7 +26,7 @@ const AttendanceCalendar = ({ attendanceData, onDayClick }) => {
   return (
     <div className="glass rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-semibold">{format(currentMonth, 'MMMM yyyy')}</h3>
+        <h3 className="theme-text font-semibold">{format(currentMonth, 'MMMM yyyy')}</h3>
         <div className="flex gap-1">
           <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-1.5 rounded-lg hover:bg-white/10 theme-text-muted">
             <FiChevronLeft size={18} />
