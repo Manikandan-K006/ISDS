@@ -9,7 +9,6 @@ import { useAuth } from '../../hooks/useAuth';
 
 const studentNav = [
   { to: '/dashboard', icon: FiHome, label: 'Dashboard' },
-  { to: '/courses', icon: FiBookOpen, label: 'My Learning' },
   { to: '/courses', icon: FiGrid, label: 'Courses' },
   { to: '/assignments', icon: FiClipboard, label: 'Assignments' },
   { to: '/attendance', icon: FiCalendar, label: 'Attendance' },
@@ -52,9 +51,10 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
   const navLinks = navMap[user?.role] || studentNav;
 
   const isActive = (path) => {
-    if (path === '/admin') return location.pathname === '/admin';
-    if (path === '/dashboard') return location.pathname === '/dashboard';
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    const current = location.pathname;
+    if (current === path) return true;
+    if (path === '/' || path === '/admin' || path === '/dashboard') return false;
+    return current.startsWith(path + '/');
   };
 
   return (
@@ -63,11 +63,11 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
       <motion.aside
         initial={false}
         animate={{ width: collapsed ? 64 : 256 }}
-        className={`fixed top-0 left-0 h-full z-40 theme-sidebar border-r theme-border overflow-hidden
+        className={`fixed top-0 left-0 h-screen z-40 theme-sidebar border-r theme-border overflow-hidden
           lg:relative
           ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-screen">
           <div className="p-[10px] border-b theme-border">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
