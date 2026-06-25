@@ -1,13 +1,13 @@
 const router = require('express').Router();
-const CallLog = require('../models/CallLog');
+const { queryDocs, addDoc } = require('../config/firestore');
 
 router.get('/', async (req, res) => {
   try {
     const { teacherId, studentId } = req.query;
-    const filter = {};
-    if (teacherId) filter.teacherId = teacherId;
-    if (studentId) filter.studentId = studentId;
-    const logs = await CallLog.find(filter).sort({ createdAt: -1 });
+    let conditions = [];
+    if (teacherId) conditions.push(['teacherId', '==', teacherId]);
+    if (studentId) conditions.push(['studentId', '==', studentId]);
+    const logs = await queryDocs('callLogs', conditions, 'createdAt', 'desc');
     res.json(logs);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const log = await CallLog.create(req.body);
+    const log = await addDoc('callLogs', req.body);
     res.status(201).json(log);
   } catch (err) {
     res.status(500).json({ error: err.message });

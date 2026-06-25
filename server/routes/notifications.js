@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Notification = require('../models/Notification');
-// Middleware: simple token verification (extract userId from JWT)
+const { collection, addDoc, getDoc, queryDocs, updateDoc, deleteDoc, countDocs, formatDoc, formatDocs } = require('../config/firestore');
+
 const auth = (req, res, next) => {
   try {
     const header = req.headers.authorization;
@@ -18,65 +18,60 @@ const auth = (req, res, next) => {
   }
 };
 
-// GET /api/notifications - Get notifications for current user
 router.get('/', auth, async (req, res) => {
   try {
     const { limit = 20, unread } = req.query;
-    const filter = { userId: req.userId };
-    if (unread === 'true') filter.isRead = false;
-    const notifications = await Notification.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit));
-    const unreadCount = await Notification.countDocuments({ userId: req.userId, isRead: false });
-    res.json({ notifications, unreadCount });
+    const conditions = [['userId', '==', req.userId]];
+    if (unread === 'true') conditions.push(['isRead', '==', false]);
+    const notifications = await queryDocs('notifications', conditions, 'createdAt', 'desc');
+    const unreadCount = await countDocs('notifications', [['userId', '==', req.userId], ['isRead', '==', false]]);
+    res.json({ notifications: notifications.slice(0, parseInt(limit)), unreadCount });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// PUT /api/notifications/:id/read - Mark single notification as read
 router.put('/:id/read', auth, async (req, res) => {
   try {
-    const notification = await Notification.findOneAndUpdate(
-      { _id: req.params.id, userId: req.userId },
-      { isRead: true },
-      { new: true }
-    );
-    if (!notification) return res.status(404).json({ error: 'Notification not found' });
-    res.json(notification);
+    const notification = await getDoc('notifications', req.params.id);
+    if (!notification || notification.userId !== req.userId) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+    const updated = await updateDoc('notifications', req.params.id, { isRead: true });
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// PUT /api/notifications/read-all - Mark all as read
 router.put('/read-all', auth, async (req, res) => {
   try {
-    await Notification.updateMany(
-      { userId: req.userId, isRead: false },
-      { isRead: true }
-    );
+    const notifications = await queryDocs('notifications', [['userId', '==', req.userId], ['isRead', '==', false]]);
+    for (const n of notifications) {
+      await updateDoc('notifications', n._id, { isRead: true });
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// DELETE /api/notifications/:id - Delete a notification
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const notification = await Notification.findOneAndDelete({ _id: req.params.id, userId: req.userId });
-    if (!notification) return res.status(404).json({ error: 'Notification not found' });
+    const notification = await getDoc('notifications', req.params.id);
+    if (!notification || notification.userId !== req.userId) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+    await deleteDoc('notifications', req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET /api/notifications/unread-count - Get unread count only
 router.get('/unread-count', auth, async (req, res) => {
   try {
-    const count = await Notification.countDocuments({ userId: req.userId, isRead: false });
+    const count = await countDocs('notifications', [['userId', '==', req.userId], ['isRead', '==', false]]);
     res.json({ count });
   } catch (err) {
     res.status(500).json({ error: err.message });

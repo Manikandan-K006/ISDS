@@ -1,18 +1,6 @@
-const mongoose = require('mongoose');
+const { addDoc, getDoc, queryDocs, updateDoc, deleteDoc, deleteDocs } = require('./config/firestore');
 const bcrypt = require('bcryptjs');
-const User = require('./models/User');
-const Course = require('./models/Course');
-const Enrollment = require('./models/Enrollment');
-const Assignment = require('./models/Assignment');
-const Submission = require('./models/Submission');
-const Certificate = require('./models/Certificate');
-const Attendance = require('./models/Attendance');
-const Trophy = require('./models/Trophy');
-const Note = require('./models/Note');
-
 require('dotenv').config();
-
-const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/isds';
 
 const users = [
   { name: 'Arjun Sharma', email: 'arjun@school.com', password: 'password123', role: 'student', class: '10A', rollNumber: '1012', parentContact: '+91 98765 43210', credits: 28 },
@@ -36,22 +24,27 @@ const courses = [
 
 async function seed() {
   try {
-    await mongoose.connect(MONGO_URI);
-    console.log('Connected to MongoDB');
+    console.log('Firestore connected via Admin SDK');
 
     // Clear existing data
     await Promise.all([
-      User.deleteMany({}), Course.deleteMany({}), Enrollment.deleteMany({}),
-      Assignment.deleteMany({}), Submission.deleteMany({}), Certificate.deleteMany({}),
-      Attendance.deleteMany({}), Trophy.deleteMany({}), Note.deleteMany({})
+      deleteDocs('users', []), deleteDocs('courses', []), deleteDocs('enrollments', []),
+      deleteDocs('assignments', []), deleteDocs('submissions', []), deleteDocs('certificates', []),
+      deleteDocs('attendance', []), deleteDocs('trophies', []), deleteDocs('notes', []),
+      deleteDocs('notifications', []), deleteDocs('callLogs', []),
     ]);
     console.log('Cleared existing data');
 
     // Create users
-    const createdUsers = await User.insertMany(users.map(u => ({
-      ...u,
-      password: bcrypt.hashSync(u.password, 12)
-    })));
+    const createdUsers = [];
+    for (const u of users) {
+      const user = await addDoc('users', {
+        ...u,
+        password: bcrypt.hashSync(u.password, 12),
+        credits: u.credits || 0,
+      });
+      createdUsers.push(user);
+    }
     console.log(`Created ${createdUsers.length} users`);
 
     const studentArjun = createdUsers.find(u => u.email === 'arjun@school.com');
@@ -59,7 +52,11 @@ async function seed() {
     const studentAnanya = createdUsers.find(u => u.email === 'ananya@school.com');
 
     // Create courses
-    const createdCourses = await Course.insertMany(courses);
+    const createdCourses = [];
+    for (const c of courses) {
+      const course = await addDoc('courses', c);
+      createdCourses.push(course);
+    }
     console.log(`Created ${createdCourses.length} courses`);
 
     const mathCourse = createdCourses.find(c => c.title === 'Advanced Mathematics');
@@ -67,64 +64,53 @@ async function seed() {
     const physicsCourse = createdCourses.find(c => c.title === 'Quantum Physics');
     const englishCourse = createdCourses.find(c => c.title === 'English Literature');
 
-    // Enroll Arjun in courses
-    await Enrollment.insertMany([
-      { userId: studentArjun._id, courseId: mathCourse._id, progress: 65, status: 'in-progress' },
-      { userId: studentArjun._id, courseId: physicsCourse._id, progress: 40, status: 'in-progress' },
-      { userId: studentArjun._id, courseId: englishCourse._id, progress: 100, status: 'completed' },
-      { userId: studentPriya._id, courseId: mathCourse._id, progress: 80, status: 'in-progress' },
-      { userId: studentAnanya._id, courseId: envCourse._id, progress: 100, status: 'completed' },
-    ]);
+    // Enroll students
+    await addDoc('enrollments', { userId: studentArjun._id, courseId: mathCourse._id, progress: 65, status: 'in-progress', completedModules: [] });
+    await addDoc('enrollments', { userId: studentArjun._id, courseId: physicsCourse._id, progress: 40, status: 'in-progress', completedModules: [] });
+    await addDoc('enrollments', { userId: studentArjun._id, courseId: englishCourse._id, progress: 100, status: 'completed', completedModules: [] });
+    await addDoc('enrollments', { userId: studentPriya._id, courseId: mathCourse._id, progress: 80, status: 'in-progress', completedModules: [] });
+    await addDoc('enrollments', { userId: studentAnanya._id, courseId: envCourse._id, progress: 100, status: 'completed', completedModules: [] });
     console.log('Created enrollments');
 
     // Create assignments
-    const assignments = await Assignment.insertMany([
-      { courseId: mathCourse._id, title: 'Calculus Problem Set', description: 'Solve 10 calculus problems', deadline: new Date('2026-06-15'), maxMarks: 100, type: 'file', createdBy: createdUsers.find(u => u.role === 'teacher')._id },
-      { courseId: physicsCourse._id, title: 'Physics Lab Report', description: 'Write a lab report on quantum entanglement', deadline: new Date('2026-06-20'), maxMarks: 50, type: 'text', createdBy: createdUsers.find(u => u.role === 'teacher')._id },
-      { courseId: englishCourse._id, title: 'Shakespeare Essay', description: 'Write a 2000 word essay on Hamlet', deadline: new Date('2026-05-10'), maxMarks: 100, type: 'text', createdBy: createdUsers.find(u => u.role === 'teacher')._id },
-    ]);
+    const teacher = createdUsers.find(u => u.role === 'teacher');
+    const assignments = [];
+    assignments.push(await addDoc('assignments', { courseId: mathCourse._id, title: 'Calculus Problem Set', description: 'Solve 10 calculus problems', deadline: '2026-06-15T23:59:59Z', maxMarks: 100, type: 'file', createdBy: teacher._id }));
+    assignments.push(await addDoc('assignments', { courseId: physicsCourse._id, title: 'Physics Lab Report', description: 'Write a lab report on quantum entanglement', deadline: '2026-06-20T23:59:59Z', maxMarks: 50, type: 'text', createdBy: teacher._id }));
+    assignments.push(await addDoc('assignments', { courseId: englishCourse._id, title: 'Shakespeare Essay', description: 'Write a 2000 word essay on Hamlet', deadline: '2026-05-10T23:59:59Z', maxMarks: 100, type: 'text', createdBy: teacher._id }));
     console.log('Created assignments');
 
     // Create submissions
-    await Submission.insertMany([
-      { assignmentId: assignments[1]._id, studentId: studentArjun._id, content: 'Lab report content...', status: 'submitted' },
-      { assignmentId: assignments[2]._id, studentId: studentArjun._id, content: 'Shakespeare essay content...', grade: 88, feedback: 'Excellent analysis!', status: 'graded' },
-    ]);
+    await addDoc('submissions', { assignmentId: assignments[1]._id, studentId: studentArjun._id, content: 'Lab report content...', status: 'submitted' });
+    await addDoc('submissions', { assignmentId: assignments[2]._id, studentId: studentArjun._id, content: 'Shakespeare essay content...', grade: 88, feedback: 'Excellent analysis!', status: 'graded' });
     console.log('Created submissions');
 
     // Create attendance
-    const attendanceRecords = [];
     for (let day = 1; day <= 30; day++) {
-      const date = new Date(2026, 4, day);
-      const dayOfWeek = date.getDay();
+      const date = new Date(2026, 4, day).toISOString().split('T')[0];
+      const dayOfWeek = new Date(2026, 4, day).getDay();
       let status = 'present';
       let reason = '';
       if (dayOfWeek === 0) { status = 'holiday'; }
       else if (day % 5 === 0) { status = 'absent'; reason = 'Medical appointment'; }
       else if (day % 7 === 0) { status = 'leave'; reason = 'Family function'; }
-      attendanceRecords.push({ studentId: studentArjun._id, date, status, reason });
+      await addDoc('attendance', { studentId: studentArjun._id, date, status, reason });
     }
-    await Attendance.insertMany(attendanceRecords);
     console.log('Created attendance records');
 
     // Create certificates
-    await Certificate.insertMany([
-      { studentId: studentArjun._id, courseId: englishCourse._id, grade: 'A', creditPoints: 0, instructor: 'Ms. Singh' },
-      { studentId: studentArjun._id, courseId: envCourse._id, grade: 'A-', creditPoints: 3, instructor: 'Dr. Gupta' },
-    ]);
+    await addDoc('certificates', { studentId: studentArjun._id, courseId: englishCourse._id, grade: 'A', creditPoints: 0, instructor: 'Ms. Singh' });
+    await addDoc('certificates', { studentId: studentArjun._id, courseId: envCourse._id, grade: 'A-', creditPoints: 3, instructor: 'Dr. Gupta' });
     console.log('Created certificates');
 
     // Create trophies
-    await Trophy.insertMany([
-      { studentId: studentArjun._id, badgeType: 'achievement', title: 'First Course Complete', description: 'Completed your first course!', icon: '🏆' },
-      { studentId: studentArjun._id, badgeType: 'attendance', title: 'Perfect Attendance - April', description: '100% attendance in April 2026', icon: '⭐' },
-      { studentId: studentArjun._id, badgeType: 'academic', title: 'Top 3 in Class', description: 'Ranked 2nd in Class 10A mid-term exams', icon: '🥈' },
-      { studentId: studentArjun._id, badgeType: 'achievement', title: '5 Certificates Earned', description: 'Completed 5 courses', icon: '🎓' },
-    ]);
+    await addDoc('trophies', { studentId: studentArjun._id, badgeType: 'achievement', title: 'First Course Complete', description: 'Completed your first course!', icon: '🏆' });
+    await addDoc('trophies', { studentId: studentArjun._id, badgeType: 'attendance', title: 'Perfect Attendance - April', description: '100% attendance in April 2026', icon: '⭐' });
+    await addDoc('trophies', { studentId: studentArjun._id, badgeType: 'academic', title: 'Top 3 in Class', description: 'Ranked 2nd in Class 10A mid-term exams', icon: '🥈' });
+    await addDoc('trophies', { studentId: studentArjun._id, badgeType: 'achievement', title: '5 Certificates Earned', description: 'Completed 5 courses', icon: '🎓' });
     console.log('Created trophies');
 
     console.log('\n✅ Seed completed successfully!');
-
     process.exit(0);
   } catch (err) {
     console.error('Seed failed:', err);

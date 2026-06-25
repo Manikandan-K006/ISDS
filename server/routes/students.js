@@ -1,13 +1,14 @@
 const router = require('express').Router();
-const User = require('../models/User');
+const { queryDocs, getDoc, updateDoc } = require('../config/firestore');
 
 router.get('/', async (req, res) => {
   try {
-    const { class: className, status } = req.query;
-    const filter = { role: 'student' };
-    if (className) filter.class = className;
-    const students = await User.find(filter).select('-password').sort({ name: 1 });
-    res.json(students);
+    const { class: className } = req.query;
+    const conditions = [['role', '==', 'student']];
+    if (className) conditions.push(['class', '==', className]);
+    const students = await queryDocs('users', conditions, 'name', 'asc');
+    const safe = students.map(({ password, ...u }) => ({ ...u }));
+    res.json(safe);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -15,9 +16,10 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const student = await User.findById(req.params.id).select('-password');
+    const student = await getDoc('users', req.params.id);
     if (!student) return res.status(404).json({ error: 'Student not found' });
-    res.json(student);
+    const { password, ...safe } = student;
+    res.json(safe);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -25,17 +27,17 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const updates = req.body;
-    delete updates.password;
-    delete updates.role;
-    const student = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password');
-    res.json(student);
+    const { password, role, ...updates } = req.body;
+    const student = await updateDoc('users', req.params.id, updates);
+    if (!student) return res.status(404).json({ error: 'Student not found' });
+    const { password: pwd, ...safe } = student;
+    res.json(safe);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.get('/:id/analytics', async (req, res) => {
+router.get('/:id/analytics', (req, res) => {
   res.redirect(`/api/analytics/student/${req.params.id}`);
 });
 

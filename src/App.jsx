@@ -8,6 +8,7 @@ import AuthLayout from './components/layout/AuthLayout';
 import StudentLayout from './components/layout/StudentLayout';
 import AdminLayout from './components/layout/AdminLayout';
 
+import AuthLanding from './pages/auth/AuthLanding';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -63,6 +64,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route element={<AuthLayout />}>
+                <Route path="/auth" element={<AuthLanding />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />

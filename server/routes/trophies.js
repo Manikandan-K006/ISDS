@@ -1,12 +1,12 @@
 const router = require('express').Router();
-const Trophy = require('../models/Trophy');
+const { queryDocs, addDoc, countDocs } = require('../config/firestore');
 
 router.get('/', async (req, res) => {
   try {
     const { studentId } = req.query;
-    const filter = {};
-    if (studentId) filter.studentId = studentId;
-    const trophies = await Trophy.find(filter).sort({ earnedAt: -1 });
+    let conditions = [];
+    if (studentId) conditions.push(['studentId', '==', studentId]);
+    const trophies = await queryDocs('trophies', conditions, 'earnedAt', 'desc');
     res.json(trophies);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const trophy = await Trophy.create(req.body);
+    const trophy = await addDoc('trophies', req.body);
     res.status(201).json(trophy);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -25,8 +25,16 @@ router.post('/', async (req, res) => {
 router.post('/auto-check', async (req, res) => {
   try {
     const { studentId } = req.body;
-    const count = await Trophy.countDocuments({ studentId });
-    res.json({ newBadges: count === 0 ? 1 : 0, message: 'Auto-check complete' });
+    const count = await countDocs('trophies', [['studentId', '==', studentId]]);
+    if (count === 0) {
+      const badge = await addDoc('trophies', {
+        studentId,
+        title: 'First Achievement',
+        earnedAt: new Date().toISOString(),
+      });
+      return res.json({ newBadges: 1, message: 'Badge awarded!', badge });
+    }
+    res.json({ newBadges: 0, message: 'Auto-check complete' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

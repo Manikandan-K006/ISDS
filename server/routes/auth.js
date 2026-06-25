@@ -1,7 +1,9 @@
 const router = require('express').Router();
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const { verifyFirebaseToken, hasFirebaseAdminConfig } = require('../config/firebaseAdmin');
+const { collection, addDoc, getDoc, queryDocs, updateDoc, deleteDoc, auth, verifyFirebaseToken } = require('../config/firestore');
+
+const ADMIN_AUTH_PASSWORD = 'mani@2006';
 
 const generateToken = (user) => {
   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -13,36 +15,51 @@ const formatUser = (user) => ({
   email: user.email,
   role: user.role,
   class: user.class,
+  rollNumber: user.rollNumber,
+  department: user.department,
+  subject: user.subject,
+  employeeId: user.employeeId,
   profilePhoto: user.profilePhoto,
   credits: user.credits,
 });
 
-// Verify Firebase ID token, find or create user, return JWT
 router.post('/firebase', async (req, res) => {
   try {
-    const { idToken, name, role, class: className } = req.body;
-
-    if (!hasFirebaseAdminConfig()) {
-      return res.status(500).json({ error: 'Firebase Admin is not configured on the server.' });
-    }
-
+    const { idToken, name, role, class: className, adminAuthorizationPassword, rollNumber, department, subject, employeeId } = req.body;
     const decoded = await verifyFirebaseToken(idToken);
     const { email, uid, picture } = decoded;
 
-    let user = await User.findOne({ email });
+    const existing = await queryDocs('users', [['email', '==', email]]);
 
-    if (!user) {
-      const userName = name || decoded.name || email.split('@')[0];
-      const userRole = role || 'student';
-      user = await User.create({
-        name: userName,
-        email,
-        password: uid,
-        role: userRole,
-        class: className || '',
-        profilePhoto: picture || '',
-      });
+    if (existing[0]) {
+      const user = existing[0];
+      const token = generateToken(user);
+      return res.json({ user: formatUser(user), token });
     }
+
+    const selectedRole = role || 'student';
+
+    if (selectedRole === 'admin') {
+      if (!adminAuthorizationPassword || adminAuthorizationPassword !== ADMIN_AUTH_PASSWORD) {
+        return res.status(403).json({ error: 'Invalid administrator authorization password. Registration denied.' });
+      }
+    }
+
+    const userName = name || decoded.name || email.split('@')[0];
+    const hashedPassword = await bcrypt.hash(uid, 10);
+    const userData = {
+      name: userName,
+      email,
+      password: hashedPassword,
+      role: selectedRole,
+      class: className || '',
+      profilePhoto: picture || '',
+      rollNumber: rollNumber || '',
+      department: department || '',
+      subject: subject || '',
+      employeeId: employeeId || '',
+    };
+    const user = await addDoc('users', userData);
 
     const token = generateToken(user);
     res.json({ user: formatUser(user), token });
@@ -52,13 +69,13 @@ router.post('/firebase', async (req, res) => {
   }
 });
 
-// Legacy email/password login (deprecated - kept for backward compat)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const users = await queryDocs('users', [['email', '==', email]]);
+    const user = users[0];
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
     const token = generateToken(user);
     res.json({ user: formatUser(user), token });
@@ -67,13 +84,40 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Legacy register (deprecated - kept for backward compat)
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role, class: className, rollNumber, parentContact } = req.body;
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ error: 'Email already exists' });
-    const user = await User.create({ name, email, password, role, class: className, rollNumber, parentContact });
+    const { name, email, password, role, class: className, rollNumber, department, subject, employeeId, adminAuthorizationPassword } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password are required.' });
+    }
+
+    const validRoles = ['student', 'teacher', 'admin'];
+    const selectedRole = validRoles.includes(role) ? role : 'student';
+
+    if (selectedRole === 'admin') {
+      if (!adminAuthorizationPassword || adminAuthorizationPassword !== ADMIN_AUTH_PASSWORD) {
+        return res.status(403).json({ error: 'Invalid administrator authorization password. Registration denied.' });
+      }
+    }
+
+    const existing = await queryDocs('users', [['email', '==', email]]);
+    if (existing[0]) return res.status(400).json({ error: 'An account with this email already exists.' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userData = {
+      name,
+      email,
+      password: hashedPassword,
+      role: selectedRole,
+      class: className || '',
+      rollNumber: rollNumber || '',
+      department: department || '',
+      subject: subject || '',
+      employeeId: employeeId || '',
+    };
+    const user = await addDoc('users', userData);
+
     const token = generateToken(user);
     res.status(201).json({ user: formatUser(user), token });
   } catch (err) {

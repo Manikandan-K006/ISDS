@@ -1,12 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
-const Course = require('../models/Course');
-const Enrollment = require('../models/Enrollment');
-const Assignment = require('../models/Assignment');
-const Submission = require('../models/Submission');
-const Attendance = require('../models/Attendance');
-const Certificate = require('../models/Certificate');
+const { collection, getDoc, queryDocs, countDocs, formatDoc, formatDocs } = require('../config/firestore');
 
 const auth = (req, res, next) => {
   try {
@@ -25,52 +19,47 @@ const auth = (req, res, next) => {
   }
 };
 
-// GET /api/analytics/dashboard - Main analytics data for admin/teacher dashboard
 router.get('/dashboard', auth, async (req, res) => {
   try {
-    // Real counts from database
-    const totalStudents = await User.countDocuments({ role: 'student' });
-    const totalCourses = await Course.countDocuments();
-    const totalEnrollments = await Enrollment.countDocuments();
-    const totalAssignments = await Assignment.countDocuments();
-    const totalSubmissions = await Submission.countDocuments();
-    const totalCertificates = await Certificate.countDocuments();
-
-    // Attendance rate: count present vs total attendance records
-    const attendanceRecords = await Attendance.countDocuments();
-    const presentRecords = await Attendance.countDocuments({ status: 'present' });
+    const totalStudents = await countDocs('users', [['role', '==', 'student']]);
+    const totalCourses = await countDocs('courses');
+    const totalEnrollments = await countDocs('enrollments');
+    const totalAssignments = await countDocs('assignments');
+    const totalSubmissions = await countDocs('submissions');
+    const totalCertificates = await countDocs('certificates');
+    const attendanceRecords = await countDocs('attendance');
+    const presentRecords = await countDocs('attendance', [['status', '==', 'present']]);
     const attendanceRate = attendanceRecords > 0 ? Math.round((presentRecords / attendanceRecords) * 100) : 0;
-
-    // Completion rate: completed enrollments vs total
-    const completedEnrollments = await Enrollment.countDocuments({ status: 'completed' });
+    const completedEnrollments = await countDocs('enrollments', [['status', '==', 'completed']]);
     const completionRate = totalEnrollments > 0 ? Math.round((completedEnrollments / totalEnrollments) * 100) : 0;
 
-    // Enrollments by month (last 12 months)
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-    const enrollmentsByMonth = await Enrollment.aggregate([
-      { $match: { createdAt: { $gte: twelveMonthsAgo } } },
-      { $group: { _id: { $month: '$createdAt' }, count: { $sum: 1 } } },
-      { $sort: { '_id': 1 } }
-    ]);
+    const recentEnrollmentsRaw = await queryDocs('enrollments', [['createdAt', '>=', twelveMonthsAgo.toISOString()]], 'createdAt', 'desc');
+    const enrollmentsByMonth = {};
+    recentEnrollmentsRaw.forEach(e => {
+      const m = new Date(e.createdAt).getMonth() + 1;
+      enrollmentsByMonth[m] = (enrollmentsByMonth[m] || 0) + 1;
+    });
 
-    // Course distribution by domain
-    const coursesByDomain = await Course.aggregate([
-      { $group: { _id: '$domain', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
-    ]);
+    const coursesRaw = await queryDocs('courses', [], 'createdAt', 'desc');
+    const coursesByDomain = {};
+    coursesRaw.forEach(c => {
+      const d = c.domain || 'Uncategorized';
+      coursesByDomain[d] = (coursesByDomain[d] || 0) + 1;
+    });
 
-    // Student registrations by month
-    const registrationsByMonth = await User.aggregate([
-      { $match: { role: 'student', createdAt: { $gte: twelveMonthsAgo } } },
-      { $group: { _id: { $month: '$createdAt' }, count: { $sum: 1 } } },
-      { $sort: { '_id': 1 } }
-    ]);
+    const studentUsers = await queryDocs('users', [['role', '==', 'student']], 'createdAt', 'desc');
+    const registrationsByMonth = {};
+    studentUsers.forEach(u => {
+      const m = new Date(u.createdAt).getMonth() + 1;
+      registrationsByMonth[m] = (registrationsByMonth[m] || 0) + 1;
+    });
 
-    // Grade distribution
-    const gradedSubmissions = await Submission.find({ grade: { $exists: true, $ne: null } });
+    const gradedSubmissions = await queryDocs('submissions', [], 'createdAt', 'desc');
     const gradeDistribution = { 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0 };
     gradedSubmissions.forEach(s => {
+      if (s.grade == null) return;
       if (s.grade >= 90) gradeDistribution['A']++;
       else if (s.grade >= 80) gradeDistribution['B']++;
       else if (s.grade >= 70) gradeDistribution['C']++;
@@ -78,12 +67,21 @@ router.get('/dashboard', auth, async (req, res) => {
       else gradeDistribution['F']++;
     });
 
-    // Recent enrollments (last 10)
-    const recentEnrollments = await Enrollment.find()
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .populate('userId', 'name email')
-      .populate('courseId', 'title');
+    const recentEnrollments = await queryDocs('enrollments', [], 'createdAt', 'desc');
+    const recent10 = recentEnrollments.slice(0, 10);
+    const enriched = [];
+    for (const e of recent10) {
+      const student = e.userId ? await getDoc('users', e.userId) : null;
+      const course = e.courseId ? await getDoc('courses', e.courseId) : null;
+      enriched.push({
+        id: e._id,
+        student: student ? { id: student._id, name: student.name, email: student.email } : null,
+        course: course ? { id: course._id, title: course.title } : null,
+        status: e.status,
+        progress: e.progress,
+        date: e.createdAt,
+      });
+    }
 
     res.json({
       totalStudents,
@@ -94,74 +92,85 @@ router.get('/dashboard', auth, async (req, res) => {
       totalCertificates,
       attendanceRate,
       completionRate,
-      enrollmentsByMonth: enrollmentsByMonth.map(e => ({ month: e._id, count: e.count })),
-      coursesByDomain: coursesByDomain.map(c => ({ name: c._id || 'Uncategorized', count: c.count })),
-      registrationsByMonth: registrationsByMonth.map(r => ({ month: r._id, count: r.count })),
+      enrollmentsByMonth: Object.entries(enrollmentsByMonth).map(([month, count]) => ({ month: parseInt(month), count })),
+      coursesByDomain: Object.entries(coursesByDomain).map(([name, count]) => ({ name, count })),
+      registrationsByMonth: Object.entries(registrationsByMonth).map(([month, count]) => ({ month: parseInt(month), count })),
       gradeDistribution,
-      recentEnrollments: recentEnrollments.map(e => ({
-        id: e._id,
-        student: e.userId ? { id: e.userId._id, name: e.userId.name, email: e.userId.email } : null,
-        course: e.courseId ? { id: e.courseId._id, title: e.courseId.title } : null,
-        status: e.status,
-        progress: e.progress,
-        date: e.createdAt,
-      })),
+      recentEnrollments: enriched,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET /api/analytics/student/:id - Analytics for a specific student
 router.get('/student/:id', auth, async (req, res) => {
   try {
-    const student = await User.findById(req.params.id);
+    const student = await getDoc('users', req.params.id);
     if (!student) return res.status(404).json({ error: 'Student not found' });
 
-    // Enrollments & progress
-    const enrollments = await Enrollment.find({ userId: req.params.id }).populate('courseId', 'title domain creditPoints');
+    const enrollments = await queryDocs('enrollments', [['userId', '==', req.params.id]], 'createdAt', 'desc');
     const completedCourses = enrollments.filter(e => e.status === 'completed').length;
     const inProgressCourses = enrollments.filter(e => e.status === 'in-progress').length;
     const avgProgress = enrollments.length > 0
       ? Math.round(enrollments.reduce((sum, e) => sum + (e.progress || 0), 0) / enrollments.length)
       : 0;
 
-    // Attendance
-    const totalAttendance = await Attendance.countDocuments({ studentId: req.params.id });
-    const presentDays = await Attendance.countDocuments({ studentId: req.params.id, status: 'present' });
-    const absentDays = await Attendance.countDocuments({ studentId: req.params.id, status: 'absent' });
+    const totalAttendance = await countDocs('attendance', [['studentId', '==', req.params.id]]);
+    const presentDays = await countDocs('attendance', [['studentId', '==', req.params.id], ['status', '==', 'present']]);
+    const absentDays = await countDocs('attendance', [['studentId', '==', req.params.id], ['status', '==', 'absent']]);
     const attendancePct = totalAttendance > 0 ? Math.round((presentDays / totalAttendance) * 100) : 0;
 
-    // Assignments & grades
-    const submissions = await Submission.find({ studentId: req.params.id });
+    const submissions = await queryDocs('submissions', [['studentId', '==', req.params.id]], 'createdAt', 'desc');
     const graded = submissions.filter(s => s.grade != null);
     const avgGrade = graded.length > 0
       ? Math.round(graded.reduce((sum, s) => sum + (s.grade || 0), 0) / graded.length)
       : 0;
-    const totalAssignments = await Assignment.countDocuments();
-    const pendingAssignments = totalAssignments - submissions.length;
+    const allAssignments = await queryDocs('assignments');
+    const totalAssignmentsCount = allAssignments.length;
+    const pendingAssignments = totalAssignmentsCount - submissions.length;
 
-    // Certificates
-    const certificates = await Certificate.countDocuments({ studentId: req.params.id });
+    const certificatesCount = await countDocs('certificates', [['studentId', '==', req.params.id]]);
 
-    // Performance by course
-    const performanceByCourse = await Submission.aggregate([
-      { $match: { studentId: require('mongoose').Types.ObjectId.createFromHexString(req.params.id), grade: { $exists: true, $ne: null } } },
-      { $lookup: { from: 'assignments', localField: 'assignmentId', foreignField: '_id', as: 'assignment' } },
-      { $unwind: { path: '$assignment', preserveNullAndEmptyArrays: true } },
-      { $lookup: { from: 'courses', localField: 'assignment.courseId', foreignField: '_id', as: 'course' } },
-      { $unwind: { path: '$course', preserveNullAndEmptyArrays: true } },
-      { $group: { _id: '$course.title', avgGrade: { $avg: '$grade' }, submissions: { $sum: 1 }, maxGrade: { $max: '$grade' } } },
-    ]);
+    const performanceByCourseMap = {};
+    for (const s of graded) {
+      const assignment = s.assignmentId ? await getDoc('assignments', s.assignmentId) : null;
+      const course = assignment && assignment.courseId ? await getDoc('courses', assignment.courseId) : null;
+      const courseTitle = course?.title || 'Unknown';
+      if (!performanceByCourseMap[courseTitle]) {
+        performanceByCourseMap[courseTitle] = { grades: [], submissions: 0, maxGrade: 0 };
+      }
+      performanceByCourseMap[courseTitle].grades.push(s.grade);
+      performanceByCourseMap[courseTitle].submissions++;
+      if (s.grade > performanceByCourseMap[courseTitle].maxGrade) {
+        performanceByCourseMap[courseTitle].maxGrade = s.grade;
+      }
+    }
+    const performanceByCourse = Object.entries(performanceByCourseMap).map(([course, data]) => ({
+      course,
+      avgGrade: Math.round(data.grades.reduce((a, b) => a + b, 0) / data.grades.length),
+      submissions: data.submissions,
+      maxGrade: data.maxGrade,
+    }));
 
-    // Monthly attendance (last 6 months)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    const monthlyAttendance = await Attendance.aggregate([
-      { $match: { studentId: require('mongoose').Types.ObjectId.createFromHexString(req.params.id), date: { $gte: sixMonthsAgo } } },
-      { $group: { _id: { $month: '$date' }, present: { $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] } }, total: { $sum: 1 } } },
-      { $sort: { '_id': 1 } },
-    ]);
+    const attendanceRecords = await queryDocs('attendance', [['studentId', '==', req.params.id]], 'date', 'asc');
+    const monthlyAttendanceMap = {};
+    attendanceRecords.forEach(a => {
+      const d = new Date(a.date);
+      if (d >= sixMonthsAgo) {
+        const m = d.getMonth() + 1;
+        if (!monthlyAttendanceMap[m]) monthlyAttendanceMap[m] = { present: 0, total: 0 };
+        monthlyAttendanceMap[m].total++;
+        if (a.status === 'present') monthlyAttendanceMap[m].present++;
+      }
+    });
+    const monthlyAttendance = Object.entries(monthlyAttendanceMap).map(([month, data]) => ({
+      month: parseInt(month),
+      present: data.present,
+      total: data.total,
+      rate: Math.round((data.present / data.total) * 100),
+    }));
 
     res.json({
       student: { id: student._id, name: student.name, email: student.email, class: student.class, rollNumber: student.rollNumber },
@@ -175,22 +184,12 @@ router.get('/student/:id', auth, async (req, res) => {
         presentDays,
         absentDays,
         avgGrade,
-        totalAssignments,
+        totalAssignments: totalAssignmentsCount,
         submittedAssignments: submissions.length,
         pendingAssignments: Math.max(0, pendingAssignments),
-        certificates,
-        performanceByCourse: performanceByCourse.map(p => ({
-          course: p._id || 'Unknown',
-          avgGrade: Math.round(p.avgGrade || 0),
-          submissions: p.submissions,
-          maxGrade: p.maxGrade || 0,
-        })),
-        monthlyAttendance: monthlyAttendance.map(m => ({
-          month: m._id,
-          present: m.present,
-          total: m.total,
-          rate: Math.round((m.present / m.total) * 100),
-        })),
+        certificates: certificatesCount,
+        performanceByCourse,
+        monthlyAttendance,
       },
     });
   } catch (err) {
@@ -198,19 +197,22 @@ router.get('/student/:id', auth, async (req, res) => {
   }
 });
 
-// GET /api/analytics/courses - Course-level analytics
 router.get('/courses', auth, async (req, res) => {
   try {
-    const courses = await Course.find();
+    const courses = await queryDocs('courses', [], 'createdAt', 'desc');
     const result = [];
     for (const course of courses) {
-      const enrollments = await Enrollment.countDocuments({ courseId: course._id });
-      const completed = await Enrollment.countDocuments({ courseId: course._id, status: 'completed' });
-      const assignments = await Assignment.countDocuments({ courseId: course._id });
-      const submissions = await Submission.countDocuments({
-        assignmentId: { $in: (await Assignment.find({ courseId: course._id }).select('_id')).map(a => a._id) }
-      });
-      const certificates = await Certificate.countDocuments({ courseId: course._id });
+      const enrollments = await countDocs('enrollments', [['courseId', '==', course._id]]);
+      const completed = await countDocs('enrollments', [['courseId', '==', course._id], ['status', '==', 'completed']]);
+      const assignments = await countDocs('assignments', [['courseId', '==', course._id]]);
+
+      const courseAssignments = await queryDocs('assignments', [['courseId', '==', course._id]]);
+      let submissions = 0;
+      for (const a of courseAssignments) {
+        submissions += await countDocs('submissions', [['assignmentId', '==', a._id]]);
+      }
+
+      const certificates = await countDocs('certificates', [['courseId', '==', course._id]]);
       result.push({
         id: course._id,
         title: course.title,

@@ -1,14 +1,12 @@
 const router = require('express').Router();
-const Certificate = require('../models/Certificate');
-const Notification = require('../models/Notification');
-const Course = require('../models/Course');
+const { queryDocs, addDoc } = require('../config/firestore');
 
 router.get('/', async (req, res) => {
   try {
     const { studentId } = req.query;
-    const filter = {};
-    if (studentId) filter.studentId = studentId;
-    const certificates = await Certificate.find(filter).sort({ issuedAt: -1 });
+    let conditions = [];
+    if (studentId) conditions.push(['studentId', '==', studentId]);
+    const certificates = await queryDocs('certificates', conditions, 'createdAt', 'desc');
     res.json(certificates);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -17,12 +15,11 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const cert = await Certificate.create(req.body);
-    const course = await Course.findById(cert.courseId);
-    await Notification.create({
+    const cert = await addDoc('certificates', req.body);
+    await addDoc('notifications', {
       userId: cert.studentId,
       title: 'Certificate Generated',
-      message: `Your certificate for "${course ? course.title : 'the course'}" has been generated`,
+      message: `Your certificate has been generated`,
       type: 'certificate_generated',
       relatedId: cert._id,
       link: `/certificates/${cert._id}`,

@@ -2,10 +2,7 @@ const router = require('express').Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const Course = require('../models/Course');
-const Enrollment = require('../models/Enrollment');
-const User = require('../models/User');
-const Notification = require('../models/Notification');
+const { collection, addDoc, getDoc, queryDocs, updateDoc, deleteDoc, deleteDocs, formatDoc, formatDocs } = require('../config/firestore');
 
 const uploadDir = path.join(__dirname, '..', 'uploads', 'courses');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -51,11 +48,11 @@ const getFileType = (mimetype) => ALLOWED_TYPES[mimetype] || 'File';
 router.get('/', async (req, res) => {
   try {
     const { domain, difficulty, type } = req.query;
-    const filter = {};
-    if (domain) filter.domain = domain;
-    if (difficulty) filter.difficulty = difficulty;
-    if (type) filter.type = type;
-    const courses = await Course.find(filter).sort({ createdAt: -1 });
+    const conditions = [];
+    if (domain) conditions.push(['domain', '==', domain]);
+    if (difficulty) conditions.push(['difficulty', '==', difficulty]);
+    if (type) conditions.push(['type', '==', type]);
+    const courses = await queryDocs('courses', conditions, 'createdAt', 'desc');
     res.json(courses);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -64,7 +61,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await getDoc('courses', req.params.id);
     if (!course) return res.status(404).json({ error: 'Course not found' });
     res.json(course);
   } catch (err) {
@@ -74,7 +71,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const course = await Course.create(req.body);
+    const course = await addDoc('courses', req.body);
     res.status(201).json(course);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -83,7 +80,8 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const course = await updateDoc('courses', req.params.id, req.body);
+    if (!course) return res.status(404).json({ error: 'Course not found' });
     res.json(course);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -92,7 +90,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await getDoc('courses', req.params.id);
     if (course) {
       for (const r of course.resources || []) {
         if (r.fileUrl && r.fileUrl.startsWith('/uploads/')) {
@@ -101,8 +99,8 @@ router.delete('/:id', async (req, res) => {
         }
       }
     }
-    await Course.findByIdAndDelete(req.params.id);
-    await Enrollment.deleteMany({ courseId: req.params.id });
+    await deleteDoc('courses', req.params.id);
+    await deleteDocs('enrollments', [['courseId', '==', req.params.id]]);
     res.json({ message: 'Course deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -112,17 +110,17 @@ router.delete('/:id', async (req, res) => {
 router.post('/:id/enroll', async (req, res) => {
   try {
     const { userId } = req.body;
-    const existing = await Enrollment.findOne({ userId, courseId: req.params.id });
-    if (existing) return res.status(400).json({ error: 'Already enrolled' });
-    const enrollment = await Enrollment.create({ userId, courseId: req.params.id });
-    const course = await Course.findById(req.params.id);
-    await Notification.create({
+    const existing = await queryDocs('enrollments', [['userId', '==', userId], ['courseId', '==', req.params.id]]);
+    if (existing.length > 0) return res.status(400).json({ error: 'Already enrolled' });
+    const enrollment = await addDoc('enrollments', { userId, courseId: req.params.id, progress: 0, status: 'in-progress', completedModules: [] });
+    const course = await getDoc('courses', req.params.id);
+    await addDoc('notifications', {
       userId: enrollment.userId,
       title: 'Course Enrolled',
-      message: `You have successfully enrolled in "${course.title}"`,
+      message: `You have successfully enrolled in "${course?.title || 'course'}"`,
       type: 'course_enrolled',
-      relatedId: course._id,
-      link: `/courses/${course._id}`,
+      relatedId: req.params.id,
+      link: `/courses/${req.params.id}`,
     });
     res.status(201).json(enrollment);
   } catch (err) {
@@ -133,23 +131,26 @@ router.post('/:id/enroll', async (req, res) => {
 router.put('/:id/progress', async (req, res) => {
   try {
     const { userId, progress, completedModules } = req.body;
-    const enrollment = await Enrollment.findOneAndUpdate(
-      { userId, courseId: req.params.id },
-      { progress, completedModules, status: progress >= 100 ? 'completed' : 'in-progress' },
-      { new: true }
-    );
+    const existing = await queryDocs('enrollments', [['userId', '==', userId], ['courseId', '==', req.params.id]]);
+    if (existing.length === 0) return res.status(404).json({ error: 'Enrollment not found' });
+    const enrollmentId = existing[0]._id;
+    const status = progress >= 100 ? 'completed' : 'in-progress';
+    const enrollment = await updateDoc('enrollments', enrollmentId, { progress, completedModules, status });
     if (progress >= 100) {
-      const course = await Course.findById(req.params.id);
-      if (course.creditPoints > 0) {
-        await User.findByIdAndUpdate(userId, { $inc: { credits: course.creditPoints } });
+      const course = await getDoc('courses', req.params.id);
+      if (course && course.creditPoints > 0) {
+        const user = await getDoc('users', userId);
+        if (user) {
+          await updateDoc('users', userId, { credits: (user.credits || 0) + course.creditPoints });
+        }
       }
-      await Notification.create({
+      await addDoc('notifications', {
         userId,
         title: 'Course Completed',
-        message: `Congratulations! You have completed the course "${course.title}"`,
+        message: `Congratulations! You have completed the course "${course?.title || 'course'}"`,
         type: 'course_completed',
-        relatedId: course._id,
-        link: `/courses/${course._id}`,
+        relatedId: req.params.id,
+        link: `/courses/${req.params.id}`,
       });
     }
     res.json(enrollment);
@@ -171,11 +172,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 router.put('/:id/resources', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await getDoc('courses', req.params.id);
     if (!course) return res.status(404).json({ error: 'Course not found' });
-    course.resources = req.body.resources || [];
-    await course.save();
-    res.json(course);
+    const updated = await updateDoc('courses', req.params.id, { resources: req.body.resources || [] });
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -183,12 +183,12 @@ router.put('/:id/resources', async (req, res) => {
 
 router.post('/:id/resources', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await getDoc('courses', req.params.id);
     if (!course) return res.status(404).json({ error: 'Course not found' });
-    const resource = { ...req.body, uploadedAt: new Date() };
-    course.resources.push(resource);
-    await course.save();
-    res.status(201).json(course);
+    const resource = { ...req.body, uploadedAt: new Date().toISOString() };
+    const resources = [...(course.resources || []), resource];
+    const updated = await updateDoc('courses', req.params.id, { resources });
+    res.status(201).json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -196,13 +196,13 @@ router.post('/:id/resources', async (req, res) => {
 
 router.put('/:id/resources/:resourceId', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await getDoc('courses', req.params.id);
     if (!course) return res.status(404).json({ error: 'Course not found' });
-    const resource = course.resources.id(req.params.resourceId);
-    if (!resource) return res.status(404).json({ error: 'Resource not found' });
-    Object.assign(resource, req.body);
-    await course.save();
-    res.json(course);
+    const resources = (course.resources || []).map(r =>
+      r._id === req.params.resourceId || r.id === req.params.resourceId ? { ...r, ...req.body } : r
+    );
+    const updated = await updateDoc('courses', req.params.id, { resources });
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -210,16 +210,20 @@ router.put('/:id/resources/:resourceId', async (req, res) => {
 
 router.delete('/:id/resources/:resourceId', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await getDoc('courses', req.params.id);
     if (!course) return res.status(404).json({ error: 'Course not found' });
-    const resource = course.resources.id(req.params.resourceId);
+    const resource = (course.resources || []).find(r =>
+      r._id === req.params.resourceId || r.id === req.params.resourceId
+    );
     if (resource && resource.fileUrl && resource.fileUrl.startsWith('/uploads/')) {
       const p = path.join(__dirname, '..', resource.fileUrl);
       if (fs.existsSync(p)) fs.unlinkSync(p);
     }
-    course.resources.pull(req.params.resourceId);
-    await course.save();
-    res.json(course);
+    const resources = (course.resources || []).filter(r =>
+      r._id !== req.params.resourceId && r.id !== req.params.resourceId
+    );
+    const updated = await updateDoc('courses', req.params.id, { resources });
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -227,20 +231,19 @@ router.delete('/:id/resources/:resourceId', async (req, res) => {
 
 router.put('/:id/resources/reorder', async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await getDoc('courses', req.params.id);
     if (!course) return res.status(404).json({ error: 'Course not found' });
     const { resourceIds } = req.body;
     if (!Array.isArray(resourceIds)) return res.status(400).json({ error: 'resourceIds must be an array' });
-    const reordered = resourceIds
-      .map((id, idx) => {
-        const r = course.resources.id(id);
-        if (r) { r.order = idx; return r; }
-        return null;
-      })
-      .filter(Boolean);
-    course.resources = reordered;
-    await course.save();
-    res.json(course);
+    const resourceMap = {};
+    (course.resources || []).forEach(r => { resourceMap[r._id || r.id] = r; });
+    const reordered = resourceIds.map((id, idx) => {
+      const r = resourceMap[id];
+      if (r) { r.order = idx; return r; }
+      return null;
+    }).filter(Boolean);
+    const updated = await updateDoc('courses', req.params.id, { resources: reordered });
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

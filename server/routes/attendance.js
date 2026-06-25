@@ -1,18 +1,22 @@
 const router = require('express').Router();
-const Attendance = require('../models/Attendance');
-const Notification = require('../models/Notification');
+const { queryDocs, addDoc, updateDoc } = require('../config/firestore');
 
 router.get('/', async (req, res) => {
   try {
     const { studentId, month, year } = req.query;
-    const filter = {};
-    if (studentId) filter.studentId = studentId;
+    let conditions = [];
+    if (studentId) conditions.push(['studentId', '==', studentId]);
+    let records = await queryDocs('attendance', conditions, 'date', 'asc');
+
     if (month && year) {
-      const start = new Date(year, month - 1, 1);
-      const end = new Date(year, month, 0);
-      filter.date = { $gte: start, $lte: end };
+      const m = parseInt(month);
+      const y = parseInt(year);
+      records = records.filter(r => {
+        const d = new Date(r.date);
+        return d.getMonth() === m - 1 && d.getFullYear() === y;
+      });
     }
-    const records = await Attendance.find(filter).sort({ date: 1 });
+
     res.json(records);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -22,16 +26,21 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { studentId, date, status, reason } = req.body;
-    const record = await Attendance.findOneAndUpdate(
-      { studentId, date },
-      { status, reason },
-      { upsert: true, new: true }
-    );
-    if (record.status === 'absent') {
-      await Notification.create({
-        userId: record.studentId,
+    const existing = await queryDocs('attendance', [
+      ['studentId', '==', studentId],
+      ['date', '==', date],
+    ]);
+    let record;
+    if (existing.length > 0) {
+      record = await updateDoc('attendance', existing[0]._id, { status, reason });
+    } else {
+      record = await addDoc('attendance', { studentId, date, status, reason });
+    }
+    if (status === 'absent') {
+      await addDoc('notifications', {
+        userId: studentId,
         title: 'Attendance Alert',
-        message: `You were marked absent on ${record.date.toISOString().split('T')[0]}`,
+        message: `You were marked absent on ${date}`,
         type: 'attendance_alert',
         relatedId: record._id,
         link: '/attendance',
@@ -46,11 +55,16 @@ router.post('/', async (req, res) => {
 router.post('/leave', async (req, res) => {
   try {
     const { studentId, date, reason } = req.body;
-    const record = await Attendance.findOneAndUpdate(
-      { studentId, date },
-      { status: 'leave', reason },
-      { upsert: true, new: true }
-    );
+    const existing = await queryDocs('attendance', [
+      ['studentId', '==', studentId],
+      ['date', '==', date],
+    ]);
+    let record;
+    if (existing.length > 0) {
+      record = await updateDoc('attendance', existing[0]._id, { status: 'leave', reason });
+    } else {
+      record = await addDoc('attendance', { studentId, date, status: 'leave', reason });
+    }
     res.status(201).json(record);
   } catch (err) {
     res.status(500).json({ error: err.message });
