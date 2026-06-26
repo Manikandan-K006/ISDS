@@ -1,13 +1,29 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useLayoutEffect } from 'react';
 
 const ThemeContext = createContext(null);
 
-export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => localStorage.getItem('isds_theme') || 'dark');
+const getInitialTheme = () => {
+  try {
+    return localStorage.getItem('isds_theme') || 'dark';
+  } catch {
+    return 'dark';
+  }
+};
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+const applyTheme = (theme) => {
+  document.documentElement.setAttribute('data-theme', theme);
+  try {
     localStorage.setItem('isds_theme', theme);
+  } catch {
+    // localStorage may be unavailable
+  }
+};
+
+export const ThemeProvider = ({ children }) => {
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  useLayoutEffect(() => {
+    applyTheme(theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
@@ -19,4 +35,8 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-export const useTheme = () => useContext(ThemeContext);
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) return { theme: 'dark', toggleTheme: () => {} };
+  return ctx;
+};
