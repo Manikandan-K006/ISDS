@@ -106,7 +106,7 @@ const KnowledgeHub = () => {
               placeholder="Search resources..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full theme-input border theme-border rounded-xl pl-10 pr-4 py-2.5 text-sm theme-text placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition-colors"
+              className="w-full theme-input border theme-border rounded-xl pl-10 pr-4 py-2.5 text-sm theme-text placeholder-theme-muted focus:outline-none focus:border-indigo-500/50 transition-colors"
             />
           </div>
         </motion.div>
@@ -146,7 +146,7 @@ const KnowledgeHub = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.4 }}
-                  className="theme-card rounded-2xl border theme-border p-5 hover:border-white/[0.12] transition-all group flex flex-col"
+                  className="theme-card rounded-2xl border theme-border p-5 hover:border-[var(--border-light)] transition-all group flex flex-col"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className={`w-12 h-12 rounded-xl ${colors.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>

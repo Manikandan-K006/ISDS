@@ -83,7 +83,7 @@ const Certificates = () => {
 
       {selected && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 theme-overlay"
           onClick={() => setSelected(null)}
         >
           <Card className="p-6 max-w-md w-full" onClick={e => e.stopPropagation()}>

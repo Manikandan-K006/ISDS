@@ -106,7 +106,7 @@ const StudentDetailAdmin = () => {
                   </thead>
                   <tbody>
                     {student.subjects && student.subjects.map(s => (
-                      <tr key={s.name} className="border-b border-white/5">
+                      <tr key={s.name} className="border-b theme-border">
                         <td className="py-2 theme-text">{s.name}</td>
                         <td className="text-center theme-text">{s.term1}</td>
                         <td className="text-center theme-text">{s.term2}</td>
@@ -147,7 +147,7 @@ const StudentDetailAdmin = () => {
             <div className="theme-card border theme-border rounded-xl p-5">
               <h3 className="text-sm font-semibold theme-text mb-3">Absent Reasons</h3>
               {attendanceData.filter(a => a.status === 'absent').map(a => (
-                <div key={a.date || a._id} className="flex items-center justify-between py-2 border-b border-white/5">
+                <div key={a.date || a._id} className="flex items-center justify-between py-2 border-b theme-border">
                   <span className="text-sm theme-text">{a.date}</span>
                   <span className="text-xs theme-text-muted">{a.reason || 'No reason provided'}</span>
                 </div>
@@ -173,7 +173,7 @@ const StudentDetailAdmin = () => {
                   <span>Progress: {c.progress}%</span>
                   {c.creditPoints > 0 && <span>· {c.creditPoints} Credits</span>}
                 </div>
-                <div className="w-full h-1.5 bg-white/10 rounded-full mt-2 overflow-hidden">
+                <div className="w-full h-1.5 bg-[var(--hover)] rounded-full mt-2 overflow-hidden">
                   <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${c.progress}%` }} />
                 </div>
               </div>
@@ -268,7 +268,7 @@ const StudentDetailAdmin = () => {
               <h3 className="text-sm font-semibold theme-text mb-3">Add Teacher Note</h3>
               <textarea value={teacherNote} onChange={e => setTeacherNote(e.target.value)}
                 placeholder="Write a private note about this student..."
-                className="w-full h-24 theme-input border theme-border rounded-lg p-3 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
+                className="w-full h-24 theme-input border theme-border rounded-lg p-3 text-sm theme-text placeholder-theme-muted focus:outline-none focus:border-indigo-500/50 resize-none"
               />
               <button onClick={() => { if (teacherNote.trim()) { setNotes([...notes, `${teacherNote} - Teacher`]); setTeacherNote(''); } }}
                 className="mt-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium">
@@ -309,7 +309,7 @@ const StudentDetailAdmin = () => {
                 <p className="text-xs theme-text-muted mt-1">Parent: {student.parentContact}</p>
               </div>
               <button onClick={() => setEditMode(!editMode)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 theme-text text-sm hover:bg-white/20 transition-colors">
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg theme-subtle theme-text text-sm hover:bg-[var(--hover)] transition-colors">
                 {editMode ? <FiSave size={16} /> : <FiEdit2 size={16} />}
                 {editMode ? 'Save' : 'Edit Profile'}
               </button>

@@ -108,7 +108,7 @@ const StudentList = () => {
           <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted" size={16} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search by name, email, or roll no..."
-            className="w-full theme-card border theme-border rounded-xl pl-10 pr-10 py-2.5 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 transition-colors"
+            className="w-full theme-card border theme-border rounded-xl pl-10 pr-10 py-2.5 text-sm theme-text placeholder-theme-muted focus:outline-none focus:border-indigo-500/50 transition-colors"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 theme-text-muted hover:theme-text">
@@ -130,7 +130,7 @@ const StudentList = () => {
             <option value="at-risk">At Risk</option>
           </select>
           {hasFilters && (
-            <button onClick={clearFilters} className="px-3 py-2.5 rounded-xl theme-hover theme-text-muted text-sm hover:bg-white/[0.1] transition-colors flex items-center gap-1.5">
+            <button onClick={clearFilters} className="px-3 py-2.5 rounded-xl theme-hover theme-text-muted text-sm hover:bg-[var(--hover)] transition-colors flex items-center gap-1.5">
               <FiFilter size={14} /> Clear
             </button>
           )}

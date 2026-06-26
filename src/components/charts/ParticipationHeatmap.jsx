@@ -5,7 +5,7 @@ const ParticipationHeatmap = ({ data }) => {
   const periods = Array.from({ length: 8 }, (_, i) => `P${i + 1}`);
 
   const getColor = (val) => {
-    if (!val || val === 0) return 'bg-slate-800';
+    if (!val || val === 0) return 'bg-[var(--subtle)]';
     if (val < 25) return 'bg-emerald-900/50';
     if (val < 50) return 'bg-emerald-700/50';
     if (val < 75) return 'bg-emerald-500/50';
@@ -26,7 +26,7 @@ const ParticipationHeatmap = ({ data }) => {
               return (
                 <div
                   key={`${day}-${i}`}
-                  className={`aspect-square rounded ${getColor(val)} cursor-pointer hover:ring-1 hover:ring-white/30 transition-all`}
+                  className={`aspect-square rounded ${getColor(val)} cursor-pointer hover:ring-1 hover:ring-[var(--text-muted)]/30 transition-all`}
                   title={`${day} ${periods[i]}: ${val}%`}
                 />
               );

@@ -68,7 +68,7 @@ const AIChatbot = () => {
                   <span className="text-xs text-emerald-400">Online</span>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 theme-text-muted">
+              <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-lg hover:bg-[var(--hover)] theme-text-muted">
                 <FiX size={18} />
               </button>
             </div>
@@ -107,7 +107,7 @@ const AIChatbot = () => {
                   <button
                     key={q}
                     onClick={() => handleSend(q)}
-                    className="text-xs px-2.5 py-1 rounded-full theme-input border theme-border theme-text-muted hover:bg-white/10 hover:theme-text transition-colors"
+                    className="text-xs px-2.5 py-1 rounded-full theme-input border theme-border theme-text-muted hover:bg-[var(--hover)] hover:theme-text transition-colors"
                   >
                     {q}
                   </button>
@@ -118,7 +118,7 @@ const AIChatbot = () => {
                   value={input} onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSend()}
                   placeholder="Ask me anything..."
-                  className="flex-1 theme-input border theme-border rounded-lg px-3 py-2 text-sm theme-text placeholder-slate-500 focus:outline-none focus:border-indigo-500/50"
+                  className="flex-1 theme-input border theme-border rounded-lg px-3 py-2 text-sm theme-text placeholder-theme-muted focus:outline-none focus:border-indigo-500/50"
                 />
                 <button onClick={() => handleSend()} className="p-2 rounded-lg gradient-accent theme-text">
                   <FiSend size={16} />

@@ -10,7 +10,7 @@ const dotColors = {
   present: 'bg-emerald-400',
   absent: 'bg-rose-400',
   leave: 'bg-amber-400',
-  holiday: 'bg-slate-600',
+  holiday: 'theme-text-muted',
 };
 
 const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -131,7 +131,7 @@ const Attendance = () => {
           { label: 'Present', dot: 'bg-emerald-400' },
           { label: 'Absent', dot: 'bg-rose-400' },
           { label: 'Leave', dot: 'bg-amber-400' },
-          { label: 'Holiday', dot: 'bg-slate-600' },
+          { label: 'Holiday', dot: 'theme-text-muted' },
         ].map(item => (
           <div key={item.label} className="flex items-center gap-2 text-xs theme-text-muted">
             <span className={`w-2 h-2 rounded-full ${item.dot}`} />

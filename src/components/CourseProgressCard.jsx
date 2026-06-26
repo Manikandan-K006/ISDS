@@ -25,7 +25,7 @@ const CourseProgressCard = ({ course, onContinue }) => {
               <span className="theme-text-muted">{progress}% complete</span>
               <span className="theme-text-muted">{course.lastAccessed ? 'Last accessed: recently' : ''}</span>
             </div>
-            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-[var(--hover)] rounded-full overflow-hidden">
               <div className="h-full gradient-accent rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
           </div>

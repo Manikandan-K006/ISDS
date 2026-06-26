@@ -200,7 +200,7 @@ const Navbar = ({ onToggleSidebar }) => {
               onClick={() => setShowProfile(!showProfile)}
               className="p-1 rounded-lg hover:bg-[var(--hover)] transition-colors"
             >
-              <div className="w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center">
+              <div className="w-7 h-7 rounded-full bg-[var(--subtle)] flex items-center justify-center">
                 <span className="theme-text-muted text-xs font-medium">{getInitials(user?.name)}</span>
               </div>
             </button>

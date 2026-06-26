@@ -41,7 +41,7 @@ export const Input = ({ icon: Icon, label, error, className = '', ...props }) =>
       {Icon && <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted" size={16} />}
       <input
         className={`w-full theme-input border ${error ? 'border-red-500/50' : 'theme-border-light'} rounded-xl
-          ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 theme-text text-sm placeholder:text-slate-500
+          ${Icon ? 'pl-10' : 'pl-3.5'} pr-3.5 py-2.5 theme-text text-sm placeholder-theme-muted
           focus:outline-none focus:border-[var(--text-muted)] transition-colors duration-150`}
         {...props}
       />

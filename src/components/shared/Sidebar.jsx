@@ -59,7 +59,7 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
 
   return (
     <>
-      {open && <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={onClose} />}
+      {open && <div className="fixed inset-0 theme-overlay z-30 lg:hidden" onClick={onClose} />}
       <motion.aside
         initial={false}
         animate={{ width: collapsed ? 64 : 256 }}
@@ -95,7 +95,7 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
                   title={collapsed ? link.label : undefined}
                 >
                   {active && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-white rounded-full" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[var(--text)] rounded-full" />
                   )}
                   <link.icon size={18} className="flex-shrink-0" />
                   {!collapsed && (

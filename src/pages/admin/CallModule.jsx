@@ -64,7 +64,7 @@ const CallModule = () => {
         <div className="relative flex-1">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted" size={16} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by student or parent name..."
-            className="w-full theme-input border theme-border rounded-lg pl-10 pr-3 py-2.5 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50"
+            className="w-full theme-input border theme-border rounded-lg pl-10 pr-3 py-2.5 text-sm theme-text placeholder-theme-muted focus:outline-none focus:border-indigo-500/50"
           />
         </div>
         <select value={classFilter} onChange={e => setClassFilter(e.target.value)}
@@ -138,7 +138,7 @@ const CallModule = () => {
                 <h3 className="text-sm font-semibold theme-text mb-3">Send Message</h3>
                 <textarea value={message} onChange={e => setMessage(e.target.value)}
                   placeholder="Type your message..."
-                  className="w-full h-24 theme-input border theme-border rounded-lg p-3 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 resize-none"
+                  className="w-full h-24 theme-input border theme-border rounded-lg p-3 text-sm theme-text placeholder-theme-muted focus:outline-none focus:border-indigo-500/50 resize-none"
                 />
                 <button onClick={async () => {
                   if (!message.trim()) return;

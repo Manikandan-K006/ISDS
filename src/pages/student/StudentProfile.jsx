@@ -80,7 +80,7 @@ const StudentProfile = () => {
           </h2>
           <div className="flex flex-wrap gap-3">
             {(trophies || []).map(t => (
-              <div key={t._id} className="flex items-center gap-2 theme-subtle rounded-xl px-3 py-2 border border-white/[0.04]">
+              <div key={t._id} className="flex items-center gap-2 theme-subtle rounded-xl px-3 py-2 theme-border">
                 <span className="text-lg">{t.icon}</span>
                 <div>
                   <p className="text-xs font-medium theme-text">{t.title}</p>
@@ -100,7 +100,7 @@ const StudentProfile = () => {
           </h2>
           <div className="space-y-2">
             {(certificates || []).slice(0, 5).map(c => (
-              <div key={c._id} className="flex items-center gap-3 theme-subtle rounded-xl p-3 border border-white/[0.04]">
+              <div key={c._id} className="flex items-center gap-3 theme-subtle rounded-xl p-3 theme-border">
                 <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
                   <FiAward className="text-indigo-400" size={16} />
                 </div>

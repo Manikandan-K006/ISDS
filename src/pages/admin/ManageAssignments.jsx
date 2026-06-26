@@ -95,7 +95,7 @@ const ManageAssignments = () => {
       <div className="relative">
         <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted" size={16} />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search assignments..."
-          className="w-full theme-input border theme-border rounded-lg pl-10 pr-3 py-2.5 text-sm theme-text placeholder-slate-600 focus:outline-none focus:border-indigo-500/50"
+          className="w-full theme-input border theme-border rounded-lg pl-10 pr-3 py-2.5 text-sm theme-text placeholder-theme-muted focus:outline-none focus:border-indigo-500/50"
         />
       </div>
 
@@ -114,7 +114,7 @@ const ManageAssignments = () => {
               </div>
               <div className="flex gap-1">
                 <button onClick={() => { setEditing(a); setForm({ courseId: a.courseId, title: a.title, description: a.description, deadline: a.deadline, maxMarks: a.maxMarks, type: a.type }); setShowForm(true); }}
-                  className="p-1.5 rounded-lg hover:bg-white/10 theme-text-muted hover:theme-text">
+                  className="p-1.5 rounded-lg hover:bg-[var(--hover)] theme-text-muted hover:theme-text">
                   <FiEdit2 size={14} />
                 </button>
                 <button onClick={() => handleDelete(a._id)}

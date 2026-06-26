@@ -116,9 +116,9 @@ function App() {
             position="top-right"
             toastOptions={{
               style: {
-                background: 'var(--toast-bg, #1E293B)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#fff',
+                background: 'var(--card-bg)',
+                border: '1px solid var(--border)',
+                color: 'var(--text)',
                 borderRadius: '12px',
               },
             }}

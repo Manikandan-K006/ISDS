@@ -191,7 +191,7 @@ const Leaderboard = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 + i * 0.04, duration: 0.3 }}
               className={`grid grid-cols-12 gap-4 items-center px-6 py-4 border-b theme-border last:border-0 transition-colors ${
-                isCurrentUser ? 'bg-indigo-500/10' : 'hover:bg-white/[0.02]'
+                isCurrentUser ? 'bg-indigo-500/10' : 'hover:bg-[var(--hover)]'
               }`}
             >
               <div className="col-span-1">

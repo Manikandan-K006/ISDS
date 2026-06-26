@@ -107,7 +107,7 @@ const LearningPage = () => {
                   <button
                     onClick={() => setExpandedChapters(prev => prev.includes(ci) ? prev.filter(i => i !== ci) : [...prev, ci])}
                     className={`flex items-center justify-between w-full px-3 py-2.5 text-left transition-colors ${
-                      isExpanded ? 'theme-subtle' : 'hover:bg-white/[0.02]'
+                      isExpanded ? 'theme-subtle' : 'hover:bg-[var(--hover)]'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
@@ -160,7 +160,7 @@ const LearningPage = () => {
 
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         <Card className="flex flex-col overflow-hidden p-0">
-          <div className="relative bg-black/80 aspect-video flex items-center justify-center">
+          <div className="relative theme-overlay aspect-video flex items-center justify-center">
             {videoUrl ? (
               <iframe
                 src={videoUrl}
@@ -251,7 +251,7 @@ const LearningPage = () => {
                     value={notes}
                     onChange={e => { setNotes(e.target.value); localStorage.setItem(notesKey, e.target.value); }}
                     placeholder="Take notes for this lesson..."
-                    className="w-full h-36 theme-subtle border theme-border rounded-xl p-3 text-sm theme-text/80 placeholder-slate-600 focus:outline-none focus:theme-border-light focus:theme-hover transition-all resize-none"
+                    className="w-full h-36 theme-subtle border theme-border rounded-xl p-3 text-sm theme-text/80 placeholder-theme-muted focus:outline-none focus:theme-border-light focus:theme-hover transition-all resize-none"
                   />
                   <p className="text-xs theme-text-muted flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60" />
@@ -268,7 +268,7 @@ const LearningPage = () => {
                       value={qaInput}
                       onChange={e => setQaInput(e.target.value)}
                       placeholder="Type your question..."
-                      className="w-full h-24 theme-subtle border theme-border rounded-xl p-3 text-sm theme-text/80 placeholder-slate-600 focus:outline-none focus:theme-border-light focus:theme-hover transition-all resize-none pr-10"
+                      className="w-full h-24 theme-subtle border theme-border rounded-xl p-3 text-sm theme-text/80 placeholder-theme-muted focus:outline-none focus:theme-border-light focus:theme-hover transition-all resize-none pr-10"
                     />
                     <Button
                       variant="secondary"
@@ -352,7 +352,7 @@ const LearningPage = () => {
 
       <AnimatePresence>
         {showQuiz && (
-          <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={() => setShowQuiz(false)}>
+          <div className="fixed inset-0 z-50 theme-overlay flex items-center justify-center p-4" onClick={() => setShowQuiz(false)}>
             <div
               className="w-full max-w-lg theme-card border theme-border rounded-2xl p-6"
               onClick={e => e.stopPropagation()}

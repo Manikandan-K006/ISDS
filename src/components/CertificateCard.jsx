@@ -16,10 +16,10 @@ const CertificateCard = ({ certificate, onDownload, student }) => {
             <FiAward className="theme-text" size={22} />
           </div>
           <div className="flex gap-2">
-            <button onClick={() => onDownload?.(certificate)} className="p-2 rounded-lg theme-input hover:bg-white/10 theme-text-muted hover:theme-text transition-colors">
+            <button onClick={() => onDownload?.(certificate)} className="p-2 rounded-lg theme-input hover:bg-[var(--hover)] theme-text-muted hover:theme-text transition-colors">
               <FiDownload size={16} />
             </button>
-            <button className="p-2 rounded-lg theme-input hover:bg-white/10 theme-text-muted hover:theme-text transition-colors">
+            <button className="p-2 rounded-lg theme-input hover:bg-[var(--hover)] theme-text-muted hover:theme-text transition-colors">
               <FiShare2 size={16} />
             </button>
           </div>

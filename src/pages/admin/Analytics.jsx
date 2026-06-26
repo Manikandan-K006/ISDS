@@ -67,7 +67,7 @@ const Analytics = () => {
             <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Analytics Dashboard</h1>
             <p className="theme-text mt-1">Real-time insights from platform data</p>
           </div>
-          <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 theme-text text-sm hover:bg-white/20 transition-colors">
+          <button className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl theme-subtle theme-text text-sm hover:bg-[var(--hover)] transition-colors">
             <FiDownload size={16} /> Export Report
           </button>
         </div>
