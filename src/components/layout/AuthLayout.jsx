@@ -18,6 +18,7 @@ const AuthLayout = () => {
       <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px]" />
 
       <button
+        type="button"
         onClick={toggleTheme}
         className="absolute top-6 right-6 p-2.5 rounded-xl theme-hover theme-text-muted hover:theme-text transition-all z-10"
         aria-label="Toggle theme"

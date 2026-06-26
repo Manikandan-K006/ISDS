@@ -120,6 +120,7 @@ const Navbar = ({ onToggleSidebar }) => {
 
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={toggleTheme}
             className="p-2 rounded-lg hover:bg-[var(--hover)] theme-text-muted hover:theme-text transition-colors"
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
