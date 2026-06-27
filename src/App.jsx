@@ -12,6 +12,7 @@ import AuthLanding from './pages/auth/AuthLanding';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import VerifyCertificate from './pages/public/VerifyCertificate';
 
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
 const CourseCatalog = lazy(() => import('./pages/student/CourseCatalog'));
@@ -72,6 +73,8 @@ function App() {
               </div>
             }>
             <Routes>
+              <Route path="/verify" element={<VerifyCertificate />} />
+              <Route path="/verify/:certificateId" element={<VerifyCertificate />} />
               <Route element={<AuthLayout />}>
                 <Route path="/auth" element={<AuthLanding />} />
                 <Route path="/login" element={<Login />} />
