@@ -32,6 +32,9 @@ const CallModule = lazy(() => import('./pages/admin/CallModule'));
 const TeacherProfile = lazy(() => import('./pages/admin/TeacherProfile'));
 const ManageCourses = lazy(() => import('./pages/admin/ManageCourses'));
 const ManageAssignments = lazy(() => import('./pages/admin/ManageAssignments'));
+const AdminCertificates = lazy(() => import('./pages/admin/AdminCertificates'));
+const Schedule = lazy(() => import('./pages/student/Schedule'));
+const Messages = lazy(() => import('./pages/shared/Messages'));
 const Notifications = lazy(() => import('./pages/shared/Notifications'));
 
 class ErrorBoundary extends Component {
@@ -102,6 +105,8 @@ function App() {
                 <Route path="knowledge-hub" element={<KnowledgeHub />} />
                 <Route path="profile" element={<StudentProfile />} />
                 <Route path="attendance" element={<Attendance />} />
+                <Route path="schedule" element={<Schedule />} />
+                <Route path="messages" element={<Messages />} />
                 <Route path="notifications" element={<Notifications />} />
               </Route>
 
@@ -121,6 +126,8 @@ function App() {
                 <Route path="profile" element={<TeacherProfile />} />
                 <Route path="courses" element={<ManageCourses />} />
                 <Route path="assignments" element={<ManageAssignments />} />
+                <Route path="certificates" element={<AdminCertificates />} />
+                <Route path="messages" element={<Messages />} />
                 <Route path="notifications" element={<Notifications />} />
               </Route>
 

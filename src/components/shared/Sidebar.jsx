@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiHome, FiBookOpen, FiGrid, FiClipboard, FiCalendar, FiAward,
   FiUser, FiUsers, FiBarChart2, FiPhone, FiStar, FiLayers,
-  FiChevronLeft, FiLogOut
+  FiChevronLeft, FiLogOut, FiMessageSquare, FiClock
 } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -11,9 +11,11 @@ const studentNav = [
   { to: '/dashboard', icon: FiHome, label: 'Dashboard' },
   { to: '/courses', icon: FiGrid, label: 'Courses' },
   { to: '/assignments', icon: FiClipboard, label: 'Assignments' },
+  { to: '/schedule', icon: FiClock, label: 'Schedule' },
   { to: '/attendance', icon: FiCalendar, label: 'Attendance' },
   { to: '/certificates', icon: FiAward, label: 'Certificates' },
   { to: '/leaderboard', icon: FiStar, label: 'Leaderboard' },
+  { to: '/messages', icon: FiMessageSquare, label: 'Messages' },
   { to: '/profile', icon: FiUser, label: 'Profile' },
 ];
 
@@ -22,8 +24,10 @@ const adminNav = [
   { to: '/admin/students', icon: FiUsers, label: 'Students' },
   { to: '/admin/courses', icon: FiLayers, label: 'Courses' },
   { to: '/admin/assignments', icon: FiClipboard, label: 'Assignments' },
+  { to: '/admin/certificates', icon: FiAward, label: 'Certificates' },
   { to: '/admin/analytics', icon: FiBarChart2, label: 'Analytics' },
-  { to: '/admin/calls', icon: FiPhone, label: 'Communications' },
+  { to: '/admin/calls', icon: FiPhone, label: 'Calls' },
+  { to: '/admin/messages', icon: FiMessageSquare, label: 'Messages' },
   { to: '/admin/profile', icon: FiUser, label: 'Profile' },
 ];
 
@@ -34,7 +38,8 @@ const teacherNav = [
   { to: '/admin/assignments', icon: FiClipboard, label: 'Assignments' },
   { to: '/admin/students', icon: FiUsers, label: 'Students' },
   { to: '/admin/analytics', icon: FiBarChart2, label: 'Analytics' },
-  { to: '/admin/calls', icon: FiPhone, label: 'Communications' },
+  { to: '/admin/calls', icon: FiPhone, label: 'Calls' },
+  { to: '/admin/messages', icon: FiMessageSquare, label: 'Messages' },
   { to: '/admin/profile', icon: FiUser, label: 'Profile' },
 ];
 
