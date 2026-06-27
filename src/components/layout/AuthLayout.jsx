@@ -1,4 +1,6 @@
 import { Outlet, Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FiSun, FiMoon } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -13,28 +15,53 @@ const AuthLayout = () => {
 
   return (
     <div className="h-screen w-screen theme-bg flex items-center justify-center relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-purple-900/20" />
-      <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px]" />
+      {/* Ambient background effects */}
+      <div className="absolute inset-0">
+        <div className="absolute top-[-15%] left-[-10%] w-[600px] h-[600px] bg-[var(--primary)]/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-indigo-500/3 rounded-full blur-[100px]" />
+      </div>
 
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="absolute top-6 right-6 p-2.5 rounded-xl theme-hover theme-text-muted hover:theme-text transition-all z-10"
-        aria-label="Toggle theme"
+      {/* Grid pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.015]"
+        style={{
+          backgroundImage: `linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px)`,
+          backgroundSize: '64px 64px',
+        }}
+      />
+
+      <div className="absolute top-6 right-6 flex items-center gap-3 z-10">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={toggleTheme}
+          className="p-2.5 rounded-xl hover:bg-[var(--hover)] theme-text-muted hover:theme-text transition-all"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <FiSun size={18} /> : <FiMoon size={18} />}
+        </motion.button>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="relative z-10 w-full max-w-md px-4"
       >
-        {theme === 'dark' ? (
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        ) : (
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-          </svg>
-        )}
-      </button>
+        <div className="text-center mb-8">
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+            className="w-14 h-14 rounded-2xl bg-[var(--primary)] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[var(--primary)]/20"
+          >
+            <span className="text-white font-bold text-lg">IS</span>
+          </motion.div>
+          <h1 className="text-page-title theme-text mb-1">ISDS</h1>
+          <p className="text-caption theme-text-muted">Intelligent Student Development System</p>
+        </div>
 
-      <Outlet />
+        <Outlet />
+      </motion.div>
     </div>
   );
 };

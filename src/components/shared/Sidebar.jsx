@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiHome, FiBookOpen, FiGrid, FiClipboard, FiCalendar, FiAward,
   FiUser, FiUsers, FiBarChart2, FiPhone, FiStar, FiLayers,
-  FiChevronLeft, FiLogOut, FiMessageSquare, FiClock
+  FiChevronLeft, FiLogOut, FiMessageSquare, FiClock,
 } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -43,10 +43,16 @@ const teacherNav = [
   { to: '/admin/profile', icon: FiUser, label: 'Profile' },
 ];
 
-const navMap = {
-  student: studentNav,
-  teacher: teacherNav,
-  admin: adminNav,
+const navMap = { student: studentNav, teacher: teacherNav, admin: adminNav };
+
+const sidebarVariants = {
+  open: { width: 256, transition: { type: 'spring', stiffness: 250, damping: 25 } },
+  collapsed: { width: 64, transition: { type: 'spring', stiffness: 250, damping: 25 } },
+};
+
+const mobileVariants = {
+  hidden: { x: '-100%', opacity: 0 },
+  visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 250, damping: 25 } },
 };
 
 const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
@@ -64,75 +70,150 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
 
   return (
     <>
-      {open && <div className="fixed inset-0 theme-overlay z-30 lg:hidden" onClick={onClose} />}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 theme-overlay z-30 lg:hidden"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile sidebar */}
+      <AnimatePresence>
+        {open && (
+          <motion.aside
+            variants={mobileVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            className="fixed top-0 left-0 h-screen z-40 theme-sidebar border-r theme-border overflow-hidden lg:!hidden"
+          >
+            <SidebarContent
+              navLinks={navLinks}
+              isActive={isActive}
+              collapsed={false}
+              onClose={onClose}
+              logout={logout}
+              navigate={navigate}
+            />
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop sidebar */}
       <motion.aside
         initial={false}
-        animate={{ width: collapsed ? 64 : 256 }}
-        className={`fixed top-0 left-0 h-screen z-40 theme-sidebar border-r theme-border overflow-hidden
-          lg:relative
-          ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+        animate={collapsed ? 'collapsed' : 'open'}
+        variants={sidebarVariants}
+        className="hidden lg:block h-screen sticky top-0 z-30 theme-sidebar border-r theme-border overflow-hidden flex-shrink-0"
       >
-        <div className="flex flex-col h-screen">
-          <div className="p-[10px] border-b theme-border">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
-                <span className="theme-text font-bold text-sm">IS</span>
-              </div>
-              {!collapsed && (
-                <span className="text-sm font-semibold theme-text">ISDS</span>
-              )}
-            </div>
-          </div>
-
-          <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
-            {navLinks.map((link) => {
-              const active = isActive(link.to);
-              return (
-                <Link
-                  key={link.to + link.label}
-                  to={link.to}
-                  onClick={onClose}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative ${
-                    active
-                      ?                       'bg-[var(--hover)] theme-text'
-                      : 'theme-text-muted hover:theme-text hover:bg-[var(--subtle)]'
-                  }`}
-                  title={collapsed ? link.label : undefined}
-                >
-                  {active && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-[var(--text)] rounded-full" />
-                  )}
-                  <link.icon size={18} className="flex-shrink-0" />
-                  {!collapsed && (
-                    <span className="truncate">{link.label}</span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="border-t theme-border py-3 px-2 space-y-1">
-            <button
-              onClick={() => { logout(); navigate('/login'); }}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium theme-text-muted hover:text-red-400 hover:bg-[var(--subtle)] transition-colors"
-              title={collapsed ? 'Sign Out' : undefined}
-            >
-              <FiLogOut size={18} className="flex-shrink-0" />
-              {!collapsed && <span className="truncate">Sign Out</span>}
-            </button>
-
-            <button
-              onClick={onToggleCollapse}
-              className="flex items-center justify-center w-full p-2 rounded-lg theme-text-muted hover:theme-text hover:bg-[var(--subtle)] transition-colors"
-              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <FiChevronLeft size={16} className={`transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
-        </div>
+        <SidebarContent
+          navLinks={navLinks}
+          isActive={isActive}
+          collapsed={collapsed}
+          onClose={onClose}
+          logout={logout}
+          navigate={navigate}
+          onToggleCollapse={onToggleCollapse}
+          showToggle
+        />
       </motion.aside>
     </>
   );
 };
+
+const SidebarContent = ({ navLinks, isActive, collapsed, onClose, logout, navigate, onToggleCollapse, showToggle }) => (
+  <div className="flex flex-col h-screen">
+    <div className="px-[14px] py-[14px] border-b theme-border flex items-center gap-3 h-14 flex-shrink-0">
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        className="w-8 h-8 rounded-xl bg-[var(--primary)] flex items-center justify-center flex-shrink-0"
+      >
+        <span className="text-white font-bold text-xs">IS</span>
+      </motion.div>
+      {!collapsed && (
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="text-sm font-semibold theme-text"
+        >
+          ISDS
+        </motion.span>
+      )}
+    </div>
+
+    <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-0.5 scrollbar-thin">
+      {navLinks.map((link) => {
+        const active = isActive(link.to);
+        return (
+          <Link
+            key={link.to + link.label}
+            to={link.to}
+            onClick={onClose}
+            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-caption font-medium transition-all duration-150
+              ${active
+                ? 'bg-[var(--primary-muted)] text-[var(--primary)]'
+                : 'theme-text-muted hover:theme-text hover:bg-[var(--hover)]'
+              }`}
+            title={collapsed ? link.label : undefined}
+          >
+            {active && (
+              <motion.span
+                layoutId="sidebar-active"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[var(--primary)] rounded-full"
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              />
+            )}
+            <link.icon size={18} strokeWidth={active ? 2.5 : 1.5} className="flex-shrink-0" />
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="truncate"
+              >
+                {link.label}
+              </motion.span>
+            )}
+          </Link>
+        );
+      })}
+    </nav>
+
+    <div className="border-t theme-border py-3 px-2.5 space-y-1 flex-shrink-0">
+      <motion.button
+        whileTap={{ scale: 0.97 }}
+        onClick={() => { logout(); navigate('/login'); }}
+        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-caption font-medium theme-text-muted hover:text-[var(--danger)] hover:bg-[var(--danger-subtle)] transition-colors"
+        title={collapsed ? 'Sign Out' : undefined}
+      >
+        <FiLogOut size={18} className="flex-shrink-0" />
+        {!collapsed && <span className="truncate">Sign Out</span>}
+      </motion.button>
+
+      {showToggle && (
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={onToggleCollapse}
+          className="flex items-center justify-center w-full p-2 rounded-xl theme-text-muted hover:theme-text hover:bg-[var(--hover)] transition-colors"
+          title={collapsed ? 'Expand' : 'Collapse'}
+        >
+          <motion.div
+            animate={{ rotate: collapsed ? 180 : 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          >
+            <FiChevronLeft size={16} />
+          </motion.div>
+        </motion.button>
+      )}
+    </div>
+  </div>
+);
 
 export default Sidebar;

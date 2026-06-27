@@ -1,31 +1,56 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Outlet, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../shared/Navbar';
 import Sidebar from '../shared/Sidebar';
 import AIChatbot from '../AIChatbot';
 
+const pageVariants = {
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
+  exit: { opacity: 0, y: -4, transition: { duration: 0.15 } },
+};
+
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem('isds_sidebar_collapsed') === 'true'; } catch { return false; }
+  });
+  const location = useLocation();
+
+  const handleToggleCollapse = () => {
+    const next = !sidebarCollapsed;
+    setSidebarCollapsed(next);
+    try { localStorage.setItem('isds_sidebar_collapsed', next.toString()); } catch {}
+  };
 
   return (
     <div className="min-h-screen theme-bg theme-text">
-      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+      <Navbar onToggleSidebar={() => setSidebarOpen(true)} />
       <div className="flex">
         <Sidebar
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onToggleCollapse={handleToggleCollapse}
         />
-        <motion.main
-          layout
-          className="flex-1 min-h-[calc(100vh-4rem)] p-4 lg:p-6 transition-all duration-300"
+        <main
+          className="flex-1 min-h-[calc(100vh-3.5rem)] transition-all duration-300"
           style={{ marginLeft: 0 }}
         >
-          <Outlet />
-        </motion.main>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="p-4 lg:p-6 xl:p-8 max-w-7xl mx-auto"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </main>
       </div>
       <AIChatbot />
     </div>
