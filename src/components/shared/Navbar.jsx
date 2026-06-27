@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -21,6 +21,13 @@ const Navbar = ({ onToggleSidebar }) => {
   const profileRef = useRef(null);
   const notifRef = useRef(null);
 
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const res = await getUnreadCount();
+      setUnreadCount(res.data?.count || 0);
+    } catch { /* silent */ }
+  }, []);
+
   const fetchNotifications = async () => {
     try {
       const res = await getNotifications({ limit: 20 });
@@ -36,13 +43,16 @@ const Navbar = ({ onToggleSidebar }) => {
   }, [showNotifications]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await getUnreadCount();
-        setUnreadCount(res.data?.count || 0);
-      } catch { /* silent */ }
-    })();
-  }, []);
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [fetchUnreadCount]);
+
+  const handleNotificationClick = (n) => {
+    if (!n.isRead) handleMarkRead(n._id);
+    setShowNotifications(false);
+    if (n.link) navigate(n.link);
+  };
 
   const handleMarkAllRead = async () => {
     try {
@@ -164,7 +174,7 @@ const Navbar = ({ onToggleSidebar }) => {
                       notifications.map(n => (
                         <div
                           key={n._id}
-                          onClick={() => { if (!n.isRead) handleMarkRead(n._id); }}
+                          onClick={() => handleNotificationClick(n)}
                           className={`p-4 border-b theme-border-light hover:theme-subtle cursor-pointer transition-colors group ${
                             !n.isRead ? 'theme-subtle' : ''
                           }`}
@@ -191,6 +201,16 @@ const Navbar = ({ onToggleSidebar }) => {
                       </div>
                     )}
                   </div>
+                  {notifications.length > 0 && (
+                    <div className="border-t theme-border p-2">
+                      <button
+                        onClick={() => { setShowNotifications(false); navigate('/notifications'); }}
+                        className="w-full text-center text-xs text-indigo-400 hover:text-indigo-300 py-1.5 rounded-lg hover:theme-subtle transition-colors"
+                      >
+                        View all notifications
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

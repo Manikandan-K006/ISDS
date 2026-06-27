@@ -32,6 +32,7 @@ const CallModule = lazy(() => import('./pages/admin/CallModule'));
 const TeacherProfile = lazy(() => import('./pages/admin/TeacherProfile'));
 const ManageCourses = lazy(() => import('./pages/admin/ManageCourses'));
 const ManageAssignments = lazy(() => import('./pages/admin/ManageAssignments'));
+const Notifications = lazy(() => import('./pages/shared/Notifications'));
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -101,6 +102,7 @@ function App() {
                 <Route path="knowledge-hub" element={<KnowledgeHub />} />
                 <Route path="profile" element={<StudentProfile />} />
                 <Route path="attendance" element={<Attendance />} />
+                <Route path="notifications" element={<Notifications />} />
               </Route>
 
               <Route
@@ -119,6 +121,7 @@ function App() {
                 <Route path="profile" element={<TeacherProfile />} />
                 <Route path="courses" element={<ManageCourses />} />
                 <Route path="assignments" element={<ManageAssignments />} />
+                <Route path="notifications" element={<Notifications />} />
               </Route>
 
               <Route path="*" element={<Navigate to="/login" replace />} />
