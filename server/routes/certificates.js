@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const crypto = require('crypto');
 const { queryDocs, addDoc, getDoc, updateDoc } = require('../config/firestore');
+const { notify } = require('../services/notify');
 
 const generateCertificateId = () => {
   const year = new Date().getFullYear();
@@ -56,13 +57,14 @@ router.post('/', async (req, res) => {
       createdAt: new Date().toISOString(),
     };
     const cert = await addDoc('certificates', certData);
-    await addDoc('notifications', {
+    await notify({
       userId: cert.studentId,
       title: 'New Certificate Issued',
       message: `Your certificate for ${cert.courseName} is ready. Certificate ID: ${certificateId}`,
       type: 'certificate_issued',
       relatedId: cert._id,
-      link: `/certificates`,
+      link: '/certificates',
+      templateData: { studentName: cert.studentName, courseName: cert.courseName, certificateId },
     });
     res.status(201).json({ ...cert, certificateId, qrData: certData.qrData });
   } catch (err) {

@@ -1,5 +1,6 @@
 const router = require('express').Router();
-const { queryDocs, addDoc, updateDoc } = require('../config/firestore');
+const { queryDocs, addDoc, getDoc, updateDoc } = require('../config/firestore');
+const { notify } = require('../services/notify');
 
 router.get('/', async (req, res) => {
   try {
@@ -37,13 +38,15 @@ router.post('/', async (req, res) => {
       record = await addDoc('attendance', { studentId, date, status, reason });
     }
     if (status === 'absent') {
-      await addDoc('notifications', {
+      const student = await getDoc('users', studentId);
+      await notify({
         userId: studentId,
         title: 'Attendance Alert',
         message: `You were marked absent on ${date}`,
         type: 'attendance_alert',
         relatedId: record._id,
         link: '/attendance',
+        templateData: { studentName: student?.name || 'Student', courseName: '' },
       });
     }
     res.status(201).json(record);

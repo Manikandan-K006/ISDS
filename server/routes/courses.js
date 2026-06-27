@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { collection, addDoc, getDoc, queryDocs, updateDoc, deleteDoc, deleteDocs, formatDoc, formatDocs } = require('../config/firestore');
+const { notify } = require('../services/notify');
 
 const uploadDir = path.join(__dirname, '..', 'uploads', 'courses');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -114,13 +115,15 @@ router.post('/:id/enroll', async (req, res) => {
     if (existing.length > 0) return res.status(400).json({ error: 'Already enrolled' });
     const enrollment = await addDoc('enrollments', { userId, courseId: req.params.id, progress: 0, status: 'in-progress', completedModules: [] });
     const course = await getDoc('courses', req.params.id);
-    await addDoc('notifications', {
+    const student = await getDoc('users', userId);
+    await notify({
       userId: enrollment.userId,
       title: 'Course Enrolled',
       message: `You have successfully enrolled in "${course?.title || 'course'}"`,
       type: 'course_enrolled',
       relatedId: req.params.id,
       link: `/courses/${req.params.id}`,
+      templateData: { studentName: student?.name || 'Student', courseName: course?.title || 'Course' },
     });
     res.status(201).json(enrollment);
   } catch (err) {
@@ -144,13 +147,14 @@ router.put('/:id/progress', async (req, res) => {
           await updateDoc('users', userId, { credits: (user.credits || 0) + course.creditPoints });
         }
       }
-      await addDoc('notifications', {
+      await notify({
         userId,
         title: 'Course Completed',
         message: `Congratulations! You have completed the course "${course?.title || 'course'}"`,
         type: 'course_completed',
         relatedId: req.params.id,
         link: `/courses/${req.params.id}`,
+        templateData: { studentName: user?.name || 'Student', courseName: course?.title || 'Course' },
       });
     }
     res.json(enrollment);

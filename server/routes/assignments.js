@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { collection, addDoc, getDoc, queryDocs, updateDoc, deleteDoc, deleteDocs, countDocs, auth } = require('../config/firestore');
+const { notify, notifyTeacher } = require('../services/notify');
 
 router.get('/', async (req, res) => {
   try {
@@ -44,16 +45,19 @@ router.post('/', auth, async (req, res) => {
       createdBy: req.userId,
     });
     const enrollments = await queryDocs('enrollments', [['courseId', '==', courseId]]);
-    await Promise.all(enrollments.map(enr =>
-      addDoc('notifications', {
+    const course = await getDoc('courses', courseId);
+    await Promise.all(enrollments.map(async enr => {
+      const student = await getDoc('users', enr.userId);
+      await notify({
         userId: enr.userId,
         title: 'New Assignment',
         message: `A new assignment "${assignment.title}" has been posted`,
         type: 'assignment_created',
         relatedId: assignment._id,
         link: `/assignments/${assignment._id}`,
-      })
-    ));
+        templateData: { studentName: student?.name || 'Student', courseName: course?.title || 'Course', title: assignment.title },
+      });
+    }));
     res.status(201).json(assignment);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -97,13 +101,16 @@ router.post('/:id/submit', async (req, res) => {
     }
     const course = await getDoc('courses', assignment.courseId);
     if (course && course.teacherId) {
-      await addDoc('notifications', {
+      const teacher = await getDoc('users', course.teacherId);
+      const student = await getDoc('users', studentId);
+      await notify({
         userId: course.teacherId,
         title: 'Assignment Submitted',
         message: `A student has submitted "${assignment.title}"`,
         type: 'assignment_submitted',
         relatedId: assignment._id,
         link: `/assignments/${assignment._id}`,
+        templateData: { teacherName: teacher?.name || 'Teacher', studentName: student?.name || 'Student', title: assignment.title },
       });
     }
     res.status(201).json(submission);
@@ -117,13 +124,16 @@ router.put('/grade/:submissionId', async (req, res) => {
     const { grade, feedback } = req.body;
     const submission = await updateDoc('submissions', req.params.submissionId, { grade, feedback, status: 'graded' });
     const assignment = await getDoc('assignments', submission.assignmentId);
-    await addDoc('notifications', {
+    const student = await getDoc('users', submission.studentId);
+    const course = assignment ? await getDoc('courses', assignment.courseId) : null;
+    await notify({
       userId: submission.studentId,
       title: 'Assignment Graded',
       message: `Your assignment "${assignment.title}" has been graded: ${submission.grade}/${assignment.maxMarks}`,
       type: 'assignment_graded',
       relatedId: assignment._id,
       link: `/assignments/${assignment._id}`,
+      templateData: { studentName: student?.name || 'Student', courseName: course?.title || 'Course', title: assignment.title, grade: `${submission.grade}/${assignment.maxMarks}` },
     });
     res.json(submission);
   } catch (err) {
