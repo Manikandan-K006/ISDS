@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiHome, FiBookOpen, FiGrid, FiClipboard, FiCalendar, FiAward,
   FiUser, FiUsers, FiBarChart2, FiPhone, FiStar, FiLayers,
-  FiChevronLeft, FiLogOut, FiMessageSquare, FiClock,
+  FiChevronLeft, FiLogOut, FiMessageSquare, FiClock, FiZap,
 } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -20,7 +20,7 @@ const studentNav = [
 ];
 
 const adminNav = [
-  { to: '/admin', icon: FiGrid, label: 'Overview' },
+  { to: '/admin', icon: FiZap, label: 'Overview' },
   { to: '/admin/students', icon: FiUsers, label: 'Students' },
   { to: '/admin/courses', icon: FiLayers, label: 'Courses' },
   { to: '/admin/assignments', icon: FiClipboard, label: 'Assignments' },
@@ -129,26 +129,34 @@ const Sidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
 
 const SidebarContent = ({ navLinks, isActive, collapsed, onClose, logout, navigate, onToggleCollapse, showToggle }) => (
   <div className="flex flex-col h-screen">
-    <div className="px-[14px] py-[14px] border-b theme-border flex items-center gap-3 h-14 flex-shrink-0">
-      <motion.div
-        whileHover={{ scale: 1.05 }}
-        className="w-8 h-8 rounded-xl bg-[var(--primary)] flex items-center justify-center flex-shrink-0"
-      >
-        <span className="text-white font-bold text-xs">IS</span>
-      </motion.div>
-      {!collapsed && (
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="text-sm font-semibold theme-text"
+    {/* Brand Area — Gradient */}
+    <div className="relative overflow-hidden flex-shrink-0">
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 via-[var(--primary)]/5 to-transparent" />
+      <div className="absolute top-[-50%] right-[-50%] w-[200px] h-[200px] bg-[var(--primary)]/5 rounded-full blur-3xl" />
+      <div className="relative px-[14px] py-[14px] flex items-center gap-3 h-16">
+        <motion.div
+          whileHover={{ scale: 1.05, rotate: -3 }}
+          className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--primary)] to-violet-500 flex items-center justify-center flex-shrink-0 shadow-sm shadow-[var(--primary)]/20"
         >
-          ISDS
-        </motion.span>
-      )}
+          <span className="text-white font-bold text-sm">IS</span>
+        </motion.div>
+        {!collapsed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col"
+          >
+            <span className="text-sm font-bold theme-text tracking-tight">ISDS</span>
+            <span className="text-[10px] theme-text-muted font-medium tracking-wide">Intelligent System</span>
+          </motion.div>
+        )}
+      </div>
+      {!collapsed && <div className="divider-gradient mx-3" />}
     </div>
 
-    <nav className="flex-1 overflow-y-auto py-4 px-2.5 space-y-0.5 scrollbar-thin">
+    {/* Navigation */}
+    <nav className="flex-1 overflow-y-auto py-3 px-2.5 space-y-0.5 scrollbar-thin">
       {navLinks.map((link) => {
         const active = isActive(link.to);
         return (
@@ -156,7 +164,7 @@ const SidebarContent = ({ navLinks, isActive, collapsed, onClose, logout, naviga
             key={link.to + link.label}
             to={link.to}
             onClick={onClose}
-            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-caption font-medium transition-all duration-150
+            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-caption font-medium transition-all duration-150 group
               ${active
                 ? 'bg-[var(--primary-muted)] text-[var(--primary)]'
                 : 'theme-text-muted hover:theme-text hover:bg-[var(--hover)]'
@@ -166,11 +174,11 @@ const SidebarContent = ({ navLinks, isActive, collapsed, onClose, logout, naviga
             {active && (
               <motion.span
                 layoutId="sidebar-active"
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[var(--primary)] rounded-full"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gradient-to-b from-[var(--primary)] to-violet-500 rounded-full"
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               />
             )}
-            <link.icon size={18} strokeWidth={active ? 2.5 : 1.5} className="flex-shrink-0" />
+            <link.icon size={18} strokeWidth={active ? 2.5 : 1.5} className="flex-shrink-0 transition-all duration-150" />
             {!collapsed && (
               <motion.span
                 initial={{ opacity: 0 }}
@@ -181,19 +189,23 @@ const SidebarContent = ({ navLinks, isActive, collapsed, onClose, logout, naviga
                 {link.label}
               </motion.span>
             )}
+            {active && !collapsed && (
+              <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--primary)] shadow-sm shadow-[var(--primary)]/50" />
+            )}
           </Link>
         );
       })}
     </nav>
 
+    {/* Footer */}
     <div className="border-t theme-border py-3 px-2.5 space-y-1 flex-shrink-0">
       <motion.button
         whileTap={{ scale: 0.97 }}
         onClick={() => { logout(); navigate('/login'); }}
-        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-caption font-medium theme-text-muted hover:text-[var(--danger)] hover:bg-[var(--danger-subtle)] transition-colors"
+        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-caption font-medium theme-text-muted hover:text-[var(--danger)] hover:bg-[var(--danger-subtle)] transition-all duration-150 group"
         title={collapsed ? 'Sign Out' : undefined}
       >
-        <FiLogOut size={18} className="flex-shrink-0" />
+        <FiLogOut size={18} className="flex-shrink-0 transition-all duration-150 group-hover:scale-110" />
         {!collapsed && <span className="truncate">Sign Out</span>}
       </motion.button>
 
@@ -201,8 +213,8 @@ const SidebarContent = ({ navLinks, isActive, collapsed, onClose, logout, naviga
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={onToggleCollapse}
-          className="flex items-center justify-center w-full p-2 rounded-xl theme-text-muted hover:theme-text hover:bg-[var(--hover)] transition-colors"
-          title={collapsed ? 'Expand' : 'Collapse'}
+          className="flex items-center justify-center w-full p-2 rounded-xl theme-text-muted hover:theme-text hover:bg-[var(--hover)] transition-all duration-150"
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <motion.div
             animate={{ rotate: collapsed ? 180 : 0 }}

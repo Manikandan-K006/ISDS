@@ -253,11 +253,37 @@ body {
 
 .card-shadow-premium {
   box-shadow: var(--shadow-sm);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 .card-shadow-premium:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), 0 0 30px var(--primary-glow);
+  transform: translateY(-3px);
+}
+
+.card-glow {
+  position: relative;
+  isolation: isolate;
+}
+.card-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--primary), transparent, var(--violet), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+}
+.card-glow:hover::before {
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .card-shadow-premium:hover {
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(129, 140, 248, 0.08);
 }
 
 .glass {
@@ -265,7 +291,7 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow), 0 1px 2px rgba(0,0,0,0.02);
 }
 
 .glass-strong {
@@ -278,6 +304,40 @@ body {
 [data-theme="dark"] .glass-strong {
   background: rgba(15, 23, 42, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-nav {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), 0 4px 30px rgba(0,0,0,0.04);
+}
+[data-theme="dark"] .glass-nav {
+  box-shadow: var(--glass-shadow), 0 4px 30px rgba(0,0,0,0.12);
+}
+
+.border-gradient {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--primary), var(--violet), var(--primary));
+  z-index: -1;
+  animation: borderRotate 4s linear infinite;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 1.5px;
+}
+
+@keyframes borderRotate {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
 }
 
 .gradient-hero {
@@ -474,6 +534,56 @@ textarea:focus-visible {
 
 @media (min-width: 641px) and (max-width: 1024px) {
   .hide-tablet { display: none !important; }
+}
+
+/* ============================================================
+   AMBIENT BACKGROUND
+   ============================================================ */
+.ambient-bg {
+  position: relative;
+}
+.ambient-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 60% at 0% 20%, var(--primary-glow) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ============================================================
+   AMBIENT ORB — larger, animated
+   ============================================================ */
+.orb-float {
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.orb-float-delayed {
+  animation: orbFloat 8s ease-in-out 2s infinite;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+/* ============================================================
+   ICON PULSE
+   ============================================================ */
+.icon-pulse {
+  animation: iconPulse 2s ease-in-out infinite;
+}
+@keyframes iconPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* ============================================================
+   BRAND GLOW
+   ============================================================ */
+.brand-glow {
+  box-shadow: 0 0 20px var(--primary-glow), 0 0 40px var(--primary-glow);
 }
 
 /* ============================================================

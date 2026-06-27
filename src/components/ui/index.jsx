@@ -121,11 +121,11 @@ export const Select = ({ icon: Icon, label, error, options = [], placeholder = '
 /* ============================================================
    CARD
    ============================================================ */
-export const Card = ({ children, className = '', hover = false, highlight = false, ...props }) => (
+export const Card = ({ children, className = '', hover = false, highlight = false, glow = false, ...props }) => (
   <motion.div
-    whileHover={hover ? { y: -2 } : undefined}
+    whileHover={hover ? { y: -3 } : undefined}
     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-    className={`theme-card border ${highlight ? 'border-[var(--primary)]/30' : 'theme-border'} rounded-2xl card-shadow-premium ${hover ? 'cursor-pointer' : ''} ${className}`}
+    className={`theme-card border ${highlight ? 'border-[var(--primary)]/30' : 'theme-border'} rounded-2xl card-shadow-premium ${glow ? 'card-glow' : ''} ${hover ? 'cursor-pointer' : ''} ${className}`}
     {...props}
   >
     {children}

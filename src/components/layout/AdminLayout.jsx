@@ -25,7 +25,7 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="min-h-screen theme-bg theme-text">
+    <div className="min-h-screen theme-bg theme-text ambient-bg">
       <Navbar onToggleSidebar={() => setSidebarOpen(true)} />
       <div className="flex">
         <Sidebar
