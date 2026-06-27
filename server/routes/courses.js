@@ -141,11 +141,14 @@ router.put('/:id/progress', async (req, res) => {
     const enrollment = await updateDoc('enrollments', enrollmentId, { progress, completedModules, status });
     if (progress >= 100) {
       const course = await getDoc('courses', req.params.id);
+      let user = null;
       if (course && course.creditPoints > 0) {
-        const user = await getDoc('users', userId);
+        user = await getDoc('users', userId);
         if (user) {
           await updateDoc('users', userId, { credits: (user.credits || 0) + course.creditPoints });
         }
+      } else {
+        user = await getDoc('users', userId);
       }
       await notify({
         userId,
@@ -156,6 +159,41 @@ router.put('/:id/progress', async (req, res) => {
         link: `/courses/${req.params.id}`,
         templateData: { studentName: user?.name || 'Student', courseName: course?.title || 'Course' },
       });
+      // Auto-generate certificate
+      try {
+        const http = require('http');
+        const certPayload = JSON.stringify({
+          userId,
+          courseId: req.params.id,
+          progress: 100,
+          completedModules: req.body.completedModules || [],
+        });
+        const certReq = http.request({
+          hostname: 'localhost',
+          port: process.env.PORT || 5000,
+          path: '/api/certificates/auto-generate',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(certPayload) },
+        }, (certRes) => {
+          let data = '';
+          certRes.on('data', chunk => data += chunk);
+          certRes.on('end', () => {
+            try {
+              const certResult = JSON.parse(data);
+              if (certResult.error) {
+                console.log(`[Auto-Cert] ${certResult.error} for user ${userId} course ${req.params.id}`);
+              } else {
+                console.log(`[Auto-Cert] Generated ${certResult.certificateId} for user ${userId}`);
+              }
+            } catch (e) { /* ignore parse errors */ }
+          });
+        });
+        certReq.on('error', () => { /* silent fail */ });
+        certReq.write(certPayload);
+        certReq.end();
+      } catch (certErr) {
+        console.log(`[Auto-Cert] Failed to trigger certificate generation: ${certErr.message}`);
+      }
     }
     res.json(enrollment);
   } catch (err) {

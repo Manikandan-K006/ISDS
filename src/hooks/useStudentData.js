@@ -43,7 +43,9 @@ export const useStudentData = () => {
         student: studRes.status === 'fulfilled' ? studRes.value.data : null,
         attendance: attRes.status === 'fulfilled' ? attRes.value.data : [],
         assignments: assignRes.status === 'fulfilled' ? assignRes.value.data : [],
-        certificates: certRes.status === 'fulfilled' ? certRes.value.data : [],
+        certificates: certRes.status === 'fulfilled'
+          ? (Array.isArray(certRes.value.data) ? certRes.value.data : (certRes.value.data?.certificates || []))
+          : [],
         trophies: trophyRes.status === 'fulfilled' ? trophyRes.value.data : [],
         courses: courseRes.status === 'fulfilled' ? courseRes.value.data : [],
         loading: false,
