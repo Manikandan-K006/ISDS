@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
@@ -12,24 +12,25 @@ import AuthLanding from './pages/auth/AuthLanding';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
-import StudentDashboard from './pages/student/StudentDashboard';
-import CourseCatalog from './pages/student/CourseCatalog';
-import LearningPage from './pages/student/LearningPage';
-import Assignments from './pages/student/Assignments';
-import Certificates from './pages/student/Certificates';
-import TrophySession from './pages/student/TrophySession';
-import StudentProfile from './pages/student/StudentProfile';
-import Attendance from './pages/student/Attendance';
-import Leaderboard from './pages/student/Leaderboard';
-import KnowledgeHub from './pages/student/KnowledgeHub';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import StudentList from './pages/admin/StudentList';
-import StudentDetailAdmin from './pages/admin/StudentDetailAdmin';
-import Analytics from './pages/admin/Analytics';
-import CallModule from './pages/admin/CallModule';
-import TeacherProfile from './pages/admin/TeacherProfile';
-import ManageCourses from './pages/admin/ManageCourses';
-import ManageAssignments from './pages/admin/ManageAssignments';
+
+const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
+const CourseCatalog = lazy(() => import('./pages/student/CourseCatalog'));
+const LearningPage = lazy(() => import('./pages/student/LearningPage'));
+const Assignments = lazy(() => import('./pages/student/Assignments'));
+const Certificates = lazy(() => import('./pages/student/Certificates'));
+const TrophySession = lazy(() => import('./pages/student/TrophySession'));
+const StudentProfile = lazy(() => import('./pages/student/StudentProfile'));
+const Attendance = lazy(() => import('./pages/student/Attendance'));
+const Leaderboard = lazy(() => import('./pages/student/Leaderboard'));
+const KnowledgeHub = lazy(() => import('./pages/student/KnowledgeHub'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const StudentList = lazy(() => import('./pages/admin/StudentList'));
+const StudentDetailAdmin = lazy(() => import('./pages/admin/StudentDetailAdmin'));
+const Analytics = lazy(() => import('./pages/admin/Analytics'));
+const CallModule = lazy(() => import('./pages/admin/CallModule'));
+const TeacherProfile = lazy(() => import('./pages/admin/TeacherProfile'));
+const ManageCourses = lazy(() => import('./pages/admin/ManageCourses'));
+const ManageAssignments = lazy(() => import('./pages/admin/ManageAssignments'));
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -62,6 +63,14 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <BrowserRouter>
+            <Suspense fallback={
+              <div className="min-h-screen theme-bg flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm theme-text-muted">Loading...</p>
+                </div>
+              </div>
+            }>
             <Routes>
               <Route element={<AuthLayout />}>
                 <Route path="/auth" element={<AuthLanding />} />
@@ -111,6 +120,7 @@ function App() {
 
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
+            </Suspense>
           </BrowserRouter>
           <Toaster
             position="top-right"
