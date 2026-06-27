@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { FiFileText, FiSearch, FiDownload, FiX, FiAward, FiUser, FiCalendar, FiCheck, FiCopy, FiExternalLink } from 'react-icons/fi';
@@ -6,6 +6,7 @@ import { useStudentData } from '../../hooks/useStudentData';
 import { formatDate } from '../../utils/helpers';
 import { Card, Input, Button } from '../../components/ui';
 import { ListSkeleton } from '../../components/shared/LoadingSkeleton';
+import { downloadCertificate } from '../../utils/downloadCertificate';
 import toast from 'react-hot-toast';
 
 const Certificates = () => {
@@ -17,6 +18,16 @@ const Certificates = () => {
     navigator.clipboard.writeText(text);
     toast.success('Certificate ID copied');
   };
+
+  const handleDownload = useCallback(async (cert, e) => {
+    if (e) e.stopPropagation();
+    try {
+      await downloadCertificate(cert);
+      toast.success('Certificate downloaded');
+    } catch {
+      toast.error('Failed to download certificate');
+    }
+  }, []);
 
   if (loading) return <ListSkeleton count={3} />;
 
@@ -59,7 +70,7 @@ const Certificates = () => {
                   variant="ghost"
                   size="sm"
                   icon={FiDownload}
-                  onClick={e => { e.stopPropagation(); }}
+                  onClick={e => handleDownload(cert, e)}
                 />
               </div>
               <h3 className="text-sm font-semibold theme-text mb-3">{cert.courseName}</h3>
@@ -151,7 +162,7 @@ const Certificates = () => {
               </div>
 
               <div className="flex gap-3">
-                <Button variant="secondary" className="flex-1" icon={FiDownload}>
+                <Button variant="secondary" className="flex-1" icon={FiDownload} onClick={() => handleDownload(selected)}>
                   Download
                 </Button>
                 <a
