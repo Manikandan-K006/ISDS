@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const bcrypt = require('bcryptjs');
 const prisma = require('../prisma');
 const { authenticate, authorize } = require('../middleware/auth');
 
@@ -180,11 +179,22 @@ router.get('/audit-logs', async (req, res) => {
         skip,
         take: parseInt(limit),
         orderBy: { createdAt: 'desc' },
-        include: { user: { select: { name: true, email: true } } },
       }),
       prisma.auditLog.count(),
     ]);
-    res.json({ logs, total, page: parseInt(page), totalPages: Math.ceil(total / parseInt(limit)) });
+
+    const adminIds = [...new Set(logs.map((l) => l.adminId).filter(Boolean))];
+    const admins = adminIds.length
+      ? await prisma.user.findMany({ where: { id: { in: adminIds } }, select: { id: true, name: true, email: true } })
+      : [];
+    const adminMap = Object.fromEntries(admins.map((a) => [a.id, a]));
+
+    res.json({
+      logs: logs.map((l) => ({ ...l, admin: adminMap[l.adminId] || null })),
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

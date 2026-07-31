@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiBarChart2, FiDownload, FiTrendingUp, FiTrendingDown, FiUsers, FiBookOpen, FiAward, FiClock, FiArrowUp, FiArrowDown } from 'react-icons/fi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
+import { FiDownload, FiTrendingUp, FiUsers, FiBookOpen, FiAward, FiClock } from 'react-icons/fi';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { getDashboardAnalytics, getCourseAnalytics } from '../../api/analytics';
 import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 import { Card, Badge } from '../../components/ui';

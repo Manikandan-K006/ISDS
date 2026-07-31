@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import API from '../../api/client';
 import { PageSkeleton } from '../../components/ui/Skeleton';
-import { ClipboardList, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { ClipboardList, Clock, CheckCircle } from 'lucide-react';
 
 export default function Assignments() {
   const [data, setData] = useState(null);

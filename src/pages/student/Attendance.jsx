@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import API from '../../api/client';
 import { PageSkeleton } from '../../components/ui/Skeleton';
-import { CalendarCheck } from 'lucide-react';
 
 export default function Attendance() {
   const [data, setData] = useState(null);

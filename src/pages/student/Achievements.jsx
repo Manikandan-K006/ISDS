@@ -5,7 +5,7 @@ import { Award } from 'lucide-react';
 
 export default function Achievements() {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     API.get('/achievements')

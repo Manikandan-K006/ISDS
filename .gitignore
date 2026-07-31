@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 server/node_modules/
+server/generated/
 server/uploads/*
 !server/uploads/.gitkeep
 *.log

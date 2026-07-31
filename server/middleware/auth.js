@@ -1,7 +1,25 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../prisma');
+const config = require('../config/env');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'sidts_jwt_secret_key_2024';
+const verifyAndLoad = async (token) => {
+  const decoded = jwt.verify(token, config.jwtSecret);
+  const user = await prisma.user.findUnique({
+    where: { id: decoded.id },
+    select: { id: true, email: true, name: true, role: true, isActive: true, profilePhoto: true, tokenVersion: true },
+  });
+  if (!user || !user.isActive) {
+    const err = new Error('User not found or deactivated');
+    err.status = 401;
+    throw err;
+  }
+  if (decoded.v !== undefined && decoded.v !== user.tokenVersion) {
+    const err = new Error('Session has been revoked');
+    err.status = 401;
+    throw err;
+  }
+  return user;
+};
 
 const authenticate = async (req, res, next) => {
   try {
@@ -10,17 +28,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
     const token = header.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, email: true, name: true, role: true, isActive: true, profilePhoto: true },
-    });
-    
-    if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'User not found or deactivated' });
-    }
-    
+    const user = await verifyAndLoad(token);
     req.user = user;
     req.userId = user.id;
     req.userRole = user.role;
@@ -29,7 +37,7 @@ const authenticate = async (req, res, next) => {
     if (err.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
     }
-    return res.status(401).json({ error: 'Invalid token' });
+    return res.status(err.status || 401).json({ error: err.message || 'Invalid token' });
   }
 };
 
@@ -47,16 +55,10 @@ const optionalAuth = async (req, res, next) => {
     const header = req.headers.authorization;
     if (header && header.startsWith('Bearer ')) {
       const token = header.split(' ')[1];
-      const decoded = jwt.verify(token, JWT_SECRET);
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: { id: true, email: true, name: true, role: true },
-      });
-      if (user) {
-        req.user = user;
-        req.userId = user.id;
-        req.userRole = user.role;
-      }
+      const user = await verifyAndLoad(token);
+      req.user = user;
+      req.userId = user.id;
+      req.userRole = user.role;
     }
   } catch (err) {
     // Ignore auth errors for optional auth

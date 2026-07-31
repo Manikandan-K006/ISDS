@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/client';
 import toast from 'react-hot-toast';
-import { User, Mail, Phone, BookOpen } from 'lucide-react';
 
 export default function StudentProfile() {
   const { user, updateUser } = useAuth();

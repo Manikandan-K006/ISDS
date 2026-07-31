@@ -6,7 +6,7 @@ import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 import toast from 'react-hot-toast';
 
 const CallModule = () => {
-  const [logs, setLogs] = useState([]);
+  const [, setLogs] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

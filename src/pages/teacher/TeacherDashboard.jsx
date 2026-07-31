@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/client';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
-import { BookOpen, Users, ClipboardCheck, CalendarCheck, Plus, ArrowUpRight, Clock } from 'lucide-react';
+import { BookOpen, Users, ClipboardCheck, CalendarCheck, Plus, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function TeacherDashboard() {

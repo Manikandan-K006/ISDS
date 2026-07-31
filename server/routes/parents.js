@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const prisma = require('../prisma');
 const { authenticate, authorize } = require('../middleware/auth');
+const { parseStudentIds } = require('../utils/access');
 
 router.use(authenticate);
 router.use(authorize('parent'));
@@ -9,7 +10,7 @@ router.use(authorize('parent'));
 router.get('/dashboard', async (req, res) => {
   try {
     const parent = await prisma.user.findUnique({ where: { id: req.userId } });
-    const studentIds = parent.studentIds || [];
+    const studentIds = parseStudentIds(parent.studentIds);
 
     if (studentIds.length === 0) {
       return res.json({ students: [], stats: {} });
@@ -73,7 +74,7 @@ router.get('/dashboard', async (req, res) => {
 router.get('/students/:studentId/performance', async (req, res) => {
   try {
     const parent = await prisma.user.findUnique({ where: { id: req.userId } });
-    if (!(parent.studentIds || []).includes(req.params.studentId)) {
+    if (!parseStudentIds(parent.studentIds).includes(req.params.studentId)) {
       return res.status(403).json({ error: 'Not authorized to view this student' });
     }
 
@@ -108,7 +109,7 @@ router.get('/students/:studentId/performance', async (req, res) => {
 router.get('/students/:studentId/report', async (req, res) => {
   try {
     const parent = await prisma.user.findUnique({ where: { id: req.userId } });
-    if (!(parent.studentIds || []).includes(req.params.studentId)) {
+    if (!parseStudentIds(parent.studentIds).includes(req.params.studentId)) {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
@@ -157,7 +158,7 @@ router.get('/students/:studentId/report', async (req, res) => {
 router.get('/ai-summary/:studentId', async (req, res) => {
   try {
     const parent = await prisma.user.findUnique({ where: { id: req.userId } });
-    if (!(parent.studentIds || []).includes(req.params.studentId)) {
+    if (!parseStudentIds(parent.studentIds).includes(req.params.studentId)) {
       return res.status(403).json({ error: 'Not authorized' });
     }
 

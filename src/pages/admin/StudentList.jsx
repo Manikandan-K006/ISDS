@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiSearch, FiMail, FiDownload, FiChevronRight, FiFilter, FiX, FiUser, FiTrendingUp, FiTrendingDown, FiCheckCircle, FiAlertTriangle } from 'react-icons/fi';
+import { FiSearch, FiMail, FiDownload, FiChevronRight, FiFilter, FiX, FiUser, FiCheckCircle, FiAlertTriangle } from 'react-icons/fi';
 import API from '../../api/client';
 import { PageSkeleton } from '../../components/shared/LoadingSkeleton';
 

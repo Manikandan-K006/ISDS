@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 const ParticipationHeatmap = ({ data }) => {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const periods = Array.from({ length: 8 }, (_, i) => `P${i + 1}`);

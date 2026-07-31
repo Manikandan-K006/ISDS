@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/client';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
-import { BookOpen, CalendarCheck, BarChart3, ClipboardList, TrendingUp, Clock, ArrowRight, GraduationCap } from 'lucide-react';
+import { BookOpen, CalendarCheck, BarChart3, TrendingUp, Clock, ArrowRight, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function StudentDashboard() {

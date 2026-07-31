@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const prisma = require('../prisma');
 const { authenticate, authorize } = require('../middleware/auth');
+const { parseJson } = require('../utils/json');
+const { canManageCourse } = require('../utils/access');
 
 router.use(authenticate);
 
@@ -22,6 +24,9 @@ router.get('/course/:courseId', async (req, res) => {
 router.post('/', authorize('teacher', 'admin'), async (req, res) => {
   try {
     const { courseId, title, description, timeLimit, passingScore, maxAttempts, shuffleQuestions, showResult, questions } = req.body;
+    if (!(await canManageCourse(prisma, req.userId, req.userRole, courseId))) {
+      return res.status(403).json({ error: 'You can only create quizzes for your own courses' });
+    }
     const quiz = await prisma.quiz.create({
       data: {
         courseId, title, description, timeLimit: parseInt(timeLimit) || null,
@@ -53,7 +58,7 @@ router.get('/:id/take', authorize('student'), async (req, res) => {
       return res.status(400).json({ error: 'You have already attempted this quiz' });
     }
 
-    res.json({ quiz });
+    res.json({ quiz: { ...quiz, questions: quiz.questions.map((q) => ({ ...q, options: parseJson(q.options, []) })) } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -76,7 +81,8 @@ router.post('/:id/submit', authorize('student'), async (req, res) => {
     for (const question of quiz.questions) {
       totalPoints += question.points;
       const userAnswer = answers?.[question.id] || '';
-      const correctOption = question.options.find(o => o.isCorrect);
+      const options = parseJson(question.options, []);
+      const correctOption = options.find(o => o.isCorrect);
       const isCorrect = userAnswer === correctOption?.text;
       if (isCorrect) score += question.points;
 
@@ -110,6 +116,11 @@ router.post('/:id/submit', authorize('student'), async (req, res) => {
 
 router.put('/:id', authorize('teacher', 'admin'), async (req, res) => {
   try {
+    const existing = await prisma.quiz.findUnique({ where: { id: req.params.id }, select: { courseId: true } });
+    if (!existing) return res.status(404).json({ error: 'Quiz not found' });
+    if (!(await canManageCourse(prisma, req.userId, req.userRole, existing.courseId))) {
+      return res.status(403).json({ error: 'You can only update quizzes for your own courses' });
+    }
     const quiz = await prisma.quiz.update({ where: { id: req.params.id }, data: req.body });
     res.json({ quiz });
   } catch (err) {
@@ -119,6 +130,11 @@ router.put('/:id', authorize('teacher', 'admin'), async (req, res) => {
 
 router.delete('/:id', authorize('teacher', 'admin'), async (req, res) => {
   try {
+    const existing = await prisma.quiz.findUnique({ where: { id: req.params.id }, select: { courseId: true } });
+    if (!existing) return res.status(404).json({ error: 'Quiz not found' });
+    if (!(await canManageCourse(prisma, req.userId, req.userRole, existing.courseId))) {
+      return res.status(403).json({ error: 'You can only delete quizzes for your own courses' });
+    }
     await prisma.quiz.delete({ where: { id: req.params.id } });
     res.json({ message: 'Quiz deleted' });
   } catch (err) {

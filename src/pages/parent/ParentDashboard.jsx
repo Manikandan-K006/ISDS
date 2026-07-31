@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/client';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
-import { GraduationCap, CalendarCheck, BarChart3, ClipboardList, TrendingUp, AlertCircle, ChevronRight } from 'lucide-react';
+import { GraduationCap, CalendarCheck, BarChart3, ClipboardList } from 'lucide-react';
 
 export default function ParentDashboard() {
   const { user } = useAuth();

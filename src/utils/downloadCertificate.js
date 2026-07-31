@@ -7,8 +7,6 @@ export const downloadCertificate = async (cert) => {
 
   const margin = 12;
   const borderPadding = 14;
-  const contentWidth = pageWidth - margin * 2 - borderPadding * 2;
-  const contentHeight = pageHeight - margin * 2 - borderPadding * 2;
 
   // Outer border (double line)
   doc.setDrawColor(30, 64, 175);
@@ -82,8 +80,6 @@ export const downloadCertificate = async (cert) => {
   // Details table
   const detailsY = 160;
   const col1X = pageWidth / 2 - 90;
-  const col2X = pageWidth / 2;
-  const col3X = pageWidth / 2 + 50;
   doc.setDrawColor(226, 232, 240);
   doc.setLineWidth(0.3);
 

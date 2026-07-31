@@ -4,8 +4,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, BookOpen, CalendarCheck, BarChart3, ClipboardList,
-  MessageSquare, Bell, User, ChevronLeft, Menu, LogOut, Sun, Moon,
+  LayoutDashboard, CalendarCheck, BarChart3, ClipboardList,
+  MessageSquare, Bell, ChevronLeft, Menu, LogOut, Sun, Moon,
   FileText, GraduationCap,
 } from 'lucide-react';
 

@@ -4,8 +4,8 @@ import API from '../../api/client';
 import { BarChart3 } from 'lucide-react';
 
 export default function StudentAnalytics() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [, setData] = useState(null);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     API.get('/students/analytics')

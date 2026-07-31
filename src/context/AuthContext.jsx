@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     }
   });
   const [token, setToken] = useState(() => localStorage.getItem('sidts_token'));
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const login = useCallback((userData, authToken) => {
     setUser(userData);

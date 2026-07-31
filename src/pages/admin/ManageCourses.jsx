@@ -9,7 +9,7 @@ import Modal from '../../components/shared/Modal';
 import { DOMAINS, DIFFICULTIES, RESOURCE_TYPES, VISIBILITY_OPTIONS } from '../../utils/constants';
 import {
   getCourses, createCourse, updateCourse, deleteCourse,
-  uploadFile, addResource, updateResource, deleteResource, updateResources,
+  uploadFile,
 } from '../../api/courses';
 
 const EMPTY_FORM = {
@@ -54,7 +54,6 @@ const ManageCourses = () => {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [resourceErrors, setResourceErrors] = useState({});
-  const [expandedResources, setExpandedResources] = useState([]);
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);

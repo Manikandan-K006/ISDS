@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import API from '../../api/client';
 import { PageSkeleton } from '../../components/ui/Skeleton';
-import { BookOpen, Users, Clock, Search, GraduationCap } from 'lucide-react';
+import { BookOpen, Users, Search, GraduationCap } from 'lucide-react';
 
 export default function CourseCatalog() {
   const [courses, setCourses] = useState([]);

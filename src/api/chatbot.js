@@ -1,6 +1,3 @@
-import axios from 'axios';
-import { API_BASE } from '../utils/constants';
+import API from './client';
 
-const api = axios.create({ baseURL: `${API_BASE}/api/chatbot` });
-
-export const sendMessage = (data) => api.post('/', data).then(r => r.data);
+export const sendMessage = (data) => API.post('/chatbot', data).then(r => r.data);

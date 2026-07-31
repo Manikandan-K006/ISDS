@@ -5,7 +5,7 @@ import { Calendar, BookOpen } from 'lucide-react';
 
 export default function StudyPlan() {
   const [plan, setPlan] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     API.get('/ai/study-plan')

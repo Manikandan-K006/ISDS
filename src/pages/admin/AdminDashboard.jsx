@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/client';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
-import { Users, BookOpen, GraduationCap, Building2, Activity, Shield } from 'lucide-react';
+import { Users, BookOpen, GraduationCap, Building2, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +42,7 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {statCards.map((stat, i) => (
+        {statCards.map((stat, _i) => (
           <Link key={stat.label} to={stat.link}
             className="theme-card rounded-2xl p-5 card-shadow-premium"
           >

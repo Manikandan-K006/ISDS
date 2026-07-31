@@ -22,7 +22,7 @@ const Notifications = () => {
           getUnreadCount(),
         ]);
         setNotifications(notifRes.data.notifications || []);
-        setUnreadCount(countRes.data?.count || 0);
+        setUnreadCount(countRes.data?.count || notifRes.data?.unreadCount || 0);
       } catch { /* silent */ }
       setLoading(false);
     })();
@@ -31,7 +31,7 @@ const Notifications = () => {
   const handleMarkRead = async (id) => {
     try {
       await markAsRead(id);
-      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch { /* silent */ }
   };
@@ -47,7 +47,7 @@ const Notifications = () => {
   const handleDelete = async (id) => {
     try {
       await deleteNotification(id);
-      setNotifications(prev => prev.filter(n => n._id !== id));
+      setNotifications(prev => prev.filter(n => n.id !== id));
     } catch { /* silent */ }
   };
 
@@ -114,7 +114,7 @@ const Notifications = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35 }} className="space-y-2">
           {notifications.map(n => (
             <Card
-              key={n._id}
+              key={n.id}
               className={`p-4 transition-colors ${!n.isRead ? 'border-indigo-500/20' : ''}`}
             >
               <div className="flex items-start justify-between gap-3">

@@ -7,7 +7,6 @@ router.use(authenticate);
 // GET /api/analytics/enrollment-trend
 router.get('/enrollment-trend', authorize('admin', 'teacher'), async (req, res) => {
   try {
-    const { period = 'monthly' } = req.query;
     const enrollments = await prisma.enrollment.findMany({
       orderBy: { enrolledAt: 'asc' },
       select: { enrolledAt: true, course: { select: { title: true } } },

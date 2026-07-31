@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import {
-  FiAward, FiSearch, FiX, FiCheck, FiAlertTriangle, FiCopy, FiRefreshCw,
-  FiDownload, FiTrash2, FiEye, FiFilter, FiCalendar, FiUser, FiBook,
-  FiStar, FiShield, FiClock, FiBarChart2, FiMoreVertical, FiFileText,
+  FiAward, FiSearch, FiX, FiCheck, FiAlertTriangle, FiRefreshCw,
+  FiDownload, FiTrash2, FiEye, FiBarChart2, FiFileText,
 } from 'react-icons/fi';
 import {
   getCertificates, issueCertificate, revokeCertificate, restoreCertificate,

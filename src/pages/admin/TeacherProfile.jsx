@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiEdit2, FiSave, FiUser, FiBookOpen, FiAward, FiBarChart2, FiStar } from 'react-icons/fi';
+import { FiEdit2, FiSave, FiBookOpen, FiBarChart2, FiStar } from 'react-icons/fi';
 import { getCourses } from '../../api/courses';
 import { useAuth } from '../../hooks/useAuth';
 

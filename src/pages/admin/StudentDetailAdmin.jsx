@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiEdit2, FiSave, FiUser, FiBookOpen, FiCalendar, FiAward, FiStar, FiFileText, FiMessageSquare, FiActivity, FiChevronLeft, FiBarChart2, FiTarget } from 'react-icons/fi';
+import { FiEdit2, FiSave, FiBookOpen, FiCalendar, FiAward, FiStar, FiFileText, FiMessageSquare, FiChevronLeft, FiBarChart2, FiTarget } from 'react-icons/fi';
 import PerformanceRadar from '../../components/charts/PerformanceRadar';
 import GradeTrendLine from '../../components/charts/GradeTrendLine';
 import AttendanceCalendar from '../../components/charts/AttendanceCalendar';
-import Modal from '../../components/shared/Modal';
 import API from '../../api/client';
 
 const tabs = [

@@ -1,10 +1,10 @@
-const { jsPDF } = require('jspdf');
-require('jspdf-autotable');
-const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, ImageRun, Table, TableRow, TableCell, WidthType, Header, Footer } = require('docx');
+﻿const { jsPDF } = require('jspdf');
+const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle } = require('docx');
 const path = require('path');
 const fs = require('fs');
+const config = require('../config/env');
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://isds-kappa.vercel.app';
+const FRONTEND_URL = config.frontendUrl;
 
 const generateCertificateId = (domain = 'GEN') => {
   const year = new Date().getFullYear();
@@ -73,7 +73,7 @@ const generatePDF = async (certData) => {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(muted[0], muted[1], muted[2]);
-  doc.text('ISDS — Intelligent Student Development System', pw / 2, 30, { align: 'center' });
+  doc.text('ISDS â€” Intelligent Student Development System', pw / 2, 30, { align: 'center' });
 
   // CERTIFICATE OF COMPLETION title
   doc.setFont('helvetica', 'bold');
@@ -96,7 +96,7 @@ const generatePDF = async (certData) => {
   doc.setFont('times', 'italic');
   doc.setFontSize(32);
   doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.text(cert.studentName || 'Student Name', pw / 2, 92, { align: 'center' });
+  doc.text(certData.studentName || 'Student Name', pw / 2, 92, { align: 'center' });
 
   // Gold underline under name
   doc.setDrawColor(gold[0], gold[1], gold[2]);
@@ -113,14 +113,14 @@ const generatePDF = async (certData) => {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
   doc.setTextColor(navy[0], navy[1], navy[2]);
-  doc.text(cert.courseName || 'Course Name', pw / 2, 130, { align: 'center' });
+  doc.text(certData.courseName || 'Course Name', pw / 2, 130, { align: 'center' });
 
   // Course duration line
-  if (cert.duration) {
+  if (certData.duration) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(muted[0], muted[1], muted[2]);
-    doc.text(`Duration: ${cert.duration}`, pw / 2, 142, { align: 'center' });
+    doc.text(`Duration: ${certData.duration}`, pw / 2, 142, { align: 'center' });
   }
 
   // Details row
@@ -134,9 +134,9 @@ const generatePDF = async (certData) => {
   doc.line(leftX, detailsY - 5, leftX + 220, detailsY - 5);
 
   const leftCols = [
-    { label: 'GRADE', value: cert.grade || cert.percentage ? getGradeFromPercentage(cert.percentage) : 'A' },
-    { label: 'COMPLETION DATE', value: cert.completionDate ? new Date(cert.completionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A' },
-    { label: 'CERTIFICATE ID', value: cert.certificateId || 'N/A' },
+    { label: 'GRADE', value: certData.grade || certData.percentage ? getGradeFromPercentage(certData.percentage) : 'A' },
+    { label: 'COMPLETION DATE', value: certData.completionDate ? new Date(certData.completionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A' },
+    { label: 'CERTIFICATE ID', value: certData.certificateId || 'N/A' },
     { label: 'ISSUE DATE', value: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) },
   ];
 
@@ -161,7 +161,7 @@ const generatePDF = async (certData) => {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(dark[0], dark[1], dark[2]);
-  const score = cert.percentage != null ? `${cert.percentage}%` : (cert.score || 'N/A');
+  const score = certData.percentage != null ? `${certData.percentage}%` : (certData.score || 'N/A');
   doc.text(String(score), rightX, detailsY + 4);
 
   // Signatures
@@ -197,7 +197,7 @@ const generatePDF = async (certData) => {
   const qrY = ph - 52;
   try {
     const QRCode = require('qrcode');
-    const qrDataUrl = await QRCode.toDataURL(`${FRONTEND_URL}/verify/${cert.certificateId}`, {
+    const qrDataUrl = await QRCode.toDataURL(`${FRONTEND_URL}/verify/${certData.certificateId}`, {
       width: 200, margin: 1, color: { dark: '#141e30', light: '#ffffff' }
     });
     doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
@@ -212,13 +212,13 @@ const generatePDF = async (certData) => {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(5.5);
   doc.setTextColor(muted[0], muted[1], muted[2]);
-  doc.text(`${FRONTEND_URL}/verify/${cert.certificateId}`, pw - 48, qrY + qrSize + 10);
+  doc.text(`${FRONTEND_URL}/verify/${certData.certificateId}`, pw - 48, qrY + qrSize + 10);
 
   // Footer - bottom bar text
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
   doc.setTextColor(muted[0], muted[1], muted[2]);
-  doc.text('ISDS — Intelligent Student Development System  |  Certificate Verification: isds-kappa.vercel.app/verify', pw / 2, ph - 7, { align: 'center' });
+  doc.text('ISDS â€” Intelligent Student Development System  |  Certificate Verification: isds-kappa.vercel.app/verify', pw / 2, ph - 7, { align: 'center' });
 
   // Watermark
   doc.setFont('helvetica', 'bold');
@@ -230,16 +230,16 @@ const generatePDF = async (certData) => {
 };
 
 const generateDOCX = async (certData) => {
-  const verificationUrl = `${FRONTEND_URL}/verify/${cert.certificateId}`;
-  const grade = cert.grade || (cert.percentage ? getGradeFromPercentage(cert.percentage) : 'A');
-  const completionDate = cert.completionDate
-    ? new Date(cert.completionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  const verificationUrl = `${FRONTEND_URL}/verify/${certData.certificateId}`;
+  const grade = certData.grade || (certData.percentage ? getGradeFromPercentage(certData.percentage) : 'A');
+  const completionDate = certData.completionDate
+    ? new Date(certData.completionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : 'N/A';
   const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   const doc = new Document({
-    title: `Certificate - ${cert.certificateId}`,
-    description: `Certificate of Completion for ${cert.studentName}`,
+    title: `Certificate - ${certData.certificateId}`,
+    description: `Certificate of Completion for ${certData.studentName}`,
     styles: {
       default: {
         document: {
@@ -293,7 +293,7 @@ const generateDOCX = async (certData) => {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: cert.studentName || 'Student Name', font: 'Times New Roman', size: 52, bold: true, italics: true, color: '0F172A' }),
+            new TextRun({ text: certData.studentName || 'Student Name', font: 'Times New Roman', size: 52, bold: true, italics: true, color: '0F172A' }),
           ],
         }),
         new Paragraph({ spacing: { before: 120 } }),
@@ -307,14 +307,14 @@ const generateDOCX = async (certData) => {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: cert.courseName || 'Course Name', font: 'Helvetica', size: 36, bold: true, color: '1E40AF' }),
+            new TextRun({ text: certData.courseName || 'Course Name', font: 'Helvetica', size: 36, bold: true, color: '1E40AF' }),
           ],
         }),
         new Paragraph({
           alignment: AlignmentType.CENTER,
           spacing: { before: 120 },
           children: [
-            new TextRun({ text: cert.duration ? `Duration: ${cert.duration}` : '', font: 'Helvetica', size: 20, color: '64748B' }),
+            new TextRun({ text: certData.duration ? `Duration: ${certData.duration}` : '', font: 'Helvetica', size: 20, color: '64748B' }),
           ],
         }),
         new Paragraph({ spacing: { before: 480 } }),
@@ -329,7 +329,7 @@ const generateDOCX = async (certData) => {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: `Grade: ${grade}    |    Completion: ${completionDate}    |    ID: ${cert.certificateId}`, font: 'Helvetica', size: 20, color: '334155' }),
+            new TextRun({ text: `Grade: ${grade}    |    Completion: ${completionDate}    |    ID: ${certData.certificateId}`, font: 'Helvetica', size: 20, color: '334155' }),
           ],
         }),
         new Paragraph({
@@ -380,7 +380,7 @@ const generateDOCX = async (certData) => {
             bottom: { style: BorderStyle.SINGLE, size: 6, color: 'D4AF37', space: 1 },
           },
           children: [
-            new TextRun({ text: 'ISDS — Intelligent Student Development System', font: 'Helvetica', size: 18, color: '94A3B8' }),
+            new TextRun({ text: 'ISDS â€” Intelligent Student Development System', font: 'Helvetica', size: 18, color: '94A3B8' }),
           ],
         }),
       ],

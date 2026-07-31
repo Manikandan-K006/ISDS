@@ -5,7 +5,7 @@ import { Zap } from 'lucide-react';
 
 export default function Skills() {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     API.get('/students/skills')

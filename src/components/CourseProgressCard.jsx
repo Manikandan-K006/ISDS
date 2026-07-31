@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiBookOpen, FiChevronRight } from 'react-icons/fi';
-import { truncate } from '../utils/helpers';
 
 const CourseProgressCard = ({ course, onContinue }) => {
   const progress = course.progress || 0;

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import API from '../../api/client';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
-import { BookOpen, ChevronLeft, CheckCircle, Play, FileText } from 'lucide-react';
+import { BookOpen, ChevronLeft, CheckCircle, Play } from 'lucide-react';
 
 export default function LearningPage() {
   const { courseId } = useParams();

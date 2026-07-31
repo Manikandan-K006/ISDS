@@ -1,23 +1,26 @@
 const nodemailer = require('nodemailer');
+const config = require('../config/env');
+
+const { smtp } = config;
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: process.env.SMTP_SECURE === 'true',
+  host: smtp.host || 'smtp.gmail.com',
+  port: smtp.port,
+  secure: smtp.secure,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: smtp.user,
+    pass: smtp.pass,
   },
 });
 
 const sendEmail = async ({ to, subject, html }) => {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!smtp.user || !smtp.pass) {
     console.log('Email not configured. Skipping email send.');
     return { message: 'Email service not configured' };
   }
   try {
     const info = await transporter.sendMail({
-      from: `"SIDTS" <${process.env.SMTP_USER}>`,
+      from: `"ISDS" <${smtp.from || smtp.user}>`,
       to,
       subject,
       html,

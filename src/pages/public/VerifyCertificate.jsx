@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
-import { FiCheckCircle, FiXCircle, FiSearch, FiExternalLink, FiAward, FiUser, FiCalendar, FiBook, FiMail, FiStar, FiShield, FiClock, FiHash } from 'react-icons/fi';
+import { FiCheckCircle, FiXCircle, FiSearch, FiExternalLink, FiAward, FiUser, FiCalendar, FiBook, FiStar, FiShield, FiClock, FiHash } from 'react-icons/fi';
 import { verifyCertificate } from '../../api/certificates';
 import { formatDate } from '../../utils/helpers';
 
