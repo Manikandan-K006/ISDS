@@ -1,8 +1,9 @@
+import { useContext } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { AuthContext } from '../../context/AuthContext';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { user, isAuthenticated } = useContext(AuthContext);
   const location = useLocation();
 
   if (!isAuthenticated) {
@@ -10,8 +11,14 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    const redirect = user?.role === 'admin' ? '/admin' : user?.role === 'teacher' ? '/admin' : '/dashboard';
-    return <Navigate to={redirect} replace />;
+    // Redirect to appropriate dashboard based on role
+    const roleRoutes = {
+      student: '/dashboard',
+      teacher: '/admin/dashboard',
+      parent: '/parent/dashboard',
+      admin: '/admin/dashboard',
+    };
+    return <Navigate to={roleRoutes[user?.role] || '/login'} replace />;
   }
 
   return children;

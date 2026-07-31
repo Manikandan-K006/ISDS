@@ -7,13 +7,16 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import AuthLayout from './components/layout/AuthLayout';
 import StudentLayout from './components/layout/StudentLayout';
 import AdminLayout from './components/layout/AdminLayout';
+import ParentLayout from './components/layout/ParentLayout';
 
+// Auth pages
 import AuthLanding from './pages/auth/AuthLanding';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import VerifyCertificate from './pages/public/VerifyCertificate';
 
+// Student pages
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
 const CourseCatalog = lazy(() => import('./pages/student/CourseCatalog'));
 const LearningPage = lazy(() => import('./pages/student/LearningPage'));
@@ -24,16 +27,51 @@ const StudentProfile = lazy(() => import('./pages/student/StudentProfile'));
 const Attendance = lazy(() => import('./pages/student/Attendance'));
 const Leaderboard = lazy(() => import('./pages/student/Leaderboard'));
 const KnowledgeHub = lazy(() => import('./pages/student/KnowledgeHub'));
+const Schedule = lazy(() => import('./pages/student/Schedule'));
+const QuizList = lazy(() => import('./pages/student/QuizList'));
+const QuizTake = lazy(() => import('./pages/student/QuizTake'));
+const Achievements = lazy(() => import('./pages/student/Achievements'));
+const Skills = lazy(() => import('./pages/student/Skills'));
+const StudyPlan = lazy(() => import('./pages/student/StudyPlan'));
+const StudentAnalytics = lazy(() => import('./pages/student/StudentAnalytics'));
+
+// Teacher pages
+const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard'));
+const ManageCourses = lazy(() => import('./pages/teacher/ManageCourses'));
+const CourseBuilder = lazy(() => import('./pages/teacher/CourseBuilder'));
+const ManageAssignments = lazy(() => import('./pages/teacher/ManageAssignments'));
+const ManageQuizzes = lazy(() => import('./pages/teacher/ManageQuizzes'));
+const GradeBook = lazy(() => import('./pages/teacher/GradeBook'));
+const StudentAnalyticsTeacher = lazy(() => import('./pages/teacher/StudentAnalytics'));
+const TeacherResources = lazy(() => import('./pages/teacher/TeacherResources'));
+const TeacherProfile = lazy(() => import('./pages/teacher/TeacherProfile'));
+const TeacherAttendance = lazy(() => import('./pages/teacher/TeacherAttendance'));
+const TeacherMessages = lazy(() => import('./pages/teacher/TeacherMessages'));
+
+// Parent pages
+const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard'));
+const ParentAttendance = lazy(() => import('./pages/parent/ParentAttendance'));
+const ParentPerformance = lazy(() => import('./pages/parent/ParentPerformance'));
+const ParentAssignments = lazy(() => import('./pages/parent/ParentAssignments'));
+const ParentReports = lazy(() => import('./pages/parent/ParentReports'));
+const ParentMessages = lazy(() => import('./pages/parent/ParentMessages'));
+const ParentNotifications = lazy(() => import('./pages/parent/ParentNotifications'));
+
+// Admin pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const StudentList = lazy(() => import('./pages/admin/StudentList'));
 const StudentDetailAdmin = lazy(() => import('./pages/admin/StudentDetailAdmin'));
+const TeacherList = lazy(() => import('./pages/admin/TeacherList'));
+const ParentList = lazy(() => import('./pages/admin/ParentList'));
 const Analytics = lazy(() => import('./pages/admin/Analytics'));
-const CallModule = lazy(() => import('./pages/admin/CallModule'));
-const TeacherProfile = lazy(() => import('./pages/admin/TeacherProfile'));
-const ManageCourses = lazy(() => import('./pages/admin/ManageCourses'));
-const ManageAssignments = lazy(() => import('./pages/admin/ManageAssignments'));
+const AdminCourses = lazy(() => import('./pages/admin/AdminCourses'));
 const AdminCertificates = lazy(() => import('./pages/admin/AdminCertificates'));
-const Schedule = lazy(() => import('./pages/student/Schedule'));
+const DepartmentManagement = lazy(() => import('./pages/admin/DepartmentManagement'));
+const AuditLogs = lazy(() => import('./pages/admin/AuditLogs'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+const DatabaseHealth = lazy(() => import('./pages/admin/DatabaseHealth'));
+
+// Shared pages
 const Messages = lazy(() => import('./pages/shared/Messages'));
 const Notifications = lazy(() => import('./pages/shared/Notifications'));
 
@@ -62,23 +100,28 @@ class ErrorBoundary extends Component {
   }
 }
 
+const LoadingSpinner = () => (
+  <div className="min-h-screen theme-bg flex items-center justify-center">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <p className="text-sm theme-text-muted">Loading...</p>
+    </div>
+  </div>
+);
+
 function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
         <ThemeProvider>
           <BrowserRouter>
-            <Suspense fallback={
-              <div className="min-h-screen theme-bg flex items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm theme-text-muted">Loading...</p>
-                </div>
-              </div>
-            }>
+            <Suspense fallback={<LoadingSpinner />}>
             <Routes>
+              {/* Public routes */}
               <Route path="/verify" element={<VerifyCertificate />} />
               <Route path="/verify/:certificateId" element={<VerifyCertificate />} />
+
+              {/* Auth routes */}
               <Route element={<AuthLayout />}>
                 <Route path="/auth" element={<AuthLanding />} />
                 <Route path="/login" element={<Login />} />
@@ -86,6 +129,7 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
               </Route>
 
+              {/* Student routes */}
               <Route
                 path="/"
                 element={
@@ -99,17 +143,68 @@ function App() {
                 <Route path="courses" element={<CourseCatalog />} />
                 <Route path="learning/:courseId" element={<LearningPage />} />
                 <Route path="assignments" element={<Assignments />} />
-                <Route path="certificates" element={<Certificates />} />
-                <Route path="trophies" element={<TrophySession />} />
-                <Route path="leaderboard" element={<Leaderboard />} />
-                <Route path="knowledge-hub" element={<KnowledgeHub />} />
-                <Route path="profile" element={<StudentProfile />} />
+                <Route path="quizzes" element={<QuizList />} />
+                <Route path="quizzes/:quizId" element={<QuizTake />} />
                 <Route path="attendance" element={<Attendance />} />
+                <Route path="certificates" element={<Certificates />} />
+                <Route path="leaderboard" element={<Leaderboard />} />
+                <Route path="achievements" element={<Achievements />} />
+                <Route path="skills" element={<Skills />} />
+                <Route path="knowledge-hub" element={<KnowledgeHub />} />
+                <Route path="trophies" element={<TrophySession />} />
                 <Route path="schedule" element={<Schedule />} />
+                <Route path="study-plan" element={<StudyPlan />} />
+                <Route path="my-analytics" element={<StudentAnalytics />} />
+                <Route path="profile" element={<StudentProfile />} />
                 <Route path="messages" element={<Messages />} />
                 <Route path="notifications" element={<Notifications />} />
               </Route>
 
+              {/* Teacher routes */}
+              <Route
+                path="/teacher"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher']}>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/teacher/dashboard" replace />} />
+                <Route path="dashboard" element={<TeacherDashboard />} />
+                <Route path="courses" element={<ManageCourses />} />
+                <Route path="courses/:courseId" element={<CourseBuilder />} />
+                <Route path="assignments" element={<ManageAssignments />} />
+                <Route path="quizzes" element={<ManageQuizzes />} />
+                <Route path="gradebook" element={<GradeBook />} />
+                <Route path="gradebook/:courseId" element={<GradeBook />} />
+                <Route path="attendance" element={<TeacherAttendance />} />
+                <Route path="students" element={<StudentAnalyticsTeacher />} />
+                <Route path="resources" element={<TeacherResources />} />
+                <Route path="profile" element={<TeacherProfile />} />
+                <Route path="messages" element={<TeacherMessages />} />
+                <Route path="notifications" element={<Notifications />} />
+              </Route>
+
+              {/* Parent routes */}
+              <Route
+                path="/parent"
+                element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <ParentLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/parent/dashboard" replace />} />
+                <Route path="dashboard" element={<ParentDashboard />} />
+                <Route path="attendance" element={<ParentAttendance />} />
+                <Route path="performance" element={<ParentPerformance />} />
+                <Route path="assignments" element={<ParentAssignments />} />
+                <Route path="reports" element={<ParentReports />} />
+                <Route path="messages" element={<ParentMessages />} />
+                <Route path="notifications" element={<ParentNotifications />} />
+              </Route>
+
+              {/* Admin routes */}
               <Route
                 path="/admin"
                 element={
@@ -119,14 +214,19 @@ function App() {
                 }
               >
                 <Route index element={<AdminDashboard />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="students" element={<StudentList />} />
                 <Route path="students/:id" element={<StudentDetailAdmin />} />
-                <Route path="analytics" element={<Analytics />} />
-                <Route path="calls" element={<CallModule />} />
-                <Route path="profile" element={<TeacherProfile />} />
-                <Route path="courses" element={<ManageCourses />} />
-                <Route path="assignments" element={<ManageAssignments />} />
+                <Route path="teachers" element={<TeacherList />} />
+                <Route path="parents" element={<ParentList />} />
+                <Route path="courses" element={<AdminCourses />} />
                 <Route path="certificates" element={<AdminCertificates />} />
+                <Route path="departments" element={<DepartmentManagement />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="audit-logs" element={<AuditLogs />} />
+                <Route path="settings" element={<AdminSettings />} />
+                <Route path="health" element={<DatabaseHealth />} />
+                <Route path="profile" element={<TeacherProfile />} />
                 <Route path="messages" element={<Messages />} />
                 <Route path="notifications" element={<Notifications />} />
               </Route>

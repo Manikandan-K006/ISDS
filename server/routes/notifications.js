@@ -1,78 +1,54 @@
-const express = require('express');
-const router = express.Router();
-const { collection, addDoc, getDoc, queryDocs, updateDoc, deleteDoc, countDocs, formatDoc, formatDocs } = require('../config/firestore');
+const router = require('express').Router();
+const prisma = require('../prisma');
+const { authenticate } = require('../middleware/auth');
 
-const auth = (req, res, next) => {
-  try {
-    const header = req.headers.authorization;
-    if (!header || !header.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'No token provided' });
-    }
-    const token = header.split(' ')[1];
-    const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'isds_jwt_secret_key_2024');
-    req.userId = decoded.id;
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-};
+router.use(authenticate);
 
-router.get('/', auth, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const { limit = 20, unread } = req.query;
-    const conditions = [['userId', '==', req.userId]];
-    if (unread === 'true') conditions.push(['isRead', '==', false]);
-    const notifications = await queryDocs('notifications', conditions, 'createdAt', 'desc');
-    const unreadCount = await countDocs('notifications', [['userId', '==', req.userId], ['isRead', '==', false]]);
-    res.json({ notifications: notifications.slice(0, parseInt(limit)), unreadCount });
+    const { page = 1, limit = 20, unread } = req.query;
+    const where = { userId: req.userId };
+    if (unread === 'true') where.isRead = false;
+
+    const [notifications, total, unreadCount] = await Promise.all([
+      prisma.notification.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: parseInt(limit),
+        skip: (parseInt(page) - 1) * parseInt(limit),
+      }),
+      prisma.notification.count({ where }),
+      prisma.notification.count({ where: { userId: req.userId, isRead: false } }),
+    ]);
+
+    res.json({ notifications, total, unreadCount, page: parseInt(page) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.put('/:id/read', auth, async (req, res) => {
+router.put('/:id/read', async (req, res) => {
   try {
-    const notification = await getDoc('notifications', req.params.id);
-    if (!notification || notification.userId !== req.userId) {
-      return res.status(404).json({ error: 'Notification not found' });
-    }
-    const updated = await updateDoc('notifications', req.params.id, { isRead: true });
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.put('/read-all', auth, async (req, res) => {
-  try {
-    const notifications = await queryDocs('notifications', [['userId', '==', req.userId], ['isRead', '==', false]]);
-    for (const n of notifications) {
-      await updateDoc('notifications', n._id, { isRead: true });
-    }
+    await prisma.notification.update({ where: { id: req.params.id }, data: { isRead: true } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.delete('/:id', auth, async (req, res) => {
+router.put('/read-all', async (req, res) => {
   try {
-    const notification = await getDoc('notifications', req.params.id);
-    if (!notification || notification.userId !== req.userId) {
-      return res.status(404).json({ error: 'Notification not found' });
-    }
-    await deleteDoc('notifications', req.params.id);
+    await prisma.notification.updateMany({ where: { userId: req.userId, isRead: false }, data: { isRead: true } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.get('/unread-count', auth, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    const count = await countDocs('notifications', [['userId', '==', req.userId], ['isRead', '==', false]]);
-    res.json({ count });
+    await prisma.notification.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

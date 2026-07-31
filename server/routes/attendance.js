@@ -1,74 +1,72 @@
 const router = require('express').Router();
-const { queryDocs, addDoc, getDoc, updateDoc } = require('../config/firestore');
-const { notify } = require('../services/notify');
+const prisma = require('../prisma');
+const { authenticate, authorize } = require('../middleware/auth');
 
-router.get('/', async (req, res) => {
+router.use(authenticate);
+
+// POST /api/attendance/mark
+router.post('/mark', authorize('teacher', 'admin'), async (req, res) => {
   try {
-    const { studentId, month, year } = req.query;
-    let conditions = [];
-    if (studentId) conditions.push(['studentId', '==', studentId]);
-    let records = await queryDocs('attendance', conditions, 'date', 'asc');
-
-    if (month && year) {
-      const m = parseInt(month);
-      const y = parseInt(year);
-      records = records.filter(r => {
-        const d = new Date(r.date);
-        return d.getMonth() === m - 1 && d.getFullYear() === y;
+    const { records } = req.body; // [{studentId, status, date, courseId, remark}]
+    const results = [];
+    for (const record of records) {
+      const attendance = await prisma.attendance.upsert({
+        where: { studentId_date: { studentId: record.studentId, date: new Date(record.date) } },
+        update: { status: record.status, markedById: req.userId, courseId: record.courseId, remark: record.remark },
+        create: { studentId: record.studentId, date: new Date(record.date), status: record.status, markedById: req.userId, courseId: record.courseId, remark: record.remark },
       });
+      results.push(attendance);
     }
-
-    res.json(records);
+    res.json({ attendance: results, count: results.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.post('/', async (req, res) => {
+// GET /api/attendance/student/:studentId
+router.get('/student/:studentId', authorize('teacher', 'admin', 'parent'), async (req, res) => {
   try {
-    const { studentId, date, status, reason } = req.body;
-    const existing = await queryDocs('attendance', [
-      ['studentId', '==', studentId],
-      ['date', '==', date],
-    ]);
-    let record;
-    if (existing.length > 0) {
-      record = await updateDoc('attendance', existing[0]._id, { status, reason });
-    } else {
-      record = await addDoc('attendance', { studentId, date, status, reason });
-    }
-    if (status === 'absent') {
-      const student = await getDoc('users', studentId);
-      await notify({
-        userId: studentId,
-        title: 'Attendance Alert',
-        message: `You were marked absent on ${date}`,
-        type: 'attendance_alert',
-        relatedId: record._id,
-        link: '/attendance',
-        templateData: { studentName: student?.name || 'Student', courseName: '' },
-      });
-    }
-    res.status(201).json(record);
+    const { startDate, endDate } = req.query;
+    const where = { studentId: req.params.studentId };
+    if (startDate) where.date = { gte: new Date(startDate) };
+    if (endDate) where.date = { ...where.date, lte: new Date(endDate) };
+    const records = await prisma.attendance.findMany({ where, orderBy: { date: 'desc' } });
+    res.json({ records });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.post('/leave', async (req, res) => {
+// GET /api/attendance/course/:courseId
+router.get('/course/:courseId', authorize('teacher', 'admin'), async (req, res) => {
   try {
-    const { studentId, date, reason } = req.body;
-    const existing = await queryDocs('attendance', [
-      ['studentId', '==', studentId],
-      ['date', '==', date],
-    ]);
-    let record;
-    if (existing.length > 0) {
-      record = await updateDoc('attendance', existing[0]._id, { status: 'leave', reason });
-    } else {
-      record = await addDoc('attendance', { studentId, date, status: 'leave', reason });
-    }
-    res.status(201).json(record);
+    const { date } = req.query;
+    const where = { courseId: req.params.courseId };
+    if (date) where.date = new Date(date);
+    const records = await prisma.attendance.findMany({
+      where,
+      include: { student: { select: { id: true, name: true, profilePhoto: true, rollNumber: true } } },
+      orderBy: { date: 'desc' },
+    });
+    res.json({ records });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/attendance/stats/:studentId
+router.get('/stats/:studentId', authorize('teacher', 'admin', 'parent', 'student'), async (req, res) => {
+  try {
+    const records = await prisma.attendance.findMany({ where: { studentId: req.params.studentId } });
+    const stats = {
+      present: records.filter(r => r.status === 'present').length,
+      absent: records.filter(r => r.status === 'absent').length,
+      late: records.filter(r => r.status === 'late').length,
+      leave: records.filter(r => r.status === 'leave').length,
+      total: records.length,
+      rate: records.length > 0 ? Math.round((records.filter(r => r.status === 'present').length / records.length) * 100) : 0,
+    };
+    res.json({ stats });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
