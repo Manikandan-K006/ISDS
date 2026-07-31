@@ -28,6 +28,14 @@ const calendarRoutes = require('./routes/calendar');
 const uploadRoutes = require('./routes/uploads');
 const aiRoutes = require('./routes/ai');
 const chatbotRoutes = require('./routes/chatbot');
+const projectRoutes = require('./routes/projects');
+const careerRoutes = require('./routes/career');
+const plannerRoutes = require('./routes/planner');
+const codingRoutes = require('./routes/coding');
+const interviewRoutes = require('./routes/interviews');
+const skillRoutes = require('./routes/skills');
+const recruiterRoutes = require('./routes/recruiter');
+const portfolioRoutes = require('./routes/portfolio');
 
 const app = express();
 const PORT = config.port;
@@ -92,6 +100,23 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/career', careerRoutes);
+app.use('/api/planner', plannerRoutes);
+app.use('/api/coding', codingRoutes);
+app.use('/api/interviews', interviewRoutes);
+app.use('/api/skills', skillRoutes);
+app.use('/api/recruiter', recruiterRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+
+// /api/v1/* compatibility alias
+app.use('/api/v1/projects', projectRoutes);
+app.use('/api/v1/career', careerRoutes);
+app.use('/api/v1/planner', plannerRoutes);
+app.use('/api/v1/coding', codingRoutes);
+app.use('/api/v1/interviews', interviewRoutes);
+app.use('/api/v1/skills', skillRoutes);
+app.use('/api/v1/recruiter', recruiterRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

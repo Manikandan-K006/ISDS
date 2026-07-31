@@ -8,11 +8,12 @@ router.use(authorize('admin'));
 // GET /api/admin/dashboard
 router.get('/dashboard', async (req, res) => {
   try {
-    const [totalUsers, totalStudents, totalTeachers, totalParents, totalCourses, totalDepartments, recentUsers, recentActivity] = await Promise.all([
+    const [totalUsers, totalStudents, totalTeachers, totalParents, totalRecruiters, totalCourses, totalDepartments, recentUsers, recentActivity] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: 'student' } }),
       prisma.user.count({ where: { role: 'teacher' } }),
       prisma.user.count({ where: { role: 'parent' } }),
+      prisma.user.count({ where: { role: 'recruiter' } }),
       prisma.course.count(),
       prisma.department.count(),
       prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 10, select: { id: true, name: true, email: true, role: true, profilePhoto: true, createdAt: true } }),
@@ -20,7 +21,7 @@ router.get('/dashboard', async (req, res) => {
     ]);
 
     res.json({
-      stats: { totalUsers, totalStudents, totalTeachers, totalParents, totalCourses, totalDepartments },
+      stats: { totalUsers, totalStudents, totalTeachers, totalParents, totalRecruiters, totalCourses, totalDepartments },
       recentUsers,
       recentActivity,
     });
@@ -280,6 +281,171 @@ router.get('/database-health', async (req, res) => {
         messages: counts[8],
       },
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------------------------------------------------
+// Jobs (admin-managed)
+// ------------------------------------------------------------
+const parseJson = (value, fallback = []) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+};
+
+router.get('/jobs', async (req, res) => {
+  try {
+    const { status, type } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    if (type) where.type = type;
+    const jobs = await prisma.job.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: { postedBy: { select: { id: true, name: true } }, _count: { select: { applications: true } } },
+    });
+    res.json({ jobs: jobs.map((j) => ({ ...j, requiredSkills: parseJson(j.requiredSkills) })) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/jobs', async (req, res) => {
+  try {
+    const { title, company, type, description, location, stipend, minCGPA, minAttendance, minProjects, requiredSkills, minSkillScore, experienceLevel, status, deadline } = req.body;
+    if (!title || !title.trim()) return res.status(400).json({ error: 'Job title is required' });
+    if (!company || !company.trim()) return res.status(400).json({ error: 'Company is required' });
+
+    const job = await prisma.job.create({
+      data: {
+        title: title.trim(),
+        company: company.trim(),
+        type: type || 'job',
+        description: description || null,
+        location: location || null,
+        stipend: stipend || null,
+        minCGPA: minCGPA != null ? parseFloat(minCGPA) : null,
+        minAttendance: minAttendance != null ? parseFloat(minAttendance) : null,
+        minProjects: minProjects != null ? parseInt(minProjects) : 0,
+        requiredSkills: JSON.stringify(requiredSkills || []),
+        minSkillScore: minSkillScore != null ? parseInt(minSkillScore) : 0,
+        experienceLevel: experienceLevel || null,
+        status: status || 'draft',
+        deadline: deadline ? new Date(deadline) : null,
+        postedById: req.userId,
+      },
+    });
+    res.status(201).json({ job });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/jobs/:id', async (req, res) => {
+  try {
+    const existing = await prisma.job.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Job not found' });
+
+    const allowed = ['title', 'company', 'type', 'description', 'location', 'stipend', 'minCGPA', 'minAttendance', 'minProjects', 'minSkillScore', 'experienceLevel', 'status', 'deadline'];
+    const data = {};
+    allowed.forEach((k) => {
+      if (req.body[k] !== undefined) {
+        if (k === 'minCGPA' || k === 'minAttendance') data[k] = parseFloat(req.body[k]);
+        else if (k === 'minProjects' || k === 'minSkillScore') data[k] = parseInt(req.body[k]);
+        else if (k === 'deadline') data[k] = req.body[k] ? new Date(req.body[k]) : null;
+        else data[k] = req.body[k];
+      }
+    });
+    if (req.body.requiredSkills !== undefined) data.requiredSkills = JSON.stringify(req.body.requiredSkills);
+
+    const job = await prisma.job.update({ where: { id: req.params.id }, data });
+    res.json({ job });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/jobs/:id', async (req, res) => {
+  try {
+    await prisma.job.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Job deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/applications', async (req, res) => {
+  try {
+    const { status, jobId } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    if (jobId) where.jobId = jobId;
+    const applications = await prisma.jobApplication.findMany({
+      where,
+      include: { job: { select: { id: true, title: true, company: true } }, student: { select: { id: true, name: true, email: true, profilePhoto: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ applications });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------------------------------------------------
+// Certificate review
+// ------------------------------------------------------------
+router.get('/certificates/review', async (req, res) => {
+  try {
+    const { status = 'pending', page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [certificates, total] = await Promise.all([
+      prisma.certificate.findMany({
+        where: { status },
+        skip,
+        take: parseInt(limit),
+        orderBy: { issuedAt: 'desc' },
+        include: { student: { select: { id: true, name: true, email: true } } },
+      }),
+      prisma.certificate.count({ where: { status } }),
+    ]);
+    res.json({ certificates, total, page: parseInt(page), totalPages: Math.ceil(total / parseInt(limit)) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.patch('/certificates/:id/status', async (req, res) => {
+  try {
+    const { status, reviewNote } = req.body;
+    if (!['pending', 'verified', 'rejected'].includes(status)) return res.status(400).json({ error: 'Invalid status' });
+
+    const certificate = await prisma.certificate.findUnique({ where: { id: req.params.id } });
+    if (!certificate) return res.status(404).json({ error: 'Certificate not found' });
+
+    const updated = await prisma.certificate.update({
+      where: { id: req.params.id },
+      data: { status, reviewNote: reviewNote || null },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: certificate.studentId,
+        title: status === 'verified' ? 'Certificate verified' : 'Certificate review update',
+        message: `"${certificate.title}" was ${status}${reviewNote ? ` — ${reviewNote}` : ''}`,
+        category: 'certificate',
+        link: '/student/certificates',
+      },
+    });
+
+    res.json({ certificate: updated });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

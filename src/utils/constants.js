@@ -1,4 +1,4 @@
-export const ROLES = { STUDENT: 'student', TEACHER: 'teacher', ADMIN: 'admin' };
+export const ROLES = { STUDENT: 'student', TEACHER: 'teacher', ADMIN: 'admin', PARENT: 'parent', RECRUITER: 'recruiter' };
 
 export const DOMAINS = [
   'Engineering', 'Science', 'Arts', 'Humanities',

@@ -2,8 +2,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiHome, FiBookOpen, FiGrid, FiClipboard, FiCalendar, FiAward,
-  FiUser, FiUsers, FiBarChart2, FiPhone, FiStar, FiLayers,
+  FiUser, FiUsers, FiBarChart2, FiStar, FiLayers,
   FiChevronLeft, FiLogOut, FiMessageSquare, FiClock, FiZap,
+  FiBriefcase, FiCode, FiFolder, FiTarget, FiCpu,
 } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -13,8 +14,14 @@ const studentNav = [
   { to: '/assignments', icon: FiClipboard, label: 'Assignments' },
   { to: '/schedule', icon: FiClock, label: 'Schedule' },
   { to: '/attendance', icon: FiCalendar, label: 'Attendance' },
+  { to: '/planner', icon: FiTarget, label: 'Study Planner' },
+  { to: '/projects', icon: FiFolder, label: 'Projects' },
+  { to: '/career', icon: FiBriefcase, label: 'Career Center' },
+  { to: '/coding', icon: FiCode, label: 'Coding Lab' },
+  { to: '/interviews', icon: FiCpu, label: 'Mock Interview' },
+  { to: '/skills', icon: FiStar, label: 'Skills' },
   { to: '/certificates', icon: FiAward, label: 'Certificates' },
-  { to: '/leaderboard', icon: FiStar, label: 'Leaderboard' },
+  { to: '/leaderboard', icon: FiZap, label: 'Leaderboard' },
   { to: '/messages', icon: FiMessageSquare, label: 'Messages' },
   { to: '/profile', icon: FiUser, label: 'Profile' },
 ];
@@ -22,28 +29,41 @@ const studentNav = [
 const adminNav = [
   { to: '/admin', icon: FiZap, label: 'Overview' },
   { to: '/admin/students', icon: FiUsers, label: 'Students' },
+  { to: '/admin/teachers', icon: FiBookOpen, label: 'Teachers' },
+  { to: '/admin/parents', icon: FiUsers, label: 'Parents' },
+  { to: '/admin/recruiters', icon: FiBriefcase, label: 'Recruiters' },
   { to: '/admin/courses', icon: FiLayers, label: 'Courses' },
-  { to: '/admin/assignments', icon: FiClipboard, label: 'Assignments' },
+  { to: '/admin/jobs', icon: FiBriefcase, label: 'Job Listings' },
   { to: '/admin/certificates', icon: FiAward, label: 'Certificates' },
+  { to: '/admin/departments', icon: FiGrid, label: 'Departments' },
   { to: '/admin/analytics', icon: FiBarChart2, label: 'Analytics' },
-  { to: '/admin/calls', icon: FiPhone, label: 'Calls' },
+  { to: '/admin/audit-logs', icon: FiClipboard, label: 'Audit Logs' },
   { to: '/admin/messages', icon: FiMessageSquare, label: 'Messages' },
   { to: '/admin/profile', icon: FiUser, label: 'Profile' },
 ];
 
 const teacherNav = [
-  { to: '/admin', icon: FiHome, label: 'Dashboard' },
-  { to: '/courses', icon: FiBookOpen, label: 'My Learning' },
-  { to: '/admin/courses', icon: FiGrid, label: 'Courses' },
-  { to: '/admin/assignments', icon: FiClipboard, label: 'Assignments' },
-  { to: '/admin/students', icon: FiUsers, label: 'Students' },
-  { to: '/admin/analytics', icon: FiBarChart2, label: 'Analytics' },
-  { to: '/admin/calls', icon: FiPhone, label: 'Calls' },
-  { to: '/admin/messages', icon: FiMessageSquare, label: 'Messages' },
-  { to: '/admin/profile', icon: FiUser, label: 'Profile' },
+  { to: '/teacher/dashboard', icon: FiHome, label: 'Dashboard' },
+  { to: '/teacher/courses', icon: FiGrid, label: 'Courses' },
+  { to: '/teacher/assignments', icon: FiClipboard, label: 'Assignments' },
+  { to: '/teacher/quizzes', icon: FiStar, label: 'Quizzes' },
+  { to: '/teacher/gradebook', icon: FiAward, label: 'Gradebook' },
+  { to: '/teacher/attendance', icon: FiCalendar, label: 'Attendance' },
+  { to: '/teacher/students', icon: FiUsers, label: 'Students' },
+  { to: '/teacher/resources', icon: FiBookOpen, label: 'Resources' },
+  { to: '/teacher/messages', icon: FiMessageSquare, label: 'Messages' },
+  { to: '/teacher/profile', icon: FiUser, label: 'Profile' },
 ];
 
-const navMap = { student: studentNav, teacher: teacherNav, admin: adminNav };
+const recruiterNav = [
+  { to: '/recruiter/dashboard', icon: FiHome, label: 'Dashboard' },
+  { to: '/recruiter/jobs', icon: FiBriefcase, label: 'My Postings' },
+  { to: '/recruiter/applications', icon: FiClipboard, label: 'Applications' },
+  { to: '/recruiter/candidates', icon: FiUsers, label: 'Browse Portfolios' },
+  { to: '/recruiter/profile', icon: FiUser, label: 'Profile' },
+];
+
+const navMap = { student: studentNav, teacher: teacherNav, admin: adminNav, recruiter: recruiterNav };
 
 const sidebarVariants = {
   open: { width: 256, transition: { type: 'spring', stiffness: 250, damping: 25 } },

@@ -67,10 +67,10 @@ router.post('/register', asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'Password must be at least 6 characters.' });
   }
 
-  const validRoles = ['student', 'teacher', 'parent', 'admin'];
+  const validRoles = ['student', 'teacher', 'parent', 'admin', 'recruiter'];
   const selectedRole = validRoles.includes(role) ? role : 'student';
 
-  if (selectedRole === 'admin') {
+  if (selectedRole === 'admin' || selectedRole === 'teacher' || selectedRole === 'recruiter') {
     if (!adminSecretKey || !ADMIN_SECRET_KEY || adminSecretKey !== ADMIN_SECRET_KEY) {
       return res.status(403).json({ error: 'Invalid administrator secret key. Registration denied.' });
     }
@@ -189,7 +189,7 @@ router.post('/firebase', asyncHandler(async (req, res) => {
   }
 
   const selectedRole = role || 'student';
-  if (selectedRole === 'admin') {
+  if (selectedRole === 'admin' || selectedRole === 'teacher' || selectedRole === 'recruiter') {
     if (!adminSecretKey || !ADMIN_SECRET_KEY || adminSecretKey !== ADMIN_SECRET_KEY) {
       return res.status(403).json({ error: 'Invalid administrator secret key.' });
     }

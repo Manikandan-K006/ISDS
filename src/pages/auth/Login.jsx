@@ -37,6 +37,7 @@ export default function Login() {
         teacher: '/teacher/dashboard',
         parent: '/parent/dashboard',
         admin: '/admin/dashboard',
+        recruiter: '/recruiter/dashboard',
       };
       navigate(routes[data.user.role] || '/dashboard');
     } catch (err) {

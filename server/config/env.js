@@ -57,6 +57,7 @@ module.exports = {
   anthropicApiKey: getRequired('ANTHROPIC_API_KEY', ''),
   firebaseProjectId: getRequired('FIREBASE_PROJECT_ID', ''),
   firebaseServiceAccountBase64: getRequired('FIREBASE_SERVICE_ACCOUNT_BASE64', ''),
+  codeExecutorUrl: getRequired('CODE_EXECUTOR_URL', ''),
   smtp,
   uploadDir: path.join(__dirname, '..', 'uploads'),
 };

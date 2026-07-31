@@ -50,7 +50,7 @@ const Navbar = ({ onToggleSidebar }) => {
   }, [fetchUnreadCount]);
 
   const handleNotificationClick = (n) => {
-    if (!n.isRead) handleMarkRead(n._id);
+    if (!n.isRead) handleMarkRead(n.id);
     setShowNotifications(false);
     if (n.link) navigate(n.link);
   };
@@ -66,7 +66,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const handleMarkRead = async (id) => {
     try {
       await markAsRead(id);
-      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch {}
   };
@@ -74,12 +74,14 @@ const Navbar = ({ onToggleSidebar }) => {
   const handleDelete = async (id) => {
     try {
       await deleteNotification(id);
-      setNotifications(prev => prev.filter(n => n._id !== id));
+      setNotifications(prev => prev.filter(n => n.id !== id));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch {}
   };
 
   const handleLogout = () => { logout(); navigate('/login'); };
+
+  const profilePath = user?.role === 'recruiter' ? '/recruiter/profile' : '/profile';
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -204,7 +206,7 @@ const Navbar = ({ onToggleSidebar }) => {
                       {notifications.length > 0 ? (
                         notifications.map((n, i) => (
                           <motion.div
-                            key={n._id}
+                            key={n.id}
                             initial={{ opacity: 0, y: 4 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.02 }}
@@ -229,7 +231,7 @@ const Navbar = ({ onToggleSidebar }) => {
                               <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                                 {!n.isRead && (
                                   <button
-                                    onClick={(e) => { e.stopPropagation(); handleMarkRead(n._id); }}
+                                    onClick={(e) => { e.stopPropagation(); handleMarkRead(n.id); }}
                                     className="p-1 rounded hover:bg-[var(--primary-muted)] theme-text-muted hover:text-[var(--primary)] transition-colors"
                                     title="Mark as read"
                                   >
@@ -237,7 +239,7 @@ const Navbar = ({ onToggleSidebar }) => {
                                   </button>
                                 )}
                                 <button
-                                  onClick={(e) => { e.stopPropagation(); handleDelete(n._id); }}
+                                  onClick={(e) => { e.stopPropagation(); handleDelete(n.id); }}
                                   className="p-1 rounded hover:bg-[var(--danger-subtle)] theme-text-muted hover:text-[var(--danger)] transition-colors"
                                   title="Delete"
                                 >
@@ -307,7 +309,7 @@ const Navbar = ({ onToggleSidebar }) => {
                     </div>
                     <div className="p-1.5">
                       <button
-                        onClick={() => { navigate('/profile'); setShowProfile(false); }}
+                        onClick={() => { navigate(profilePath); setShowProfile(false); }}
                         className="flex items-center gap-2.5 w-full px-3 py-2 text-small theme-text hover:bg-[var(--hover)] rounded-xl transition-colors"
                       >
                         <FiUser size={14} /> Profile

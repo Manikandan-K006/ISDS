@@ -14,6 +14,47 @@ enum UserRole {
   teacher
   parent
   admin
+  recruiter
+}
+
+enum CertificateStatus {
+  pending
+  verified
+  rejected
+}
+
+enum ProjectStatus {
+  idea
+  planning
+  development
+  testing
+  completed
+}
+
+enum JobType {
+  job
+  internship
+  placement_drive
+}
+
+enum JobStatus {
+  draft
+  open
+  closed
+}
+
+enum JobApplicationStatus {
+  submitted
+  shortlisted
+  rejected
+  selected
+}
+
+enum PlannerTaskStatus {
+  pending
+  completed
+  skipped
+  rescheduled
 }
 
 enum AttendanceStatus {
@@ -165,6 +206,15 @@ model User {
   refreshTokens       RefreshToken[]
   settings            UserSettings?
   quizAnswers         QuizResponse[]
+  projects            Project[]             @relation("StudentProjects")
+  mentoredProjects    Project[]             @relation("MentorProjects")
+  projectReviews      ProjectReview[]
+  careerProfile       CareerProfile?
+  jobApplications     JobApplication[]
+  postedJobs          Job[]                 @relation("PostedJobs")
+  codingSubmissions   CodeSubmission[]
+  interviewSessions   InterviewSession[]
+  plannerTasks        PlannerTask[]
 
   @@index([email])
   @@index([role])
@@ -503,10 +553,10 @@ model QuizResponse {
 // CERTIFICATES
 // ============================================================
 model Certificate {
-  id              String     @id @default(cuid())
-  certificateId   String?    @unique
+  id              String            @id @default(cuid())
+  certificateId   String?           @unique
   studentId       String
-  courseId        String
+  courseId        String?
   title           String
   description     String?
   grade           String?
@@ -515,23 +565,31 @@ model Certificate {
   completionDate  DateTime?
   certificateUrl  String?
   verificationHash String?
-  isRevoked       Boolean    @default(false)
+  isRevoked       Boolean           @default(false)
   revokedAt       DateTime?
   revokedReason   String?
-  downloads       Int        @default(0)
-  shares          Int        @default(0)
-  issuedAt        DateTime   @default(now())
+  downloads       Int               @default(0)
+  shares          Int               @default(0)
+  issuedAt        DateTime          @default(now())
   expiresAt       DateTime?
   metadata        Json?
+  status          CertificateStatus @default(pending)
+  organization    String?
+  source          String            @default("course") // course | upload
+  issueDate       DateTime?
+  expiryDate      DateTime?
+  visibility      String            @default("private") // private | public
+  reviewNote      String?
 
-  student         User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  course          Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student         User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course          Course?           @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   verifications   CertificateVerification[]
 
   @@unique([studentId, courseId])
   @@index([studentId])
   @@index([courseId])
+  @@index([status])
   @@map("certificates")
 }
 
@@ -816,4 +874,234 @@ model SystemSetting {
   createdAt DateTime @default(now())
 
   @@map("system_settings")
+}
+
+// ============================================================
+// STUDENT PROJECTS
+// ============================================================
+model Project {
+  id           String        @id @default(cuid())
+  studentId    String
+  title        String
+  description  String?
+  techStack    Json          @default("[]")
+  githubUrl    String?
+  demoUrl      String?
+  team         Json          @default("[]")
+  mentorId     String?
+  mentorName   String?
+  screenshots  Json          @default("[]")
+  status       ProjectStatus @default(idea)
+  visibility   String        @default("private") // private | public
+  evaluation   Json?
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  student      User          @relation("StudentProjects", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor       User?         @relation("MentorProjects", fields: [mentorId], references: [id], onDelete: SetNull)
+  reviews      ProjectReview[]
+
+  @@index([studentId])
+  @@index([status])
+  @@map("projects")
+}
+
+model ProjectReview {
+  id         String   @id @default(cuid())
+  projectId  String
+  reviewerId String
+  rating     Int      @default(0) // 1-5
+  feedback   String?
+  createdAt  DateTime @default(now())
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviewer   User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_reviews")
+}
+
+// ============================================================
+// CAREER CENTER
+// ============================================================
+model CareerProfile {
+  id          String   @id @default(cuid())
+  studentId   String   @unique
+  headline    String?
+  summary     String?
+  github      String?
+  linkedin    String?
+  portfolioUrl String?
+  resumeUrl   String?
+  experience  Json?    // [{title, company, startDate, endDate, description}]
+  education   Json?    // [{degree, institution, year, score}]
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("career_profiles")
+}
+
+model Job {
+  id             String     @id @default(cuid())
+  title          String
+  company        String
+  type           JobType    @default(job)
+  description    String?
+  location       String?
+  stipend        String?
+  minCGPA        Float?
+  minAttendance  Float?     // 0-100
+  minProjects    Int        @default(0)
+  requiredSkills Json       @default("[]")
+  minSkillScore  Int        @default(0)
+  experienceLevel String?
+  status         JobStatus  @default(draft)
+  deadline       DateTime?
+  postedById     String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  postedBy       User       @relation("PostedJobs", fields: [postedById], references: [id])
+  applications   JobApplication[]
+
+  @@index([status])
+  @@index([type])
+  @@index([postedById])
+  @@map("jobs")
+}
+
+model JobApplication {
+  id               String               @id @default(cuid())
+  jobId            String
+  studentId        String
+  status           JobApplicationStatus @default(submitted)
+  eligibility      Json?                // { eligible, met, missing }
+  resumeSnapshot   Json?
+  createdAt        DateTime             @default(now())
+
+  job              Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  student          User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, studentId])
+  @@index([jobId])
+  @@index([studentId])
+  @@map("job_applications")
+}
+
+// ============================================================
+// STUDY PLANNER
+// ============================================================
+model PlannerTask {
+  id          String           @id @default(cuid())
+  studentId   String
+  title       String
+  description String?
+  subject     String?
+  date        DateTime
+  duration    Int?             // minutes
+  priority    String           @default("medium") // high | medium | low
+  status      PlannerTaskStatus @default(pending)
+  deadline    DateTime?
+  source      String?          // assignment | quiz | course | manual | skill
+  sourceId    String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  student     User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, date])
+  @@index([studentId, status])
+  @@map("planner_tasks")
+}
+
+// ============================================================
+// CODING LAB
+// ============================================================
+model CodingProblem {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  difficulty   Difficulty @default(beginner)
+  topics       Json       @default("[]")
+  languages    Json       @default("[]")
+  starterCode  Json?
+  testCases    Json?
+  examples     Json?
+  constraints  String?
+  status       String     @default("published")
+  createdById  String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  submissions  CodeSubmission[]
+
+  @@index([difficulty])
+  @@index([status])
+  @@map("coding_problems")
+}
+
+model CodeSubmission {
+  id           String   @id @default(cuid())
+  problemId    String
+  studentId    String
+  language     String
+  code         String
+  status       String   @default("submitted") // submitted | executed
+  output       String?
+  error        String?
+  passedTests  Int      @default(0)
+  totalTests   Int      @default(0)
+  accuracy     Float?
+  submittedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  problem      CodingProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  student      User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
+  @@index([studentId])
+  @@map("code_submissions")
+}
+
+// ============================================================
+// AI MOCK INTERVIEW
+// ============================================================
+model InterviewQuestion {
+  id        String   @id @default(cuid())
+  role      String
+  category  String
+  question  String
+  keywords  Json     @default("[]")
+  level     String   @default("basic") // basic | intermediate | advanced
+  createdAt DateTime @default(now())
+
+  @@index([role])
+  @@map("interview_questions")
+}
+
+model InterviewSession {
+  id            String   @id @default(cuid())
+  studentId     String
+  role          String
+  status        String   @default("in_progress") // in_progress | completed
+  answers       Json?
+  score         Float?
+  strengths     Json?
+  weakAreas     Json?
+  recommendations Json?
+  startedAt     DateTime @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  student       User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([role])
+  @@map("interview_sessions")
 }

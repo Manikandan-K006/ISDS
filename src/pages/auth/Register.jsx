@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiShield, FiBook, FiHash, FiBriefcase } from 'react-icons/fi';
-import { register as registerApi, getFirebaseErrorMessage } from '../../api/auth';
+import API from '../../api/client';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { Button, Input } from '../../components/ui';
@@ -10,6 +10,7 @@ import { Button, Input } from '../../components/ui';
 const roles = [
   { id: 'student', label: 'Student', icon: '🎓', color: 'from-indigo-500 to-indigo-600' },
   { id: 'teacher', label: 'Teacher', icon: '👨‍🏫', color: 'from-emerald-500 to-emerald-600' },
+  { id: 'recruiter', label: 'Recruiter', icon: '💼', color: 'from-sky-500 to-sky-600' },
   { id: 'admin', label: 'Admin', icon: '⚙️', color: 'from-purple-500 to-purple-600' },
 ];
 
@@ -55,7 +56,7 @@ const Register = () => {
       if (!form.subject.trim()) e.subject = 'Subject is required';
       if (!form.employeeId.trim()) e.employeeId = 'Employee ID is required';
     }
-    if (form.role === 'admin') {
+    if (form.role === 'admin' || form.role === 'teacher' || form.role === 'recruiter') {
       if (!form.adminAuthorizationPassword.trim()) e.adminAuthorizationPassword = 'Administrator authorization password is required.';
     }
     return e;
@@ -76,22 +77,20 @@ const Register = () => {
         role: form.role,
         class: form.role === 'student' ? form.class : undefined,
         rollNumber: form.role === 'student' ? form.rollNumber : undefined,
-        department: form.role === 'teacher' ? form.department : undefined,
         subject: form.role === 'teacher' ? form.subject : undefined,
-        employeeId: form.role === 'teacher' ? form.employeeId : undefined,
-        adminAuthorizationPassword: form.role === 'admin' ? form.adminAuthorizationPassword : undefined,
+        employeeId: form.role === 'teacher' || form.role === 'recruiter' ? form.employeeId : undefined,
+        adminSecretKey: form.role === 'admin' || form.role === 'teacher' || form.role === 'recruiter' ? form.adminAuthorizationPassword : undefined,
       };
-      const data = await registerApi(payload);
-      login({ id: data.user._id, ...data.user }, data.token);
+      const { data } = await API.post('/auth/register', payload);
+      login(data.user, data.token);
+      if (data.refreshToken) {
+        localStorage.setItem('sidts_refresh_token', data.refreshToken);
+      }
       toast.success(`Welcome, ${data.user.name}!`);
-      const redirect = data.user.role === 'admin' || data.user.role === 'teacher' ? '/admin' : '/dashboard';
+      const redirect = data.user.role === 'recruiter' ? '/recruiter/dashboard' : data.user.role === 'admin' || data.user.role === 'teacher' ? '/admin/dashboard' : '/dashboard';
       navigate(redirect);
     } catch (err) {
-      const code = err.code;
-      const message = code
-        ? getFirebaseErrorMessage(code)
-        : err.response?.data?.error || 'Registration failed';
-      toast.error(message);
+      toast.error(err.response?.data?.error || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -125,7 +124,7 @@ const Register = () => {
                   onClick={() => setForm((prev) => ({ ...prev, role: r.id }))}
                   className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     form.role === r.id
-                      ? `bg-gradient-to-br ${r.color} text-white shadow-lg shadow-${r.id === 'student' ? 'indigo' : r.id === 'teacher' ? 'emerald' : 'purple'}-500/20`
+                      ? `bg-gradient-to-br ${r.color} text-white`
                       : 'theme-text-muted hover:theme-text hover:bg-[var(--hover)] border border-[var(--border)]'
                   }`}
                 >
@@ -246,6 +245,37 @@ const Register = () => {
                       placeholder="e.g. EMP001"
                       error={errors.employeeId}
                     />
+                  </motion.div>
+                )}
+
+                {form.role === 'recruiter' && (
+                  <motion.div
+                    key="recruiter"
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+                    <Input
+                      icon={FiHash}
+                      label="Employee ID (optional)"
+                      type="text"
+                      value={form.employeeId}
+                      onChange={handleChange('employeeId')}
+                      placeholder="e.g. EMP002"
+                      error={errors.employeeId}
+                    />
+                    <Input
+                      icon={FiShield}
+                      label="Administrator Authorization Password"
+                      type="password"
+                      value={form.adminAuthorizationPassword}
+                      onChange={handleChange('adminAuthorizationPassword')}
+                      placeholder="Enter admin authorization password"
+                      error={errors.adminAuthorizationPassword}
+                    />
+                    <p className="text-xs theme-text-muted -mt-1">Recruiter accounts are created by the institution. An admin authorization password is required.</p>
                   </motion.div>
                 )}
 

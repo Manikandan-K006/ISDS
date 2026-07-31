@@ -41,6 +41,16 @@ const achievementSeed = [
 
 async function clearAll() {
   const order = [
+    prisma.projectReview.deleteMany({}),
+    prisma.project.deleteMany({}),
+    prisma.jobApplication.deleteMany({}),
+    prisma.job.deleteMany({}),
+    prisma.careerProfile.deleteMany({}),
+    prisma.plannerTask.deleteMany({}),
+    prisma.codeSubmission.deleteMany({}),
+    prisma.codingProblem.deleteMany({}),
+    prisma.interviewSession.deleteMany({}),
+    prisma.interviewQuestion.deleteMany({}),
     prisma.certificateVerification.deleteMany({}),
     prisma.certificate.deleteMany({}),
     prisma.assignmentSubmission.deleteMany({}),
@@ -102,6 +112,8 @@ async function seed() {
       const student = students.find((s) => s.email === p.student);
       await prisma.user.create({ data: { name: p.name, email: p.email, password: hash('password123'), role: 'parent', isVerified: true, studentIds: JSON.stringify([student.id]) } });
     }
+
+    const recruiter = await prisma.user.create({ data: { name: 'Sana Kapoor', email: 'recruiter@school.com', password: hash('password123'), role: 'recruiter', employeeId: 'R-101', isVerified: true } });
 
     const studentArjun = students.find((s) => s.email === 'arjun@school.com');
     const studentPriya = students.find((s) => s.email === 'priya@school.com');
@@ -231,19 +243,29 @@ async function seed() {
     });
     console.log('Created achievements');
 
-    // Skills
-    const skills = ['Critical Thinking', 'Communication', 'Mathematics', 'Physics', 'Programming', 'Public Speaking', 'Environmental Awareness', 'Music Theory'];
+    // Skills catalog (names match server/config/career.js SKILL_COURSE_KEYWORDS)
+    const skillNames = [
+      'Python', 'JavaScript', 'Java', 'C', 'C++', 'SQL', 'React', 'Node.js', 'Web Development',
+      'Machine Learning', 'Statistics', 'Data Visualization', 'Data Structures & Algorithms',
+      'Operating Systems', 'Networking', 'Cybersecurity', 'System Design', 'Mathematics',
+      'Physics', 'Communication', 'Critical Thinking', 'Public Speaking',
+    ];
     const skillRows = [];
-    for (const name of skills) {
-      skillRows.push(await prisma.skill.create({ data: { name, description: `${name} proficiency skill` } }));
+    for (const name of skillNames) {
+      skillRows.push(await prisma.skill.create({ data: { name, description: `${name} proficiency skill`, category: 'General' } }));
     }
+    const skillId = (name) => skillRows.find((s) => s.name === name).id;
     await prisma.userSkill.createMany({
       data: [
-        { userId: studentArjun.id, skillId: skillRows[0].id, level: 70, xp: 700 },
-        { userId: studentArjun.id, skillId: skillRows[2].id, level: 80, xp: 800 },
-        { userId: studentArjun.id, skillId: skillRows[3].id, level: 65, xp: 650 },
-        { userId: studentPriya.id, skillId: skillRows[2].id, level: 90, xp: 900 },
-        { userId: studentAnanya.id, skillId: skillRows[6].id, level: 75, xp: 750 },
+        { userId: studentArjun.id, skillId: skillId('Mathematics'), level: 80, xp: 800 },
+        { userId: studentArjun.id, skillId: skillId('Physics'), level: 65, xp: 650 },
+        { userId: studentArjun.id, skillId: skillId('Communication'), level: 70, xp: 700 },
+        { userId: studentArjun.id, skillId: skillId('Critical Thinking'), level: 75, xp: 750 },
+        { userId: studentArjun.id, skillId: skillId('JavaScript'), level: 60, xp: 600 },
+        { userId: studentPriya.id, skillId: skillId('Mathematics'), level: 90, xp: 900 },
+        { userId: studentPriya.id, skillId: skillId('Python'), level: 72, xp: 720 },
+        { userId: studentAnanya.id, skillId: skillId('Communication'), level: 75, xp: 750 },
+        { userId: studentAnanya.id, skillId: skillId('Public Speaking'), level: 70, xp: 700 },
       ],
     });
     console.log('Created skills');
@@ -267,8 +289,241 @@ async function seed() {
     });
     console.log('Created messages');
 
+    // ------------------------------------------------------------
+    // Career profiles
+    // ------------------------------------------------------------
+    await prisma.careerProfile.create({
+      data: {
+        studentId: studentArjun.id,
+        headline: 'Aspiring Full Stack Developer',
+        summary: 'Enthusiastic student passionate about web development, mathematics, and building real-world tools.',
+        github: 'https://github.com/arjun',
+        linkedin: 'https://linkedin.com/in/arjun',
+        portfolioUrl: 'https://arjun.dev',
+        education: JSON.stringify([{ degree: 'Class 10', institution: 'ISDS School', year: '2026', score: '92%' }]),
+        experience: JSON.stringify([{ title: 'Web Dev Intern (Virtual)', company: 'Campus Club', startDate: '2026-01', endDate: '2026-04', description: 'Built event pages and dashboards' }]),
+        isPublic: true,
+      },
+    });
+    await prisma.careerProfile.create({
+      data: { studentId: studentPriya.id, headline: 'Mathematics Enthusiast', summary: 'Top student in advanced mathematics.', isPublic: true },
+    });
+    console.log('Created career profiles');
+
+    // ------------------------------------------------------------
+    // Projects
+    // ------------------------------------------------------------
+    const projectArjun = await prisma.project.create({
+      data: {
+        studentId: studentArjun.id,
+        title: 'Student Habit Tracker',
+        description: 'A web app that helps students track study streaks, planner tasks, and attendance risk.',
+        techStack: JSON.stringify(['React', 'Node.js', 'JavaScript']),
+        githubUrl: 'https://github.com/arjun/habit-tracker',
+        demoUrl: 'https://habit-tracker.arjun.dev',
+        status: 'development',
+        visibility: 'public',
+        mentorId: teacher.id,
+        mentorName: 'Dr. Verma',
+        team: JSON.stringify([{ name: 'Arjun Sharma', role: 'Developer' }]),
+      },
+    });
+    await prisma.project.create({
+      data: {
+        studentId: studentArjun.id,
+        title: 'Math Quiz Generator',
+        description: 'Generates adaptive math quizzes for class 9-10 with difficulty scaling.',
+        techStack: JSON.stringify(['JavaScript', 'React']),
+        githubUrl: 'https://github.com/arjun/math-quiz',
+        status: 'completed',
+        visibility: 'public',
+        team: JSON.stringify([]),
+      },
+    });
+    await prisma.project.create({
+      data: {
+        studentId: studentPriya.id,
+        title: 'Data Science Notebooks',
+        description: 'A collection of statistics and data visualization notebooks.',
+        techStack: JSON.stringify(['Python', 'Data Visualization']),
+        status: 'planning',
+        visibility: 'public',
+        team: JSON.stringify([]),
+      },
+    });
+    await prisma.projectReview.create({
+      data: {
+        projectId: projectArjun.id,
+        reviewerId: teacher.id,
+        rating: 4,
+        feedback: 'Great architecture. Add test coverage before submission.',
+      },
+    });
+    await prisma.project.update({
+      where: { id: projectArjun.id },
+      data: { evaluation: JSON.stringify({ avgRating: 4, count: 1, reviewedAt: new Date() }) },
+    });
+    console.log('Created projects');
+
+    // ------------------------------------------------------------
+    // Jobs + applications
+    // ------------------------------------------------------------
+    await prisma.job.create({
+      data: {
+        title: 'Junior Web Developer (Internship)',
+        company: 'TechNova Solutions',
+        type: 'internship',
+        description: 'Assist in building React frontends and Node.js APIs for student-facing products.',
+        location: 'Remote',
+        stipend: '₹15,000/month',
+        minCGPA: 8,
+        minAttendance: 75,
+        minProjects: 1,
+        requiredSkills: JSON.stringify(['JavaScript', 'React', 'Node.js']),
+        minSkillScore: 60,
+        experienceLevel: 'internship',
+        status: 'open',
+        deadline: new Date('2026-09-30T23:59:59Z'),
+        postedById: recruiter.id,
+      },
+    });
+    await prisma.job.create({
+      data: {
+        title: 'Data Analyst Trainee',
+        company: 'Insight Analytics',
+        type: 'placement_drive',
+        description: 'Trainee role for freshers with strong SQL and statistics foundations.',
+        location: 'Bengaluru',
+        stipend: '₹25,000/month',
+        minCGPA: 8.5,
+        minAttendance: 80,
+        minProjects: 0,
+        requiredSkills: JSON.stringify(['SQL', 'Statistics']),
+        minSkillScore: 65,
+        status: 'open',
+        deadline: new Date('2026-08-31T23:59:59Z'),
+        postedById: recruiter.id,
+      },
+    });
+    await prisma.job.create({
+      data: {
+        title: 'Campus Ambassador',
+        company: 'EduConnect',
+        type: 'job',
+        description: 'Represent EduConnect on campus and run awareness drives.',
+        location: 'On-campus',
+        stipend: 'Stipend + incentives',
+        minCGPA: 7,
+        minProjects: 0,
+        requiredSkills: JSON.stringify(['Communication']),
+        minSkillScore: 0,
+        status: 'draft',
+        postedById: recruiter.id,
+      },
+    });
+    console.log('Created jobs');
+
+    // ------------------------------------------------------------
+    // Planner tasks
+    // ------------------------------------------------------------
+    await prisma.plannerTask.createMany({
+      data: [
+        { studentId: studentArjun.id, title: 'Finish: Calculus Problem Set', subject: 'Advanced Mathematics', date: new Date('2026-06-15T00:00:00Z'), duration: 90, priority: 'high', status: 'pending', deadline: new Date('2026-06-15T23:59:59Z'), source: 'assignment' },
+        { studentId: studentArjun.id, title: 'Study: Quantum Physics (40% left)', subject: 'Quantum Physics', date: new Date('2026-06-18T00:00:00Z'), duration: 60, priority: 'medium', status: 'pending', source: 'course' },
+        { studentId: studentArjun.id, title: 'Revise English Literature notes', subject: 'English Literature', date: new Date('2026-06-10T00:00:00Z'), duration: 45, priority: 'low', status: 'completed', source: 'manual' },
+      ],
+    });
+    console.log('Created planner tasks');
+
+    // ------------------------------------------------------------
+    // Coding problems
+    // ------------------------------------------------------------
+    const codingInstructor = teacherMap['Mr. Raj'];
+    await prisma.codingProblem.create({
+      data: {
+        title: 'Two Sum',
+        description: 'Given an array of integers nums and an integer target, return indices of the two numbers that add up to target.',
+        difficulty: 'beginner',
+        topics: JSON.stringify(['arrays', 'hash-map']),
+        languages: JSON.stringify(['javascript', 'python']),
+        starterCode: JSON.stringify({ javascript: 'function twoSum(nums, target) {\n  // your code\n}', python: 'def two_sum(nums, target):\n    pass' }),
+        testCases: JSON.stringify([{ input: '[2,7,11,15], 9', expected: '[0,1]' }, { input: '[3,2,4], 6', expected: '[1,2]' }]),
+        examples: JSON.stringify([{ input: 'nums = [2,7,11,15], target = 9', output: '[0,1]', explanation: 'nums[0] + nums[1] == 9' }]),
+        constraints: '2 <= nums.length <= 10^4',
+        status: 'published',
+        createdById: codingInstructor.id,
+      },
+    });
+    await prisma.codingProblem.create({
+      data: {
+        title: 'Valid Parentheses',
+        description: 'Given a string s containing just the characters (, ), {, }, [ and ], determine if the input string is valid.',
+        difficulty: 'intermediate',
+        topics: JSON.stringify(['stack', 'strings']),
+        languages: JSON.stringify(['javascript', 'python']),
+        starterCode: JSON.stringify({ javascript: 'function isValid(s) {\n  // your code\n}', python: 'def is_valid(s):\n    pass' }),
+        testCases: JSON.stringify([{ input: '"()"', expected: 'true' }, { input: '"()[]{}"', expected: 'true' }, { input: '"(]"', expected: 'false' }]),
+        examples: JSON.stringify([{ input: 's = "()"', output: 'true' }, { input: 's = "(]"', output: 'false' }]),
+        constraints: '1 <= s.length <= 10^4',
+        status: 'published',
+        createdById: codingInstructor.id,
+      },
+    });
+    await prisma.codingProblem.create({
+      data: {
+        title: 'LRU Cache',
+        description: 'Design a data structure that follows the constraints of a Least Recently Used (LRU) cache.',
+        difficulty: 'advanced',
+        topics: JSON.stringify(['design', 'linked-list']),
+        languages: JSON.stringify(['javascript', 'python']),
+        starterCode: JSON.stringify({ javascript: 'class LRUCache {\n  constructor(capacity) {}\n}', python: 'class LRUCache:\n    def __init__(self, capacity):\n        pass' }),
+        status: 'draft',
+        createdById: codingInstructor.id,
+      },
+    });
+    console.log('Created coding problems');
+
+    // ------------------------------------------------------------
+    // Interview questions
+    // ------------------------------------------------------------
+    const interviewQuestions = [
+      { role: 'full_stack_developer', category: 'fundamentals', level: 'basic', question: 'Explain the difference between var, let, and const in JavaScript.', keywords: JSON.stringify(['var', 'let', 'const', 'scope', 'block']) },
+      { role: 'full_stack_developer', category: 'web', level: 'basic', question: 'What is the difference between GET and POST requests?', keywords: JSON.stringify(['get', 'post', 'http', 'body', 'url']) },
+      { role: 'full_stack_developer', category: 'frontend', level: 'intermediate', question: 'Explain how React handles state and why props are immutable.', keywords: JSON.stringify(['react', 'state', 'props', 'component', 'render']) },
+      { role: 'full_stack_developer', category: 'backend', level: 'intermediate', question: 'Describe how a REST API request flows through a typical Node.js application.', keywords: JSON.stringify(['request', 'express', 'route', 'middleware', 'response', 'api']) },
+      { role: 'full_stack_developer', category: 'databases', level: 'advanced', question: 'How would you design a database schema for a multi-user task planner?', keywords: JSON.stringify(['schema', 'users', 'tasks', 'foreign key', 'index', 'relations']) },
+      { role: 'ai_engineer', category: 'fundamentals', level: 'basic', question: 'What is the difference between supervised and unsupervised learning?', keywords: JSON.stringify(['supervised', 'unsupervised', 'labels', 'training', 'clustering']) },
+      { role: 'ai_engineer', category: 'ml', level: 'intermediate', question: 'Explain the bias-variance tradeoff with examples.', keywords: JSON.stringify(['bias', 'variance', 'overfitting', 'underfitting', 'model']) },
+      { role: 'ai_engineer', category: 'ml', level: 'advanced', question: 'Walk through the steps of training and evaluating a classification model.', keywords: JSON.stringify(['data', 'features', 'train', 'test', 'accuracy', 'evaluate', 'model']) },
+      { role: 'data_analyst', category: 'sql', level: 'basic', question: 'What is a SQL JOIN and what types of joins exist?', keywords: JSON.stringify(['sql', 'join', 'inner', 'outer', 'left', 'right', 'tables']) },
+      { role: 'data_analyst', category: 'statistics', level: 'intermediate', question: 'Explain the difference between correlation and causation.', keywords: JSON.stringify(['correlation', 'causation', 'variables', 'relationship', 'confound']) },
+      { role: 'data_analyst', category: 'visualization', level: 'advanced', question: 'How do you choose the right chart type for a given dataset?', keywords: JSON.stringify(['chart', 'data', 'bar', 'line', 'scatter', 'audience', 'insight']) },
+      { role: 'communication', category: 'interview', level: 'basic', question: 'Tell me about yourself in under two minutes.', keywords: JSON.stringify(['name', 'interest', 'strength', 'experience', 'goal']) },
+      { role: 'communication', category: 'interview', level: 'intermediate', question: 'Describe a time you faced a challenge and how you resolved it.', keywords: JSON.stringify(['challenge', 'problem', 'action', 'result', 'learned']) },
+      { role: 'communication', category: 'interview', level: 'advanced', question: 'Why should we hire you for this role?', keywords: JSON.stringify(['skills', 'match', 'value', 'enthusiasm', 'experience']) },
+    ];
+    await prisma.interviewQuestion.createMany({ data: interviewQuestions });
+    console.log('Created interview questions');
+
+    // ------------------------------------------------------------
+    // Pending certificate for review flow
+    // ------------------------------------------------------------
+    await prisma.certificate.create({
+      data: {
+        studentId: studentArjun.id,
+        title: 'Python for Beginners — Online Course',
+        organization: 'CodeCamp Online',
+        source: 'upload',
+        status: 'pending',
+        visibility: 'public',
+        issuedAt: new Date('2026-05-20T00:00:00Z'),
+        issueDate: new Date('2026-05-20T00:00:00Z'),
+      },
+    });
+    console.log('Created sample upload certificate');
+
     console.log('\n✅ Seed completed successfully!');
-    console.log(`Users: admin@school.com / password123 | teacher: verma@school.com / password123 | student: arjun@school.com / password123 | parent: parent-arjun@school.com / password123`);
+    console.log(`Users: admin@school.com / password123 | teacher: verma@school.com / password123 | student: arjun@school.com / password123 | parent: parent-arjun@school.com / password123 | recruiter: recruiter@school.com / password123`);
     await prisma.$disconnect();
     process.exit(0);
   } catch (err) {

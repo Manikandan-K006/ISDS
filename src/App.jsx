@@ -34,6 +34,19 @@ const Achievements = lazy(() => import('./pages/student/Achievements'));
 const Skills = lazy(() => import('./pages/student/Skills'));
 const StudyPlan = lazy(() => import('./pages/student/StudyPlan'));
 const StudentAnalytics = lazy(() => import('./pages/student/StudentAnalytics'));
+const Planner = lazy(() => import('./pages/student/Planner'));
+const Projects = lazy(() => import('./pages/student/Projects'));
+const Career = lazy(() => import('./pages/student/Career'));
+const Coding = lazy(() => import('./pages/student/Coding'));
+const Interviews = lazy(() => import('./pages/student/Interviews'));
+
+// Recruiter pages
+const RecruiterDashboard = lazy(() => import('./pages/recruiter/RecruiterDashboard'));
+const RecruiterJobs = lazy(() => import('./pages/recruiter/RecruiterJobs'));
+const RecruiterApplications = lazy(() => import('./pages/recruiter/RecruiterApplications'));
+const RecruiterApplicationDetail = lazy(() => import('./pages/recruiter/RecruiterApplicationDetail'));
+const RecruiterCandidates = lazy(() => import('./pages/recruiter/RecruiterCandidates'));
+const RecruiterProfile = lazy(() => import('./pages/recruiter/RecruiterProfile'));
 
 // Teacher pages
 const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard'));
@@ -154,6 +167,11 @@ function App() {
                 <Route path="trophies" element={<TrophySession />} />
                 <Route path="schedule" element={<Schedule />} />
                 <Route path="study-plan" element={<StudyPlan />} />
+                <Route path="planner" element={<Planner />} />
+                <Route path="projects" element={<Projects />} />
+                <Route path="career" element={<Career />} />
+                <Route path="coding" element={<Coding />} />
+                <Route path="interviews" element={<Interviews />} />
                 <Route path="my-analytics" element={<StudentAnalytics />} />
                 <Route path="profile" element={<StudentProfile />} />
                 <Route path="messages" element={<Messages />} />
@@ -208,7 +226,7 @@ function App() {
               <Route
                 path="/admin"
                 element={
-                  <ProtectedRoute allowedRoles={['admin', 'teacher']}>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <AdminLayout />
                   </ProtectedRoute>
                 }
@@ -227,6 +245,26 @@ function App() {
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="health" element={<DatabaseHealth />} />
                 <Route path="profile" element={<TeacherProfile />} />
+                <Route path="messages" element={<Messages />} />
+                <Route path="notifications" element={<Notifications />} />
+              </Route>
+
+              {/* Recruiter routes */}
+              <Route
+                path="/recruiter"
+                element={
+                  <ProtectedRoute allowedRoles={['recruiter']}>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/recruiter/dashboard" replace />} />
+                <Route path="dashboard" element={<RecruiterDashboard />} />
+                <Route path="jobs" element={<RecruiterJobs />} />
+                <Route path="applications" element={<RecruiterApplications />} />
+                <Route path="applications/:id" element={<RecruiterApplicationDetail />} />
+                <Route path="candidates" element={<RecruiterCandidates />} />
+                <Route path="profile" element={<RecruiterProfile />} />
                 <Route path="messages" element={<Messages />} />
                 <Route path="notifications" element={<Notifications />} />
               </Route>
