@@ -41,8 +41,8 @@ router.get('/users', async (req, res) => {
     if (role) where.role = role;
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search } },
+        { email: { contains: search } },
       ];
     }
 

@@ -94,9 +94,9 @@ router.get('/jobs', authorize('student', 'teacher', 'admin', 'recruiter'), async
     if (type) where.type = type;
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { company: { contains: search, mode: 'insensitive' } },
-        { location: { contains: search, mode: 'insensitive' } },
+        { title: { contains: search } },
+        { company: { contains: search } },
+        { location: { contains: search } },
       ];
     }
     const jobs = await prisma.job.findMany({ where, orderBy: { createdAt: 'desc' } });

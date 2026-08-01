@@ -2,21 +2,42 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/client';
+import toast from 'react-hot-toast';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
-import { BookOpen, CalendarCheck, BarChart3, TrendingUp, Clock, ArrowRight, GraduationCap } from 'lucide-react';
+import { BookOpen, CalendarCheck, BarChart3, TrendingUp, Clock, ArrowRight, GraduationCap, Briefcase, Share2, Copy, Check, Rocket, UserCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function StudentDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
+  const [placement, setPlacement] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     API.get('/students/dashboard')
       .then(({ data }) => setData(data))
       .catch(console.error)
       .finally(() => setLoading(false));
+    API.get('/career/placement/summary')
+      .then(({ data }) => setPlacement(data))
+      .catch(() => {});
   }, []);
+
+  const portfolioUrl = user?.registerNumber ? `/student/${user.registerNumber}` : null;
+
+  const copyPortfolioLink = async () => {
+    if (!portfolioUrl) return;
+    const url = `${window.location.origin}${portfolioUrl}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success('Portfolio link copied to clipboard');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Could not copy link');
+    }
+  };
 
   if (loading) return <DashboardSkeleton />;
 
@@ -77,6 +98,73 @@ export default function StudentDashboard() {
             <p className="text-xs theme-text-muted mt-1">{stat.label}</p>
           </motion.div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Placement Readiness */}
+        <div className="theme-card rounded-2xl p-5 card-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-card-subtitle theme-text flex items-center gap-2"><Rocket size={16} className="text-emerald-500" /> Placement Readiness</h2>
+            <Link to="/placement" className="text-xs text-indigo-500 hover:underline inline-flex items-center gap-1">Open Placement Cell <ArrowRight size={12} /></Link>
+          </div>
+          {placement ? (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs theme-text-muted">Career readiness score</span>
+                  <span className="text-sm font-semibold theme-text">{placement.stats?.readiness ?? 0}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div className={`h-full rounded-full transition-all ${placement.stats?.readiness >= 70 ? 'bg-emerald-500' : placement.stats?.readiness >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`} style={{ width: `${placement.stats?.readiness ?? 0}%` }} />
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2 text-center">
+                {[
+                  { label: 'Open drives', value: placement.stats?.openDrives ?? 0, cls: 'text-indigo-500' },
+                  { label: 'Applied', value: placement.stats?.applied ?? 0, cls: 'text-amber-500' },
+                  { label: 'Shortlisted', value: placement.stats?.shortlisted ?? 0, cls: 'text-violet-500' },
+                  { label: 'Selected', value: placement.stats?.selected ?? 0, cls: 'text-emerald-500' },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-xl bg-white/5 py-3">
+                    <p className={`text-lg font-bold ${s.cls}`}>{s.value}</p>
+                    <p className="text-[11px] theme-text-muted mt-0.5">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+              {(placement.stats?.openDrives ?? 0) > 0 && (
+                <Link to="/placement" className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-500 hover:underline"><UserCheck size={13} /> View open drives & eligibility</Link>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-8 text-sm theme-text-muted">Loading readiness…</div>
+          )}
+        </div>
+
+        {/* Shareable Career Portfolio */}
+        <div className="theme-card rounded-2xl p-5 card-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-card-subtitle theme-text flex items-center gap-2"><Share2 size={16} className="text-indigo-500" /> Career Portfolio</h2>
+            <Link to="/portfolio" className="text-xs text-indigo-500 hover:underline">Edit profile</Link>
+          </div>
+          {portfolioUrl ? (
+            <div className="space-y-3">
+              <p className="text-xs theme-text-muted leading-relaxed">
+                Share your public portfolio with recruiters and placement officers. Recruiters discover you through the candidate directory once your profile is public.
+              </p>
+              <div className="flex items-center gap-2">
+                <Link to={portfolioUrl} className="flex-1 min-w-0 inline-flex items-center gap-2 rounded-xl bg-white/5 px-3.5 py-2.5 text-sm theme-text truncate hover:bg-white/10 transition-colors">
+                  <Briefcase size={15} className="text-[var(--primary)] shrink-0" />
+                  <span className="truncate">{portfolioUrl}</span>
+                </Link>
+                <button onClick={copyPortfolioLink} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-theme-text-muted hover:text-[var(--primary)]" title="Copy link">
+                  {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-8 text-sm theme-text-muted">Complete your profile to generate a shareable link</div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

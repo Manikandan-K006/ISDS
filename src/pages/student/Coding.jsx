@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import API from '../../api/client';
 import { Code2, Terminal, ChevronLeft, CheckCircle2, XCircle, Clock, Play, FileCode2, Award } from 'lucide-react';
 import { Card, Button, Badge, EmptyState, Select, SkeletonCard } from '../../components/ui';
+import CodeEditor from '../../components/code/CodeEditor';
 
 const diffColor = { beginner: 'emerald', intermediate: 'amber', advanced: 'rose' };
 
@@ -123,12 +124,7 @@ export default function Coding() {
                 </div>
                 <Select value={language} onChange={(e) => changeLanguage(e.target.value)} options={[{ value: 'javascript', label: 'JavaScript' }, { value: 'python', label: 'Python' }]} className="w-36" />
               </div>
-              <textarea
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                rows={14}
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--input-bg)] px-3.5 py-2.5 text-sm theme-text font-mono outline-none focus:border-[var(--primary)] transition-colors resize-none"
-              />
+                <CodeEditor value={code} language={language} onChange={setCode} height={360} />
               <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
                 <div className="flex items-center gap-2 text-small theme-text-muted">
                   <Clock size={14} />

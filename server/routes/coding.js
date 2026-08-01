@@ -51,7 +51,7 @@ router.get('/problems', authorize('student', 'teacher', 'admin', 'recruiter'), a
     const where = {};
     if (req.userRole !== 'admin' && req.userRole !== 'teacher') where.status = 'published';
     if (difficulty) where.difficulty = difficulty;
-    if (search) where.OR = [{ title: { contains: search, mode: 'insensitive' } }];
+    if (search) where.OR = [{ title: { contains: search } }];
 
     const problems = await prisma.codingProblem.findMany({
       where,

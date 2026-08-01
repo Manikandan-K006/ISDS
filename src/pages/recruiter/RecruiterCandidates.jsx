@@ -1,117 +1,173 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import API from '../../api/client';
-import { User, Search, GitBranch, Link2, Globe, Mail, FolderGit2, BadgeCheck } from 'lucide-react';
-import { Card, Input, Badge, EmptyState, SkeletonCard } from '../../components/ui';
+import { User, Search, GitBranch, Globe, Mail, ExternalLink, Users, GraduationCap } from 'lucide-react';
+import { Card, Input, Badge, EmptyState, SkeletonCard, Select } from '../../components/ui';
+
+function cgpaColor(cgpa) {
+  if (!cgpa) return 'muted';
+  if (cgpa >= 8.5) return 'emerald';
+  if (cgpa >= 7.5) return 'indigo';
+  if (cgpa >= 6.5) return 'amber';
+  return 'rose';
+}
+
+function skillColor(score) {
+  if (score >= 75) return 'emerald';
+  if (score >= 50) return 'indigo';
+  if (score >= 30) return 'amber';
+  return 'rose';
+}
 
 export default function RecruiterCandidates() {
   const [candidates, setCandidates] = useState(null);
-  const [search, setSearch] = useState('');
-  const [expanded, setExpanded] = useState(null);
-  const [loadingDetail, setLoadingDetail] = useState(null);
-  const [detail, setDetail] = useState(null);
+  const [departments, setDepartments] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [filters, setFilters] = useState({ search: '', departmentId: '', minCgpa: '', hasInternship: false, hasResearch: false, minSkillScore: '' });
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceRef = useRef(null);
 
   useEffect(() => {
-    API.get('/portfolio')
-      .then(({ data }) => setCandidates(data.candidates))
-      .catch((err) => toast.error(err.response?.data?.error || 'Could not load candidates'));
+    API.get('/recruiter/departments')
+      .then(({ data }) => setDepartments(data.departments || []))
+      .catch(() => {});
   }, []);
 
-  const openProfile = async (id) => {
-    if (expanded === id) { setExpanded(null); return; }
-    setExpanded(id);
-    setLoadingDetail(id);
-    setDetail(null);
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(filters.search.trim()), 400);
+    return () => clearTimeout(debounceRef.current);
+  }, [filters.search]);
+
+  const fetchCandidates = useCallback(async () => {
+    setCandidates(null);
     try {
-      const { data } = await API.get(`/portfolio/${id}`);
-      setDetail(data);
+      const params = new URLSearchParams({ limit: 50 });
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      if (filters.departmentId) params.set('departmentId', filters.departmentId);
+      if (filters.minCgpa) params.set('minCgpa', filters.minCgpa);
+      if (filters.hasInternship) params.set('hasInternship', 'true');
+      if (filters.hasResearch) params.set('hasResearch', 'true');
+      if (filters.minSkillScore) params.set('minSkillScore', filters.minSkillScore);
+      const { data } = await API.get(`/recruiter/candidates?${params.toString()}`);
+      setCandidates(data.candidates || []);
+      setTotal(data.total || data.candidates?.length || 0);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Could not load profile');
-    } finally {
-      setLoadingDetail(null);
+      toast.error(err.response?.data?.error || 'Could not load candidates');
+      setCandidates([]);
     }
-  };
+  }, [debouncedSearch, filters.departmentId, filters.minCgpa, filters.hasInternship, filters.hasResearch, filters.minSkillScore]);
 
-  if (!candidates) return <div className="space-y-6"><h1 className="text-page-title theme-text">Candidates</h1><div className="grid grid-cols-1 md:grid-cols-2 gap-4">{[1, 2, 3].map((i) => <SkeletonCard key={i} />)}</div></div>;
+  useEffect(() => {
+    fetchCandidates();
+  }, [fetchCandidates]);
 
-  const filtered = candidates.filter((c) => {
-    const q = search.toLowerCase();
-    return !q || c.student?.name?.toLowerCase().includes(q) || (c.headline || '').toLowerCase().includes(q) || (c.student?.email || '').toLowerCase().includes(q);
-  });
+  const setFilter = (key, value) => setFilters((f) => ({ ...f, [key]: value }));
+
+  const hasActiveFilters = filters.search || filters.departmentId || filters.minCgpa || filters.hasInternship || filters.hasResearch || filters.minSkillScore;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-page-title theme-text">Candidate Directory</h1>
-          <p className="text-caption theme-text-muted mt-1">Browse students who made their career profiles public</p>
-        </div>
-        <Input placeholder="Search by name or skill..." value={search} onChange={(e) => setSearch(e.target.value)} icon={Search} className="w-72" />
+      <div>
+        <h1 className="text-page-title theme-text">Candidate Directory</h1>
+        <p className="text-caption theme-text-muted mt-1">Talent pool built from students who made their career profiles public</p>
       </div>
 
-      {filtered.length === 0 ? (
-        <Card><EmptyState icon={User} title="No public profiles yet" description="Students who enable public career profiles will appear here." /></Card>
+      <Card className="p-4 space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Input placeholder="Search name, register no, skill..." value={filters.search} onChange={(e) => setFilter('search', e.target.value)} icon={Search} className="w-full" />
+          <Select value={filters.departmentId} onChange={(e) => setFilter('departmentId', e.target.value)}>
+            <option value="">All departments</option>
+            {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </Select>
+          <Select value={filters.minCgpa} onChange={(e) => setFilter('minCgpa', e.target.value)}>
+            <option value="">Min CGPA · Any</option>
+            <option value="9">9.0+</option>
+            <option value="8.5">8.5+</option>
+            <option value="8">8.0+</option>
+            <option value="7.5">7.5+</option>
+            <option value="7">7.0+</option>
+          </Select>
+          <Select value={filters.minSkillScore} onChange={(e) => setFilter('minSkillScore', e.target.value)}>
+            <option value="">Min skill score · Any</option>
+            <option value="80">80%+</option>
+            <option value="70">70%+</option>
+            <option value="60">60%+</option>
+          </Select>
+        </div>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-4 flex-wrap text-small theme-text-muted">
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" className="accent-[var(--primary)]" checked={filters.hasInternship} onChange={(e) => setFilter('hasInternship', e.target.checked)} />
+              Has internship
+            </label>
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" className="accent-[var(--primary)]" checked={filters.hasResearch} onChange={(e) => setFilter('hasResearch', e.target.checked)} />
+              Has research
+            </label>
+          </div>
+          <div className="flex items-center gap-3 text-small theme-text-muted">
+            {hasActiveFilters && (
+              <button className="hover:text-[var(--primary)]" onClick={() => setFilters({ search: '', departmentId: '', minCgpa: '', hasInternship: false, hasResearch: false, minSkillScore: '' })}>
+                Clear filters
+              </button>
+            )}
+            {total > 0 && (
+              <span className="inline-flex items-center gap-1.5"><Users size={14} /> {total} candidate{total !== 1 ? 's' : ''}</span>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {!candidates ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{[1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)}</div>
+      ) : candidates.length === 0 ? (
+        <Card><EmptyState icon={User} title="No candidates match" description="Try widening your filters, or ask students to make their career profiles public." /></Card>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((c) => (
-            <Card key={c.studentId} hover className="p-4 cursor-pointer" onClick={() => openProfile(c.studentId)}>
-              <div className="flex items-start justify-between flex-wrap gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {candidates.map((c) => (
+            <Card key={c.id} hover className="p-4 flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-11 h-11 rounded-full bg-[var(--primary)]/10 flex items-center justify-center shrink-0"><User size={20} className="text-[var(--primary)]" /></div>
+                  {c.profilePhoto ? (
+                    <img src={c.profilePhoto} alt={c.name} className="w-11 h-11 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-[var(--primary)]/10 flex items-center justify-center shrink-0"><User size={20} className="text-[var(--primary)]" /></div>
+                  )}
                   <div className="min-w-0">
-                    <h3 className="text-card-subtitle theme-text">{c.student?.name}</h3>
-                    {c.headline && <p className="text-small theme-text-muted truncate">{c.headline}</p>}
+                    <h3 className="text-card-subtitle theme-text truncate">{c.name}</h3>
+                    <p className="text-micro theme-text-muted">{c.registerNumber}{c.department ? ` · ${c.department}` : ''}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge color="emerald" size="sm"><BadgeCheck size={11} /> Verified</Badge>
-                  <span className="text-small theme-text-muted">{expanded === c.studentId ? 'Close' : 'View profile'}</span>
+                <Badge color={cgpaColor(c.cgpa)} size="sm">CGPA {c.cgpa ? c.cgpa.toFixed(2) : '—'}</Badge>
+              </div>
+
+              {c.headline && <p className="text-caption theme-text-muted line-clamp-2 -mt-1">{c.headline}</p>}
+
+              <div className="flex flex-wrap gap-1.5">
+                {c.topSkills?.map((s) => <Badge key={s.name} color={skillColor(s.score)} size="sm">{s.name} {s.score}%</Badge>)}
+              </div>
+
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-small theme-text-muted">
+                {c.careerGoal && <span className="inline-flex items-center gap-1.5"><GraduationCap size={13} /> {c.careerGoal}</span>}
+                {c.internshipCount > 0 && <span>{c.internshipCount} internship{c.internshipCount !== 1 ? 's' : ''}</span>}
+                {c.researchCount > 0 && <span>{c.researchCount} research paper{c.researchCount !== 1 ? 's' : ''}</span>}
+                {c.placementStatus && c.placementStatus !== 'not_eligible' && <Badge color="emerald" size="sm">{c.placementStatus.replace(/_/g, ' ')}</Badge>}
+              </div>
+
+              <div className="flex items-center gap-2 mt-auto pt-1">
+                <Link to={`/student/${c.registerNumber}`} className="inline-flex items-center gap-1.5 text-small font-medium text-[var(--primary)] hover:underline">
+                  <ExternalLink size={13} /> Public portfolio
+                </Link>
+                <div className="ml-auto flex items-center gap-2">
+                  {c.linkedin && <a href={c.linkedin} target="_blank" rel="noreferrer" className="text-theme-text-muted hover:text-[var(--primary)]"><GitBranch size={15} /></a>}
+                  {c.github && <a href={c.github} target="_blank" rel="noreferrer" className="text-theme-text-muted hover:text-[var(--primary)]"><Globe size={15} /></a>}
+                  {c.resumeUrl && <a href={c.resumeUrl} target="_blank" rel="noreferrer" className="text-theme-text-muted hover:text-[var(--primary)]"><Mail size={15} /></a>}
+                  <a href={`mailto:${c.email}`} className="text-theme-text-muted hover:text-[var(--primary)]" title={c.email}><Mail size={15} /></a>
                 </div>
               </div>
-              {c.summary && <p className="text-caption theme-text-muted mt-2 line-clamp-2">{c.summary}</p>}
-
-              {expanded === c.studentId && (
-                <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                  {loadingDetail === c.studentId ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <SkeletonCard key={i} />)}</div>
-                  ) : detail?.portfolio ? (
-                    <div className="space-y-5">
-                      <div className="flex items-center gap-3 flex-wrap text-small theme-text-muted">
-                        <span className="inline-flex items-center gap-1.5"><Mail size={13} /> {detail.portfolio.student?.email}</span>
-                        {detail.portfolio.links?.GitBranch && <a href={detail.portfolio.links.GitBranch} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-[var(--primary)]"><GitBranch size={13} /> GitBranch</a>}
-                        {detail.portfolio.links?.Link2 && <a href={detail.portfolio.links.Link2} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-[var(--primary)]"><Link2 size={13} /> Link2</a>}
-                        {detail.portfolio.links?.portfolioUrl && <a href={detail.portfolio.links.portfolioUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-[var(--primary)]"><Globe size={13} /> Portfolio</a>}
-                      </div>
-                      {detail.portfolio.summary && <p className="text-caption theme-text-muted leading-relaxed">{detail.portfolio.summary}</p>}
-                      {detail.portfolio.academics && <p className="text-small theme-text-muted">Completed {detail.portfolio.academics.courses} courses · Avg score {detail.portfolio.academics.averageScore}%</p>}
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {detail.portfolio.topSkills?.length > 0 && (
-                          <div>
-                            <h4 className="text-micro theme-text-muted uppercase tracking-wide mb-2">Top skills</h4>
-                            <div className="flex gap-1.5 flex-wrap">{detail.portfolio.topSkills.slice(0, 8).map((s) => <Badge key={s.name} color="indigo" size="sm">{s.name} {s.score}%</Badge>)}</div>
-                          </div>
-                        )}
-                        {detail.portfolio.projects?.length > 0 && (
-                          <div>
-                            <h4 className="text-micro theme-text-muted uppercase tracking-wide mb-2">Projects</h4>
-                            <div className="space-y-1.5">{detail.portfolio.projects.slice(0, 3).map((p) => <p key={p.id} className="text-small theme-text-muted inline-flex items-center gap-1.5"><FolderGit2 size={13} /> {p.title}</p>)}</div>
-                          </div>
-                        )}
-                        {detail.portfolio.certificates?.length > 0 && (
-                          <div>
-                            <h4 className="text-micro theme-text-muted uppercase tracking-wide mb-2">Certificates</h4>
-                            <div className="space-y-1.5">{detail.portfolio.certificates.slice(0, 3).map((c2, i) => <p key={i} className="text-small theme-text-muted inline-flex items-center gap-1.5"><BadgeCheck size={13} className="text-emerald-500" /> {c2.title}</p>)}</div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-caption theme-text-muted">No profile details available.</p>
-                  )}
-                </div>
-              )}
             </Card>
           ))}
         </div>

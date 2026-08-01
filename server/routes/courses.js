@@ -9,7 +9,7 @@ router.get('/', optionalAuth, async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const where = { status: 'published', isPublished: true };
-    if (search) where.title = { contains: search, mode: 'insensitive' };
+    if (search) where.title = { contains: search };
     if (department) where.departmentId = department;
     if (difficulty) where.difficulty = difficulty;
 

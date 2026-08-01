@@ -4,7 +4,7 @@ import {
   FiHome, FiBookOpen, FiGrid, FiClipboard, FiCalendar, FiAward,
   FiUser, FiUsers, FiBarChart2, FiStar, FiLayers,
   FiChevronLeft, FiLogOut, FiMessageSquare, FiClock, FiZap,
-  FiBriefcase, FiCode, FiFolder, FiTarget, FiCpu,
+  FiBriefcase, FiCode, FiFolder, FiTarget, FiCpu, FiUserCheck,
 } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -17,6 +17,7 @@ const studentNav = [
   { to: '/planner', icon: FiTarget, label: 'Study Planner' },
   { to: '/projects', icon: FiFolder, label: 'Projects' },
   { to: '/career', icon: FiBriefcase, label: 'Career Center' },
+  { to: '/placement', icon: FiUserCheck, label: 'Placement Cell' },
   { to: '/coding', icon: FiCode, label: 'Coding Lab' },
   { to: '/interviews', icon: FiCpu, label: 'Mock Interview' },
   { to: '/skills', icon: FiStar, label: 'Skills' },

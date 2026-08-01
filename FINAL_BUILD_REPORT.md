@@ -1,20 +1,52 @@
 # ISDS — Final Build Report
 
-**Date:** 2026-07-31
-**Status:** ✅ Build verified, backend hardened, tests + CI in place
+**Date:** 2026-08-01
+**Status:** ✅ Phase 1 hardened + Phase 2 (AI, careers, portfolios, recruiter) verified
 
-This report tracks the state of every item in `PROJECT_AUDIT.md` (Phase 1) at project completion.
+This report tracks the state of every item in `PROJECT_AUDIT.md` (Phase 1) at project completion, then documents the Phase 2 expansion delivered on top of it.
 
 ## Verification summary
 
 | Check | Result |
 | ----- | ------ |
-| `npm run build` (Vite production) | ✅ Passes — 3208 modules, no unresolved imports |
-| `npm run lint` (ESLint flat config) | ✅ 0 errors, 5 pre-existing warnings |
-| `npm test` (server unit tests, Node `node:test`) | ✅ 9/9 pass |
+| `npm run build` (Vite production) | ✅ Passes — Monaco bundled as lazy chunks, no unresolved imports |
+| `npm run lint` (ESLint flat config) | ✅ 0 errors, 5 pre-existing warnings (untouched files) |
+| `npm test` (server unit tests, Node `node:test`) | ✅ **18/18 pass** (9 original + 9 advisor/helper) |
 | `npm audit` | ✅ 0 production vulns (1 RSC-mode advisory, non-applicable — see below) |
 | Backend smoke tests (all roles + RBAC + IDOR) | ✅ Pass (see `role-smoke.ps1`, `admin-quiz-smoke.ps1`) |
+| API smoke harness (13 endpoints incl. all new AI/career/recruiter/portfolio) | ✅ All 200/201 |
 | Health check `/api/health` | ✅ `{"status":"ok"}` |
+
+## Phase 2 — what was added
+
+### AI assistant & personalization (`server/utils/advisor.js` + routes)
+- **Intent engine** (`resolveIntent`): word-boundary keyword matching with weights and priority; maps CGPA, attendance, GPA, assignments, quizzes, skills, projects, internships, research, recommendations, and general queries.
+- **`POST /api/chatbot`** rewritten around the deterministic engine — no external LLM required for data-grounded answers; open-ended `default` intent degrades gracefully (Anthropic only when configured). Returns `{ reply, intent, suggestions }`; rate-limited 30/15 min.
+- **`POST /api/ai/study-plan/generate`**: builds a real workload from assignments/quizzes, adds focus areas, and persists an active `AIStudyPlan` with a deterministic, deadline-first weekly schedule (`generateWeeklySchedule`).
+- **`GET /api/ai/skill-gap?role=`**: computes target-vs-current skill scores for 5 career roles (AI engineer, full-stack, data analyst, cybersecurity, software engineer) + a static ROADMAP.
+- **`GET /api/ai/career-advisor`**: best-fit role, next skills, learning path, certifications, project + internship suggestions.
+
+### Careers & placement
+- **`GET /api/career/placement/summary`**: student placement cell — open drives with per-drive live eligibility (CGPA/attendance/skills), application status counts, readiness score.
+- **Placement Cell page** (`src/pages/student/Placement.jsx`) with eligibility rule breakdown and one-click apply.
+
+### Public portfolios & recruiter discovery
+- **`server/routes/portfolio.js`** rebuilt with shared privacy-aware `buildPortfolio` (403 unless `careerProfile.isPublic`; only public projects, verified/public certificates, verified/completed internships, verified/published research) + **`GET /api/portfolio/by-register/:registerNumber`**.
+- **Public portfolio page** at `/student/:slug` (`src/pages/public/PublicPortfolio.jsx`) with 403/404 handling, cover hero, skill score chips, projects/internships/research/certificates.
+- **`GET /api/recruiter/candidates`**: server-side filters (`search`, `departmentId`, `minCgpa`, `hasInternship`, `hasResearch`, `minSkillScore`) over public-profile students only; top-5 skills per candidate; `GET /api/recruiter/departments`.
+- **Candidate Directory** (`src/pages/recruiter/RecruiterCandidates.jsx`) rebuilt with filter bar + deep links to each candidate's public portfolio.
+
+### Student experience
+- **Landing page** (`src/pages/public/Landing.jsx`) — premium marketing page with hero, stats, features, FAQ, testimonial, demo modal.
+- **Real analytics** (`src/pages/student/StudentAnalytics.jsx`) — attendance, quiz pass/fail, course progress, assignment grades from `/students/analytics`.
+- **Study Planner UI** rewritten around the generator; **Skill Gap Analyzer** card in the Skills page.
+- **Student dashboard** now shows Placement Readiness (score + open drives/applied/shortlisted/selected) and a copy-link **Career Portfolio** share card.
+- **Coding Lab editor**: Monaco (`monaco-editor` + `@monaco-editor/react`, npm bundle) with Vite worker wiring (`src/components/code/CodeEditor.jsx`) — works offline on the LAN, lazy-loaded only when Coding Lab opens.
+
+### Bug fixed along the way
+- Prisma `mode: 'insensitive'` is invalid on MySQL → removed in recruiter/admin/courses/coding/career search filters (MySQL collation is case-insensitive by default). All previously-latent 500s on search now return 200.
+- `Quiz` has no `Course` relation — `buildStudentContext` and friends fetch enrollments first, then filter quizzes by `courseId in` enrolled ids.
+- `Github`/`Linkedin` lucide icons don't exist in lucide-react 1.22 — replaced with `GitBranch`/`Share2` (lint could not catch this; the build could and did).
 
 ## Audit recommendation status (Section 10)
 
@@ -58,6 +90,7 @@ This report tracks the state of every item in `PROJECT_AUDIT.md` (Phase 1) at pr
 
 ## Known limitations (deployment)
 
-- No production SMTP/Firebase/Anthropic credentials → email, Firebase login, and AI features degrade gracefully until configured.
+- No production SMTP/Firebase/Anthropic credentials → email, Firebase login, and the optional LLM fallback degrade gracefully until configured; the AI assistant is fully functional deterministically.
 - MySQL is the supported database (dev instance `localhost:3307`; helper `scripts/dev-db.ps1`). No managed DB or hosting credentials.
 - `certificateGenerator` signatories hardcoded (item 18, low).
+- Monaco adds ~2.7 MB (gzip ~685 kB) to the frontend bundle; it is route-lazy so the main bundle is unaffected. Vite emits a chunk-size warning — informational only.

@@ -37,6 +37,19 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+router.get('/departments', async (req, res) => {
+  try {
+    const departments = await prisma.department.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    });
+    res.json({ departments });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ------------------------------------------------------------
 // Candidate discovery
 //
@@ -61,9 +74,9 @@ router.get('/candidates', async (req, res) => {
     if (minCgpa) where.cgpa = { gte: parseFloat(minCgpa) };
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { registerNumber: { contains: search, mode: 'insensitive' } },
-        { careerProfile: { headline: { contains: search, mode: 'insensitive' } } },
+        { name: { contains: search } },
+        { registerNumber: { contains: search } },
+        { careerProfile: { headline: { contains: search } } },
       ];
     }
     if (hasInternship === 'true') {

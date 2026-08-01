@@ -16,6 +16,7 @@ import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import VerifyCertificate from './pages/public/VerifyCertificate';
 import Landing from './pages/public/Landing';
+import PublicPortfolio from './pages/public/PublicPortfolio';
 
 // Student pages
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
@@ -40,6 +41,7 @@ const Projects = lazy(() => import('./pages/student/Projects'));
 const Career = lazy(() => import('./pages/student/Career'));
 const Coding = lazy(() => import('./pages/student/Coding'));
 const Interviews = lazy(() => import('./pages/student/Interviews'));
+const Placement = lazy(() => import('./pages/student/Placement'));
 
 // Recruiter pages
 const RecruiterDashboard = lazy(() => import('./pages/recruiter/RecruiterDashboard'));
@@ -135,6 +137,7 @@ function App() {
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Landing />} />
+              <Route path="/student/:slug" element={<PublicPortfolio />} />
               <Route path="/verify" element={<VerifyCertificate />} />
               <Route path="/verify/:certificateId" element={<VerifyCertificate />} />
 
@@ -173,6 +176,7 @@ function App() {
                 <Route path="planner" element={<Planner />} />
                 <Route path="projects" element={<Projects />} />
                 <Route path="career" element={<Career />} />
+                <Route path="placement" element={<Placement />} />
                 <Route path="coding" element={<Coding />} />
                 <Route path="interviews" element={<Interviews />} />
                 <Route path="my-analytics" element={<StudentAnalytics />} />
