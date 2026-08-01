@@ -273,7 +273,7 @@ function App() {
                 <Route path="notifications" element={<Notifications />} />
               </Route>
 
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<Navigate to="/auth" replace />} />
             </Routes>
             </Suspense>
           </BrowserRouter>
