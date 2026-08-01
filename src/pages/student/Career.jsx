@@ -10,25 +10,20 @@ const appStatusColor = { submitted: 'indigo', shortlisted: 'amber', selected: 'e
 
 function Eligibility({ eligibility }) {
   if (!eligibility) return null;
-  const rows = [
-    { key: 'cgpa', label: 'CGPA', value: eligibility.cgpa, req: eligibility.minCGPA, pass: eligibility.cgpaMet },
-    { key: 'attendance', label: 'Attendance', value: eligibility.attendance, req: eligibility.minAttendance, pass: eligibility.attendanceMet },
-    { key: 'projects', label: 'Projects', value: eligibility.projects, req: eligibility.minProjects, pass: eligibility.projectsMet },
-    { key: 'skills', label: 'Skills', value: eligibility.skillsMet ? `${eligibility.matchedSkills?.length ?? 0} matched` : `${eligibility.matchedSkills?.length ?? 0} of ${eligibility.requiredSkills?.length ?? 0}`, req: eligibility.requiredSkills?.join(', '), pass: eligibility.skillsMet },
-  ].filter((r) => r.req != null);
   return (
     <div className="space-y-2.5">
-      {rows.map((r) => (
-        <div key={r.key} className="flex items-center gap-3">
-          {r.pass ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <XCircle size={16} className="text-rose-500 shrink-0" />}
-          <span className="text-small theme-text w-24 shrink-0">{r.label}</span>
-          <span className="text-small theme-text font-medium flex-1">{r.value}</span>
-          <span className="text-small theme-text-muted">{r.req}</span>
+      {eligibility.rules.map((r) => (
+        <div key={r.label} className="flex items-center gap-3">
+          {r.ok ? <CheckCircle2 size={16} className="text-emerald-500 shrink-0" /> : <XCircle size={16} className="text-rose-500 shrink-0" />}
+          <span className="text-small theme-text w-40 shrink-0">{r.label}</span>
+          <span className="text-small theme-text font-medium flex-1">{r.actual}</span>
+          <span className="text-small theme-text-muted">needs {r.requirement}</span>
         </div>
       ))}
+      {eligibility.rules.length === 0 && <p className="text-small theme-text-muted">No minimum criteria set for this position.</p>}
       <p className={`text-caption mt-2 flex items-center gap-1.5 ${eligibility.eligible ? 'text-emerald-500' : 'text-amber-500'}`}>
         {eligibility.eligible ? <BadgeCheck size={14} /> : <AlertCircle size={14} />}
-        {eligibility.eligible ? 'You are eligible for this position' : 'You do not meet all criteria yet'}
+        {eligibility.eligible ? 'You are eligible for this position' : `Missing: ${eligibility.missing.join(', ')}`}
       </p>
     </div>
   );
@@ -70,7 +65,7 @@ function JobsTab() {
   const apply = async () => {
     setApplying(true);
     try {
-      const { data } = await API.post(`/career/jobs/${selected.id}/apply`);
+      await API.post(`/career/jobs/${selected.id}/apply`);
       toast.success('Application submitted');
       setSelected(null);
       load();
@@ -240,22 +235,27 @@ function ReadinessTab() {
           <div className="mt-4"><ProgressBar value={r.readiness} color={r.readiness >= 70 ? 'emerald' : r.readiness >= 40 ? 'amber' : 'rose'} /></div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
             <div className="rounded-xl bg-[var(--hover)] p-3.5">
-              <p className="text-micro theme-text-muted uppercase tracking-wide mb-1.5">Skills</p>
+              <p className="text-micro theme-text-muted uppercase tracking-wide mb-1.5">Strong</p>
               <div className="flex gap-1.5 flex-wrap">
-                {r.skillStatus?.matched?.length ? r.skillStatus.matched.slice(0, 4).map((s) => <Badge key={s} color="emerald" size="sm">{s}</Badge>) : <span className="text-caption theme-text-muted">None</span>}
-                {r.skillStatus?.missing?.slice(0, 3).map((s) => <Badge key={s} color="rose" size="sm">{s}</Badge>)}
+                {r.strong?.length ? r.strong.slice(0, 4).map((s) => <Badge key={s} color="emerald" size="sm">{s}</Badge>) : <span className="text-caption theme-text-muted">None</span>}
               </div>
             </div>
             <div className="rounded-xl bg-[var(--hover)] p-3.5">
-              <p className="text-micro theme-text-muted uppercase tracking-wide mb-1.5">Progress</p>
-              <div className="text-small theme-text space-y-1">
-                <p>{r.skillProgress ?? 0}% skills covered</p>
-                <p>{r.practiceSessions ?? 0} practice sessions</p>
+              <p className="text-micro theme-text-muted uppercase tracking-wide mb-1.5">Needs work</p>
+              <div className="flex gap-1.5 flex-wrap">
+                {r.weak?.length ? r.weak.map((s) => <Badge key={s} color="rose" size="sm">{s}</Badge>) : <span className="text-caption theme-text-muted">None</span>}
               </div>
             </div>
             <div className="rounded-xl bg-[var(--hover)] p-3.5">
-              <p className="text-micro theme-text-muted uppercase tracking-wide mb-1.5">Top recommendation</p>
-              <p className="text-small theme-text-muted leading-snug">{r.recommendations?.[0] || 'Keep building your skills.'}</p>
+              <p className="text-micro theme-text-muted uppercase tracking-wide mb-1.5">Skill scores</p>
+              <div className="space-y-1">
+                {r.rows.slice(0, 3).map((row) => (
+                  <div key={row.skill} className="flex items-center justify-between gap-2">
+                    <span className="text-small theme-text-muted truncate">{row.skill}</span>
+                    <span className="text-small theme-text font-medium">{row.current}/{row.target}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </Card>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import API from '../../api/client';
-import { Calendar, Plus, Trash2, Sparkles, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, Plus, Trash2, Sparkles, CheckCircle2, Clock, ChevronDown } from 'lucide-react';
 import { Card, Button, Input, Select, Badge, Modal, EmptyState, ProgressBar, SkeletonCard } from '../../components/ui';
 
 const priorityColor = { high: 'rose', medium: 'amber', low: 'slate' };

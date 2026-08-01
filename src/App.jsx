@@ -81,6 +81,8 @@ const AdminCourses = lazy(() => import('./pages/admin/AdminCourses'));
 const AdminCertificates = lazy(() => import('./pages/admin/AdminCertificates'));
 const DepartmentManagement = lazy(() => import('./pages/admin/DepartmentManagement'));
 const AuditLogs = lazy(() => import('./pages/admin/AuditLogs'));
+const AdminRecruiters = lazy(() => import('./pages/admin/AdminRecruiters'));
+const AdminJobs = lazy(() => import('./pages/admin/AdminJobs'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const DatabaseHealth = lazy(() => import('./pages/admin/DatabaseHealth'));
 
@@ -237,7 +239,9 @@ function App() {
                 <Route path="students/:id" element={<StudentDetailAdmin />} />
                 <Route path="teachers" element={<TeacherList />} />
                 <Route path="parents" element={<ParentList />} />
+                <Route path="recruiters" element={<AdminRecruiters />} />
                 <Route path="courses" element={<AdminCourses />} />
+                <Route path="jobs" element={<AdminJobs />} />
                 <Route path="certificates" element={<AdminCertificates />} />
                 <Route path="departments" element={<DepartmentManagement />} />
                 <Route path="analytics" element={<Analytics />} />

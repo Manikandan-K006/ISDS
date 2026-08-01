@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import API from '../../api/client';
-import { FolderGit2, Plus, ExternalLink, Github, Star, Trash2, Users, Eye, Lock } from 'lucide-react';
+import { FolderGit2, Plus, ExternalLink, GitBranch, Star, Trash2, Users, Eye, Lock } from 'lucide-react';
 import { Card, Button, Input, Select, Badge, Modal, EmptyState, SkeletonCard } from '../../components/ui';
 
 const statusColor = { idea: 'slate', 'in-progress': 'indigo', completed: 'emerald', abandoned: 'rose' };
@@ -129,7 +129,7 @@ export default function Projects() {
                   <span className="inline-flex items-center gap-1"><Eye size={13} /> {p.student?.name}</span>
                 </div>
                 <div className="flex gap-2">
-                  {p.githubUrl && <a href={p.githubUrl} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg theme-text-muted hover:text-[var(--primary)] hover:bg-[var(--hover)]"><Github size={15} /></a>}
+                  {p.githubUrl && <a href={p.githubUrl} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg theme-text-muted hover:text-[var(--primary)] hover:bg-[var(--hover)]"><GitBranch size={15} /></a>}
                   {p.demoUrl && <a href={p.demoUrl} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg theme-text-muted hover:text-[var(--primary)] hover:bg-[var(--hover)]"><ExternalLink size={15} /></a>}
                   <button onClick={() => openEdit(p)} className="px-2.5 py-1 rounded-lg text-small theme-text-muted hover:theme-text hover:bg-[var(--hover)]">Edit</button>
                 </div>
@@ -149,7 +149,7 @@ export default function Projects() {
           </div>
           <Input label="Tech Stack (comma separated)" value={form.techStack} onChange={(e) => setForm({ ...form, techStack: e.target.value })} placeholder="React, Node.js, MySQL" />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="GitHub URL" value={form.githubUrl} onChange={(e) => setForm({ ...form, githubUrl: e.target.value })} placeholder="https://github.com/..." />
+            <Input label="GitBranch URL" value={form.githubUrl} onChange={(e) => setForm({ ...form, githubUrl: e.target.value })} placeholder="https://GitBranch.com/..." />
             <Input label="Demo URL" value={form.demoUrl} onChange={(e) => setForm({ ...form, demoUrl: e.target.value })} placeholder="https://..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
