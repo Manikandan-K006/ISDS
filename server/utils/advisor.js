@@ -315,4 +315,52 @@ function recommendFocusAreas(context) {
   return areas.slice(0, 5);
 }
 
-module.exports = { resolveIntent, buildStudentContext, buildAdvisorReply, buildQuickActions, recommendFocusAreas, PROJECT_IDEAS };
+// -------------------------------------------------------------------
+// Deterministic weekly schedule generator
+//
+// Produces a reproducible 7-day plan (no randomness):
+//   1. Collect the student's real workload via recommendFocusAreas().
+//   2. Urgent deadlines (assignments) are placed before revision/practice.
+//   3. Tasks are spread across the week (max 2 fixed blocks per day).
+//   4. Each task carries the derived metadata used by the planner UI.
+// -------------------------------------------------------------------
+const PLAN_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const PLAN_BLOCKS = [
+  { start: '09:00', end: '10:30', focus: 'Deep work — highest priority task' },
+  { start: '17:00', end: '18:30', focus: 'Practice & revision' },
+];
+
+function generateWeeklySchedule(context) {
+  const focusAreas = recommendFocusAreas(context);
+  const schedule = {};
+  const upcomingDates = [];
+  for (let i = 0; i < 7; i += 1) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    upcomingDates.push(d);
+  }
+
+  let slot = 0;
+  for (let i = 0; i < PLAN_DAYS.length && slot < focusAreas.length; i += 1) {
+    const date = upcomingDates[i];
+    const tasks = [];
+    for (const block of PLAN_BLOCKS) {
+      if (slot >= focusAreas.length) break;
+      const area = focusAreas[slot];
+      slot += 1;
+      tasks.push({
+        time: `${block.start} – ${block.end}`,
+        task: area.title,
+        type: area.kind,
+        subject: area.subject || null,
+        date: date.toISOString().slice(0, 10),
+        estimatedMinutes: area.kind === 'assignment' ? 90 : 45,
+        priority: area.kind === 'assignment' ? 'high' : 'medium',
+      });
+    }
+    schedule[PLAN_DAYS[i]] = tasks;
+  }
+  return { schedule, focusAreas };
+}
+
+module.exports = { resolveIntent, buildStudentContext, buildAdvisorReply, buildQuickActions, recommendFocusAreas, generateWeeklySchedule, PROJECT_IDEAS };

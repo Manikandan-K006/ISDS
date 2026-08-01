@@ -229,4 +229,67 @@ router.get('/resume/preview', authorize('student'), async (req, res) => {
   }
 });
 
+// ------------------------------------------------------------
+// Placement cell summary (student-facing)
+// ------------------------------------------------------------
+router.get('/placement/summary', authorize('student'), async (req, res) => {
+  try {
+    const [drives, applications, readiness, profile] = await Promise.all([
+      prisma.job.findMany({
+        where: { status: 'open', type: 'placement_drive' },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.jobApplication.findMany({
+        where: { studentId: req.userId },
+        include: { job: { select: { id: true, title: true, company: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      (async () => {
+        const skills = await computeStudentSkills(prisma, req.userId);
+        const roles = CAREER_ROLES.map((role) => ({ ...computeCareerReadiness(skills, role.targets) })).sort((a, b) => b.readiness - a.readiness);
+        return roles[0]?.readiness || 0;
+      })(),
+      getStudentProfile(prisma, req.userId),
+    ]);
+
+    const appByJob = {};
+    applications.forEach((a) => { appByJob[a.jobId] = a; });
+
+    const drivesWithEligibility = drives.map((d) => {
+      const app = appByJob[d.id];
+      return {
+        id: d.id,
+        title: d.title,
+        company: d.company,
+        location: d.location,
+        stipend: d.stipend,
+        description: d.description,
+        minCGPA: d.minCGPA,
+        minAttendance: d.minAttendance,
+        requiredSkills: parseJson(d.requiredSkills),
+        deadline: d.deadline,
+        application: app ? { id: app.id, status: app.status, appliedAt: app.createdAt } : null,
+        eligibility: computeEligibility(d, profile),
+      };
+    });
+
+    const counts = applications.reduce((acc, a) => { acc[a.status] = (acc[a.status] || 0) + 1; return acc; }, {});
+    res.json({
+      drives: drivesWithEligibility,
+      stats: {
+        openDrives: drives.length,
+        applied: counts.submitted || 0,
+        shortlisted: counts.shortlisted || 0,
+        selected: counts.selected || 0,
+        rejected: counts.rejected || 0,
+        readiness: readiness || 0,
+        cgpa: profile.cgpa,
+        attendance: profile.attendance,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

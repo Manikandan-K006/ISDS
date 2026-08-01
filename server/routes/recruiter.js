@@ -37,6 +37,97 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// ------------------------------------------------------------
+// Candidate discovery
+//
+// Server-side filtering so recruiters can slice the talent pool
+// without pulling full portfolios. Only students with a PUBLIC
+// career profile appear; sensitive data is never exposed.
+//   GET /api/recruiter/candidates
+//     ?search=&departmentId=&minCgpa=&hasInternship=true&hasResearch=true
+//     &minSkillScore=&limit=
+// ------------------------------------------------------------
+router.get('/candidates', async (req, res) => {
+  try {
+    const { search, departmentId, minCgpa, hasInternship, hasResearch, minSkillScore } = req.query;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
+
+    const where = {
+      role: 'student',
+      isActive: true,
+      careerProfile: { isPublic: true },
+    };
+    if (departmentId) where.departmentId = departmentId;
+    if (minCgpa) where.cgpa = { gte: parseFloat(minCgpa) };
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { registerNumber: { contains: search, mode: 'insensitive' } },
+        { careerProfile: { headline: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+    if (hasInternship === 'true') {
+      where.internships = { some: { OR: [{ isVerified: true }, { status: 'completed' }] } };
+    }
+    if (hasResearch === 'true') {
+      where.researchPapers = { some: { OR: [{ isVerified: true }, { status: 'published' }] } };
+    }
+
+    const students = await prisma.user.findMany({
+      where,
+      take: limit,
+      orderBy: [{ cgpa: 'desc' }, { name: 'asc' }],
+      select: {
+        id: true, name: true, email: true, profilePhoto: true, registerNumber: true,
+        batch: true, semester: true, cgpa: true, placementStatus: true, careerGoal: true,
+        department: { select: { id: true, name: true } },
+        careerProfile: { select: { headline: true, summary: true, resumeUrl: true, linkedin: true, github: true } },
+        internships: { where: { OR: [{ isVerified: true }, { status: 'completed' }] }, select: { id: true, company: true, role: true } },
+        researchPapers: { where: { OR: [{ isVerified: true }, { status: 'published' }] }, select: { id: true, title: true } },
+      },
+    });
+
+    let candidates = [];
+    for (const s of students) {
+      const skills = await computeStudentSkills(prisma, s.id);
+      const top = skills.filter((x) => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 5).map((x) => ({ name: x.name, score: x.score }));
+      const bestScore = top.length ? Math.max(...top.map((t) => t.score)) : 0;
+      candidates.push({
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        profilePhoto: s.profilePhoto,
+        registerNumber: s.registerNumber,
+        batch: s.batch,
+        semester: s.semester,
+        cgpa: s.cgpa,
+        placementStatus: s.placementStatus,
+        careerGoal: s.careerGoal,
+        department: s.department?.name || null,
+        headline: s.careerProfile?.headline || null,
+        summary: s.careerProfile?.summary || null,
+        resumeUrl: s.careerProfile?.resumeUrl || null,
+        linkedin: s.careerProfile?.linkedin || null,
+        github: s.careerProfile?.github || null,
+        internships: s.internships.map((i) => `${i.role} @ ${i.company}`),
+        internshipCount: s.internships.length,
+        researchCount: s.researchPapers.length,
+        topSkills: top,
+        bestSkillScore: bestScore,
+      });
+    }
+
+    if (minSkillScore) {
+      const threshold = parseInt(minSkillScore, 10);
+      candidates = candidates.filter((c) => c.bestSkillScore >= threshold);
+    }
+
+    res.json({ candidates, total: candidates.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/jobs', async (req, res) => {
   try {
     const where = req.userRole === 'recruiter' ? { postedById: req.userId } : {};
