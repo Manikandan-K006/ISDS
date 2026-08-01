@@ -30,13 +30,28 @@ const INTENTS = {
 // Priority used to break ties when a message matches multiple intents.
 const INTENT_PRIORITY = ['career', 'study', 'quiz', 'assignments', 'skills', 'projects', 'cgpa', 'attendance', 'help', 'greeting'];
 
+// Keywords that carry extra weight (e.g. "job"/"placement" are the
+// strongest signal for the career intent).
+const INTENT_WEIGHTS = {
+  career: ['job', 'internship', 'placement', 'offer', 'drive', 'company'],
+};
+
+const hasKeyword = (text, keyword) => {
+  if (keyword.length <= 3) {
+    return new RegExp(`(^|[^a-z])${keyword}([^a-z]|$)`, 'i').test(text);
+  }
+  return text.includes(keyword);
+};
+
 function resolveIntent(message) {
   const text = String(message || '').toLowerCase();
   let best = 'default';
   let bestScore = 0;
   for (const intent of INTENT_PRIORITY) {
     const keywords = INTENTS[intent];
-    const score = keywords.reduce((n, k) => n + (text.includes(k) ? 1 : 0), 0);
+    const extra = (INTENT_WEIGHTS[intent] || []);
+    const score = keywords.reduce((n, k) => n + (hasKeyword(text, k) ? 1 : 0), 0)
+      + extra.reduce((n, k) => n + (hasKeyword(text, k) ? 2 : 0), 0);
     if (score > bestScore) {
       bestScore = score;
       best = intent;
