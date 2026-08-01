@@ -10,11 +10,11 @@ const TeacherProfile = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
-    name: user?.name || 'Teacher',
+    name: user?.name || 'Faculty',
     email: user?.email || '',
     subject: 'General',
     phone: user?.parentContact || '',
-    bio: 'Teacher at ISDS',
+    bio: 'Faculty at ISDS',
   });
 
   useEffect(() => {
@@ -64,7 +64,7 @@ const TeacherProfile = () => {
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-bold theme-text">{profile.name}</h1>
-            <p className="theme-text-muted">{profile.subject} Teacher</p>
+            <p className="theme-text-muted">{profile.subject} Faculty</p>
           </div>
           <button onClick={() => setEditing(!editing)} className="flex items-center gap-1.5 px-4 py-2 rounded-lg theme-subtle theme-text text-sm hover:theme-hover transition-colors">
             {editing ? <FiSave size={16} /> : <FiEdit2 size={16} />} {editing ? 'Save' : 'Edit'}
