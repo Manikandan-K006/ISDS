@@ -74,7 +74,7 @@ export default function ParentReports() {
                   className="w-full theme-card border theme-border rounded-xl px-3.5 py-2.5 text-sm theme-text focus:outline-none focus:border-indigo-500/50 transition-colors"
                 >
                   {students.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name} • Class {s.class} • Roll {s.rollNumber}</option>
+                    <option key={s.id} value={s.id}>{s.name} • Sem {s.semester || s.class} • Reg {s.registerNumber || s.rollNumber}</option>
                   ))}
                 </select>
               </div>
@@ -96,8 +96,8 @@ export default function ParentReports() {
                 <h2 className="text-card-title theme-text">Report Card</h2>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-1 mt-2 text-sm">
                   <p className="theme-text">{student?.name}</p>
-                  <p className="theme-text-muted">Class {student?.class}</p>
-                  <p className="theme-text-muted">Roll: {student?.rollNumber}</p>
+                  <p className="theme-text-muted">Sem {student?.semester || student?.class}</p>
+                  <p className="theme-text-muted">Reg: {student?.registerNumber || student?.rollNumber}</p>
                   {student?.email && <p className="theme-text-muted">{student.email}</p>}
                 </div>
               </div>
