@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiEdit2, FiSave, FiBookOpen, FiCalendar, FiAward, FiStar, FiFileText, FiMessageSquare, FiChevronLeft, FiBarChart2, FiTarget } from 'react-icons/fi';
-import PerformanceRadar from '../../components/charts/PerformanceRadar';
-import GradeTrendLine from '../../components/charts/GradeTrendLine';
 import AttendanceCalendar from '../../components/charts/AttendanceCalendar';
 import API from '../../api/client';
 
@@ -37,15 +35,15 @@ const StudentDetailAdmin = () => {
     setError(null);
     try {
       const results = await Promise.allSettled([
-        API.get(`/students/${id}`),
-        API.get('/attendance', { params: { studentId: id } }),
-        API.get('/assignments', { params: { studentId: id } }),
-        API.get(`/students/${id}/certificates`),
+        API.get(`/admin/users/${id}`),
+        API.get(`/attendance/student/${id}`),
+        API.get('/assignments', { params: { courseId: '' } }).catch(() => ({ data: [] })),
+        API.get(`/certificates`).catch(() => ({ data: [] })),
         API.get(`/students/${id}/trophies`),
         API.get(`/students/${id}/notes`),
       ]);
 
-      if (results[0].status === 'fulfilled') setStudent(results[0].value.data);
+      if (results[0].status === 'fulfilled') setStudent(results[0].value.data.user || results[0].value.data);
       if (results[1].status === 'fulfilled') setAttendanceData(Array.isArray(results[1].value.data) ? results[1].value.data : []);
       if (results[2].status === 'fulfilled') setAssignments(Array.isArray(results[2].value.data) ? results[2].value.data : []);
       if (results[3].status === 'fulfilled') setCertificates(Array.isArray(results[3].value.data) ? results[3].value.data : []);
@@ -79,8 +77,6 @@ const StudentDetailAdmin = () => {
 
   if (!student) return null;
 
-  const gpaData = student.gpaHistory ? student.gpaHistory.map((gpa, i) => ({ term: `T${i + 1}`, gpa })) : [];
-
   const presentCount = attendanceData.filter(a => a.status === 'present').length;
   const absentCount = attendanceData.filter(a => a.status === 'absent').length;
   const leaveCount = attendanceData.filter(a => a.status === 'leave').length;
@@ -91,38 +87,73 @@ const StudentDetailAdmin = () => {
       case 'academic':
         return (
           <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: 'CGPA', value: student.cgpa != null ? student.cgpa : '—' },
+                { label: 'Current Semester GPA', value: student.currentSemesterGpa != null ? student.currentSemesterGpa : '—' },
+                { label: 'Credits Earned', value: student.creditsEarned != null ? `${student.creditsEarned} / ${student.creditsRequired || '—'}` : '—' },
+                { label: 'Backlogs', value: student.backlogs ?? 0 },
+              ].map(d => (
+                <div key={d.label} className="theme-card border theme-border rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold theme-text">{d.value}</div>
+                  <div className="text-xs theme-text-muted">{d.label}</div>
+                </div>
+              ))}
+            </div>
             <div className="theme-card border theme-border rounded-xl p-5">
-              <h3 className="text-sm font-semibold theme-text mb-3">Subject-wise Marks</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b theme-border">
-                      <th className="text-left py-2 theme-text-muted font-medium">Subject</th>
-                      <th className="text-center py-2 theme-text-muted font-medium">Term 1</th>
-                      <th className="text-center py-2 theme-text-muted font-medium">Term 2</th>
-                      <th className="text-center py-2 theme-text-muted font-medium">Overall</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {student.subjects && student.subjects.map(s => (
-                      <tr key={s.name} className="border-b theme-border">
-                        <td className="py-2 theme-text">{s.name}</td>
-                        <td className="text-center theme-text">{s.term1}</td>
-                        <td className="text-center theme-text">{s.term2}</td>
-                        <td className={`text-center font-medium ${s.score >= 90 ? 'text-emerald-400' : s.score >= 75 ? 'text-amber-400' : 'text-rose-400'}`}>{s.score}%</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <h3 className="text-sm font-semibold theme-text mb-3">Academic Profile</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div><span className="text-xs theme-text-muted block">Department</span><span className="theme-text">{student.department?.name || '—'}</span></div>
+                <div><span className="text-xs theme-text-muted block">Program</span><span className="theme-text">{student.program?.name || '—'}</span></div>
+                <div><span className="text-xs theme-text-muted block">Batch</span><span className="theme-text">{student.batch || '—'}</span></div>
+                <div><span className="text-xs theme-text-muted block">Section</span><span className="theme-text">{student.section || '—'}</span></div>
+                <div><span className="text-xs theme-text-muted block">Placement Status</span><span className="theme-text capitalize">{student.placementStatus || 'Not placed'}</span></div>
+                <div><span className="text-xs theme-text-muted block">Career Goal</span><span className="theme-text">{student.careerGoal || '—'}</span></div>
+                <div><span className="text-xs theme-text-muted block">Faculty Advisor</span><span className="theme-text">{student.facultyAdvisor?.name || '—'}</span></div>
+                <div><span className="text-xs theme-text-muted block">Coding Profile</span>
+                  <span className="theme-text flex flex-wrap gap-2">
+                    {student.github && <a className="text-indigo-400 hover:underline" href={student.github} target="_blank" rel="noreferrer">GitHub</a>}
+                    {student.leetcode && <a className="text-indigo-400 hover:underline" href={student.leetcode} target="_blank" rel="noreferrer">LeetCode</a>}
+                    {student.codeforces && <a className="text-indigo-400 hover:underline" href={student.codeforces} target="_blank" rel="noreferrer">Codeforces</a>}
+                    {student.hackerrank && <a className="text-indigo-400 hover:underline" href={student.hackerrank} target="_blank" rel="noreferrer">HackerRank</a>}
+                    {!student.github && !student.leetcode && !student.codeforces && !student.hackerrank && '—'}
+                  </span>
+                </div>
               </div>
             </div>
             <div className="theme-card border theme-border rounded-xl p-5">
-              <h3 className="text-sm font-semibold theme-text mb-3">GPA Trend</h3>
-              <GradeTrendLine data={gpaData} />
+              <h3 className="text-sm font-semibold theme-text mb-3">Internships</h3>
+              {(student.internships && student.internships.length > 0) ? (
+                <div className="space-y-2">
+                  {student.internships.map(int => (
+                    <div key={int.id} className="border border-theme-border rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium theme-text">{int.role} at {int.company}</span>
+                        <span className={`text-xs px-2 py-1 rounded-full capitalize ${int.isVerified ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                          {int.status}
+                        </span>
+                      </div>
+                      <p className="text-xs theme-text-muted mt-1">{int.startDate} → {int.endDate || 'Present'}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : <p className="text-sm theme-text-muted">No internships recorded.</p>}
             </div>
             <div className="theme-card border theme-border rounded-xl p-5">
-              <h3 className="text-sm font-semibold theme-text mb-3">Performance Radar</h3>
-              <PerformanceRadar />
+              <h3 className="text-sm font-semibold theme-text mb-3">Research Papers</h3>
+              {(student.researchPapers && student.researchPapers.length > 0) ? (
+                <div className="space-y-2">
+                  {student.researchPapers.map(rp => (
+                    <div key={rp.id} className="border border-theme-border rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium theme-text">{rp.title}</span>
+                        <span className="text-xs theme-text-muted">{rp.venue || ''}</span>
+                      </div>
+                      <p className="text-xs theme-text-muted mt-1">{rp.type} · {rp.year}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : <p className="text-sm theme-text-muted">No research papers recorded.</p>}
             </div>
           </div>
         );
@@ -304,7 +335,7 @@ const StudentDetailAdmin = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold theme-text">{student.name}</h1>
-                <p className="theme-text">Class {student.class} · Roll No. {student.rollNumber}</p>
+                <p className="theme-text">{student.program?.name || 'Program'} · Sem {student.semester || student.class} · Reg {student.registerNumber || student.rollNumber}</p>
                 <p className="text-xs theme-text-muted mt-1">Parent: {student.parentContact}</p>
               </div>
               <button onClick={() => setEditMode(!editMode)}
