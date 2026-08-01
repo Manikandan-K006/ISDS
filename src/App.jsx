@@ -10,7 +10,7 @@ import AdminLayout from './components/layout/AdminLayout';
 import ParentLayout from './components/layout/ParentLayout';
 
 // Auth pages
-import AuthLanding from './pages/auth/AuthLanding';
+import RoleSelect from './pages/auth/RoleSelect';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -138,7 +138,7 @@ function App() {
 
               {/* Auth routes */}
               <Route element={<AuthLayout />}>
-                <Route path="/auth" element={<AuthLanding />} />
+                <Route path="/auth" element={<RoleSelect />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
