@@ -54,7 +54,7 @@ export default function ParentDashboard() {
                 </div>
                 <div>
                   <h2 className="text-card-title theme-text">{student.name}</h2>
-                  <p className="text-sm theme-text-muted">Class {student.class} • Roll: {student.rollNumber}</p>
+                  <p className="text-sm theme-text-muted">{student.program?.name || 'Program'} • Sem {student.semester || student.class} • Reg: {student.registerNumber || student.rollNumber}</p>
                 </div>
               </div>
 

@@ -106,7 +106,7 @@ export default function ParentAttendance() {
             className="w-full max-w-sm theme-card border theme-border rounded-xl px-3.5 py-2.5 text-sm theme-text focus:outline-none focus:border-indigo-500/50 transition-colors"
           >
             {students.map((s) => (
-              <option key={s.id} value={s.id}>{s.name} • Class {s.class} • Roll {s.rollNumber}</option>
+              <option key={s.id} value={s.id}>{s.name} • Sem {s.semester || s.class} • Reg {s.registerNumber || s.rollNumber}</option>
             ))}
           </select>
         </div>

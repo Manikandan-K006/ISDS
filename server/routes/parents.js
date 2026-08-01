@@ -116,7 +116,7 @@ router.get('/students/:studentId/report', async (req, res) => {
 
     const student = await prisma.user.findUnique({
       where: { id: req.params.studentId },
-      select: { id: true, name: true, email: true, class: true, rollNumber: true, profilePhoto: true },
+      select: { id: true, name: true, email: true, class: true, rollNumber: true, registerNumber: true, section: true, semester: true, profilePhoto: true, program: { select: { id: true, name: true, code: true } } },
     });
 
     const [attendance, assignments, quizResults, enrollments] = await Promise.all([
