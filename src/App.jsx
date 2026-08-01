@@ -134,6 +134,7 @@ function App() {
             <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               {/* Public routes */}
+              <Route path="/" element={<Landing />} />
               <Route path="/verify" element={<VerifyCertificate />} />
               <Route path="/verify/:certificateId" element={<VerifyCertificate />} />
 
@@ -154,7 +155,6 @@ function App() {
                   </ProtectedRoute>
                 }
               >
-                <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<StudentDashboard />} />
                 <Route path="courses" element={<CourseCatalog />} />
                 <Route path="learning/:courseId" element={<LearningPage />} />
@@ -274,7 +274,7 @@ function App() {
                 <Route path="notifications" element={<Notifications />} />
               </Route>
 
-              <Route path="*" element={<Navigate to="/auth" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             </Suspense>
           </BrowserRouter>
