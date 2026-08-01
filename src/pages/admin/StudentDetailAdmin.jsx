@@ -264,7 +264,7 @@ const StudentDetailAdmin = () => {
         return (
           <div className="space-y-4">
             <div className="theme-card border theme-border rounded-xl p-5">
-              <h3 className="text-sm font-semibold theme-text mb-3">Add Teacher Note</h3>
+              <h3 className="text-sm font-semibold theme-text mb-3">Add Faculty Note</h3>
               <textarea value={teacherNote} onChange={e => setTeacherNote(e.target.value)}
                 placeholder="Write a private note about this student..."
                 className="w-full h-24 theme-input border theme-border rounded-lg p-3 text-sm theme-text placeholder-theme-muted focus:outline-none focus:border-indigo-500/50 resize-none"

@@ -20,11 +20,11 @@ const TeacherProfile = () => {
   useEffect(() => {
     if (user) {
       setProfile({
-        name: user.name || 'Teacher',
+        name: user.name || 'Faculty',
         email: user.email || '',
         subject: 'General',
         phone: user.parentContact || '',
-        bio: user.bio || 'Teacher at ISDS',
+        bio: user.bio || 'Faculty at ISDS',
       });
     }
   }, [user]);

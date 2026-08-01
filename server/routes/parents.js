@@ -19,7 +19,8 @@ router.get('/dashboard', async (req, res) => {
     const students = await prisma.user.findMany({
       where: { id: { in: studentIds } },
       select: {
-        id: true, name: true, email: true, profilePhoto: true, class: true, rollNumber: true,
+        id: true, name: true, email: true, profilePhoto: true, class: true, rollNumber: true, registerNumber: true, section: true, semester: true, programId: true,
+        program: { select: { id: true, name: true, code: true } },
       },
     });
 
