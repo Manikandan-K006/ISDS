@@ -95,10 +95,11 @@ All passwords are `password123`.
 
 | Role    | Email |
 | ------- | ----- |
-| Admin   | `admin@school.com` |
-| Teacher | `verma@school.com` |
-| Student | `arjun@school.com` |
-| Parent  | `parent-arjun@school.com` |
+| Admin   | `admin@college.edu` |
+| Faculty | `verma@college.edu` |
+| Student | `arjun@college.edu` |
+| Parent  | `parent-arjun@college.edu` |
+| Recruiter | `recruiter@college.edu` |
 
 ## API notes
 
