@@ -50,7 +50,7 @@ router.get('/users', async (req, res) => {
         skip,
         take: parseInt(limit),
         orderBy: { createdAt: 'desc' },
-        select: { id: true, name: true, email: true, role: true, profilePhoto: true, isActive: true, isVerified: true, class: true, departmentId: true, createdAt: true, lastLogin: true },
+        select: { id: true, name: true, email: true, role: true, profilePhoto: true, isActive: true, isVerified: true, class: true, departmentId: true, programId: true, section: true, semester: true, registerNumber: true, cgpa: true, placementStatus: true, subject: true, employeeId: true, createdAt: true, lastLogin: true, department: { select: { id: true, name: true, code: true } }, program: { select: { id: true, name: true, code: true } } },
       }),
       prisma.user.count({ where }),
     ]);
@@ -65,7 +65,7 @@ router.get('/users/:id', async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.params.id },
-      include: { department: true, settings: true, _count: { select: { enrollments: true, attendances: true, certificates: true } } },
+      include: { department: true, program: true, facultyAdvisor: { select: { id: true, name: true, email: true } }, settings: true, internships: true, researchPapers: true, _count: { select: { enrollments: true, attendances: true, certificates: true } } },
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ user });
@@ -76,11 +76,18 @@ router.get('/users/:id', async (req, res) => {
 
 router.put('/users/:id', async (req, res) => {
   try {
-    const { name, email, role, isActive, class: className, departmentId, subject, employeeId } = req.body;
+    const { name, email, role, isActive, class: className, departmentId, programId, section, semester, batch, registerNumber, placementStatus, subject, employeeId } = req.body;
     const user = await prisma.user.update({
       where: { id: req.params.id },
-      data: { name, email, role, isActive, class: className, departmentId, subject, employeeId },
-      select: { id: true, name: true, email: true, role: true, isActive: true },
+      data: {
+        name, email, role, isActive,
+        class: className,
+        departmentId, programId, section,
+        semester: semester !== undefined && semester !== null && semester !== '' ? parseInt(semester) : undefined,
+        batch, registerNumber, placementStatus,
+        subject, employeeId,
+      },
+      select: { id: true, name: true, email: true, role: true, isActive: true, section: true, semester: true, programId: true },
     });
 
     await prisma.auditLog.create({
@@ -142,6 +149,105 @@ router.delete('/departments/:id', async (req, res) => {
   try {
     await prisma.department.delete({ where: { id: req.params.id } });
     res.json({ message: 'Department deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Program Management
+router.get('/programs', async (req, res) => {
+  try {
+    const programs = await prisma.program.findMany({
+      include: { department: { select: { id: true, name: true, code: true } }, _count: { select: { users: true, semesters: true } } },
+      orderBy: { name: 'asc' },
+    });
+    res.json({ programs });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/programs', async (req, res) => {
+  try {
+    const { name, code, departmentId, level, durationYears, creditsRequired } = req.body;
+    if (!name || !code || !departmentId) return res.status(400).json({ error: 'Name, code, and department are required.' });
+    const program = await prisma.program.create({
+      data: { name, code, departmentId, level: level || 'UG', durationYears: parseInt(durationYears) || 4, creditsRequired: parseInt(creditsRequired) || 0 },
+    });
+    await prisma.auditLog.create({ data: { adminId: req.userId, action: 'create_program', resource: 'program', resourceId: program.id } });
+    res.status(201).json({ program });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/programs/:id', async (req, res) => {
+  try {
+    const { name, code, departmentId, level, durationYears, creditsRequired, isActive } = req.body;
+    const program = await prisma.program.update({
+      where: { id: req.params.id },
+      data: { name, code, departmentId, level, durationYears: durationYears !== undefined && durationYears !== '' ? parseInt(durationYears) : undefined, creditsRequired: creditsRequired !== undefined && creditsRequired !== '' ? parseInt(creditsRequired) : undefined, isActive },
+    });
+    res.json({ program });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/programs/:id', async (req, res) => {
+  try {
+    await prisma.program.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Program deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Semester Management
+router.get('/semesters', async (req, res) => {
+  try {
+    const { programId } = req.query;
+    const semesters = await prisma.semester.findMany({
+      where: programId ? { programId } : undefined,
+      include: { program: { select: { id: true, name: true, code: true } } },
+      orderBy: [{ program: { name: 'asc' } }, { number: 'asc' }],
+    });
+    res.json({ semesters });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/semesters', async (req, res) => {
+  try {
+    const { programId, number, name, startDate, endDate, isActive } = req.body;
+    if (!programId || !number) return res.status(400).json({ error: 'Program and semester number are required.' });
+    const semester = await prisma.semester.create({
+      data: { programId, number: parseInt(number), name, startDate: startDate ? new Date(startDate) : null, endDate: endDate ? new Date(endDate) : null, isActive: !!isActive },
+    });
+    res.status(201).json({ semester });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/semesters/:id', async (req, res) => {
+  try {
+    const { number, name, startDate, endDate, isActive } = req.body;
+    const semester = await prisma.semester.update({
+      where: { id: req.params.id },
+      data: { number: number !== undefined && number !== '' ? parseInt(number) : undefined, name, startDate: startDate ? new Date(startDate) : null, endDate: endDate ? new Date(endDate) : null, isActive },
+    });
+    res.json({ semester });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/semesters/:id', async (req, res) => {
+  try {
+    await prisma.semester.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Semester deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

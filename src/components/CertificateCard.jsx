@@ -45,7 +45,7 @@ const CertificateCard = ({ certificate, onDownload, student }) => {
           </div>
           <div className="text-right text-xs theme-text-muted">
             <div className="font-medium theme-text-muted">ISDS</div>
-            <div>School Seal</div>
+            <div>College Seal</div>
           </div>
         </div>
       </div>

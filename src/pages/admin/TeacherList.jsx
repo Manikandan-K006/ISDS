@@ -81,8 +81,8 @@ const TeacherList = () => {
         <div className="absolute top-0 right-0 w-64 h-64 theme-input rounded-full -translate-y-32 translate-x-32" />
         <div className="absolute bottom-0 left-0 w-48 h-48 theme-input rounded-full translate-y-24 -translate-x-24" />
         <div className="relative">
-          <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Teachers</h1>
-          <p className="theme-text mt-1">Manage teaching staff accounts and details</p>
+          <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Faculty</h1>
+          <p className="theme-text mt-1">Manage faculty accounts and details</p>
         </div>
       </motion.div>
 
@@ -102,8 +102,8 @@ const TeacherList = () => {
       {teachers.length === 0 ? (
         <div className="theme-card border theme-border rounded-2xl p-12 text-center">
           <FiUsers className="mx-auto theme-text-muted mb-3" size={40} />
-          <p className="theme-text-muted text-lg">No teachers found</p>
-          <p className="theme-text-muted text-sm mt-1">Teachers will appear here once they register.</p>
+          <p className="theme-text-muted text-lg">No faculty found</p>
+          <p className="theme-text-muted text-sm mt-1">Faculty members will appear here once they register.</p>
         </div>
       ) : (
         <>
@@ -112,7 +112,8 @@ const TeacherList = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b theme-border">
-                    <th className="p-3 pl-5 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Teacher</th>
+                    <th className="p-3 pl-5 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Faculty</th>
+                    <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Department</th>
                     <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Subject</th>
                     <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Employee ID</th>
                     <th className="p-3 text-left text-xs theme-text-muted font-medium uppercase tracking-wider">Status</th>

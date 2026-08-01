@@ -192,7 +192,7 @@ export default function Coding() {
       </div>
 
       {problems.length === 0 ? (
-        <Card><EmptyState icon={Code2} title="No problems yet" description="Teachers can add problems from the teacher portal." /></Card>
+        <Card><EmptyState icon={Code2} title="No problems yet" description="Faculty can add problems from the faculty portal." /></Card>
       ) : (
         <div className="space-y-3">
           {problems.map((p) => (

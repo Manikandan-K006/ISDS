@@ -17,14 +17,14 @@ const cardVariants = {
 };
 
 const ROLES = [
-  { key: 'student', label: 'Student', description: 'Dashboard, courses, quizzes, projects, career center', icon: GraduationCap, accent: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20', demo: 'arjun@school.com' },
-  { key: 'teacher', label: 'Teacher', description: 'Courses, assignments, quizzes, gradebook, attendance', icon: BookOpen, accent: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20', demo: 'verma@school.com' },
-  { key: 'admin', label: 'Admin', description: 'Users, jobs, certificates, departments, analytics', icon: Shield, accent: 'from-purple-500 to-purple-600', shadow: 'shadow-purple-500/20', demo: 'admin@school.com' },
+  { key: 'student', label: 'Student', description: 'Courses, internships, research, career center', icon: GraduationCap, accent: 'from-indigo-500 to-indigo-600', shadow: 'shadow-indigo-500/20', demo: 'arjun@college.edu' },
+  { key: 'teacher', label: 'Faculty', description: 'Courses, assignments, quizzes, gradebook, attendance', icon: BookOpen, accent: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20', demo: 'verma@college.edu' },
+  { key: 'admin', label: 'Admin', description: 'Departments, programs, faculty, users, analytics', icon: Shield, accent: 'from-purple-500 to-purple-600', shadow: 'shadow-purple-500/20', demo: 'admin@college.edu' },
 ];
 
 const EXTRA_ROLES = [
-  { key: 'recruiter', label: 'Recruiter', icon: Briefcase, demo: 'recruiter@school.com' },
-  { key: 'parent', label: 'Parent', icon: Users, demo: 'parent-arjun@school.com' },
+  { key: 'recruiter', label: 'Recruiter', icon: Briefcase, demo: 'recruiter@college.edu' },
+  { key: 'parent', label: 'Parent', icon: Users, demo: 'parent-arjun@college.edu' },
 ];
 
 const ROLE_ROUTES = {

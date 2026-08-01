@@ -28,7 +28,7 @@ export default function TeacherDashboard() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-page-title theme-text">Teacher Dashboard</h1>
+          <h1 className="text-page-title theme-text">Faculty Dashboard</h1>
           <p className="theme-text-muted mt-1">Welcome back, {user?.name}</p>
         </div>
         <Link to="/teacher/courses" className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-accent text-white text-sm font-medium hover:opacity-90 transition-opacity">

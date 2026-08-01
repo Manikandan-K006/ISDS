@@ -27,7 +27,7 @@ export default function AdminDashboard() {
   const statCards = [
     { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-500/10', link: '/admin/students' },
     { label: 'Students', value: stats.totalStudents, icon: GraduationCap, color: 'text-emerald-500', bg: 'bg-emerald-500/10', link: '/admin/students' },
-    { label: 'Teachers', value: stats.totalTeachers, icon: Users, color: 'text-violet-500', bg: 'bg-violet-500/10', link: '/admin/teachers' },
+    { label: 'Faculty', value: stats.totalTeachers, icon: Users, color: 'text-violet-500', bg: 'bg-violet-500/10', link: '/admin/teachers' },
     { label: 'Parents', value: stats.totalParents, icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10', link: '/admin/parents' },
     { label: 'Courses', value: stats.totalCourses, icon: BookOpen, color: 'text-rose-500', bg: 'bg-rose-500/10', link: '/admin/courses' },
     { label: 'Departments', value: stats.totalDepartments, icon: Building2, color: 'text-cyan-500', bg: 'bg-cyan-500/10', link: '/admin/departments' },

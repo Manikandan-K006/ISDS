@@ -82,7 +82,7 @@ const Messages = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-page-title theme-text">Messages</h1>
-          <p className="theme-text-muted mt-1">Chat with teachers, students, and parents</p>
+          <p className="theme-text-muted mt-1">Chat with faculty, students, and parents</p>
         </div>
         <button
           onClick={async () => {

@@ -9,7 +9,7 @@ import { Button, Input } from '../../components/ui';
 
 const roles = [
   { id: 'student', label: 'Student', icon: '🎓', color: 'from-indigo-500 to-indigo-600' },
-  { id: 'teacher', label: 'Teacher', icon: '👨‍🏫', color: 'from-emerald-500 to-emerald-600' },
+  { id: 'teacher', label: 'Faculty', icon: '👨‍🏫', color: 'from-emerald-500 to-emerald-600' },
   { id: 'recruiter', label: 'Recruiter', icon: '💼', color: 'from-sky-500 to-sky-600' },
   { id: 'admin', label: 'Admin', icon: '⚙️', color: 'from-purple-500 to-purple-600' },
 ];
@@ -22,7 +22,7 @@ const Register = () => {
     confirmPassword: '',
     role: 'student',
     class: '',
-    rollNumber: '',
+    registerNumber: '',
     department: '',
     subject: '',
     employeeId: '',
@@ -48,8 +48,8 @@ const Register = () => {
     if (!form.confirmPassword.trim()) e.confirmPassword = 'Please confirm your password';
     else if (form.password !== form.confirmPassword) e.confirmPassword = 'Passwords do not match';
     if (form.role === 'student') {
-      if (!form.class.trim()) e.class = 'Class is required';
-      if (!form.rollNumber.trim()) e.rollNumber = 'Roll number is required';
+      if (!form.class.trim()) e.class = 'Semester is required';
+      if (!form.registerNumber.trim()) e.registerNumber = 'Register number is required';
     }
     if (form.role === 'teacher') {
       if (!form.department.trim()) e.department = 'Department is required';
@@ -76,7 +76,7 @@ const Register = () => {
         password: form.password,
         role: form.role,
         class: form.role === 'student' ? form.class : undefined,
-        rollNumber: form.role === 'student' ? form.rollNumber : undefined,
+        registerNumber: form.role === 'student' ? form.registerNumber : undefined,
         subject: form.role === 'teacher' ? form.subject : undefined,
         employeeId: form.role === 'teacher' || form.role === 'recruiter' ? form.employeeId : undefined,
         adminSecretKey: form.role === 'admin' || form.role === 'teacher' || form.role === 'recruiter' ? form.adminAuthorizationPassword : undefined,
@@ -151,7 +151,7 @@ const Register = () => {
                 type="email"
                 value={form.email}
                 onChange={handleChange('email')}
-                placeholder="you@school.com"
+                placeholder="you@college.edu"
                 error={errors.email}
               />
 
@@ -188,21 +188,21 @@ const Register = () => {
                   >
                     <Input
                       icon={FiBook}
-                      label="Department / Class"
+                      label="Semester"
                       type="text"
                       value={form.class}
                       onChange={handleChange('class')}
-                      placeholder="e.g. 10A"
+                      placeholder="e.g. Sem 3"
                       error={errors.class}
                     />
                     <Input
                       icon={FiHash}
-                      label="Roll Number"
+                      label="Register Number"
                       type="text"
-                      value={form.rollNumber}
-                      onChange={handleChange('rollNumber')}
-                      placeholder="e.g. 1012"
-                      error={errors.rollNumber}
+                      value={form.registerNumber}
+                      onChange={handleChange('registerNumber')}
+                      placeholder="e.g. 21CS301"
+                      error={errors.registerNumber}
                     />
                   </motion.div>
                 )}

@@ -29,7 +29,7 @@ const studentNav = [
 const adminNav = [
   { to: '/admin', icon: FiZap, label: 'Overview' },
   { to: '/admin/students', icon: FiUsers, label: 'Students' },
-  { to: '/admin/teachers', icon: FiBookOpen, label: 'Teachers' },
+  { to: '/admin/teachers', icon: FiBookOpen, label: 'Faculty' },
   { to: '/admin/parents', icon: FiUsers, label: 'Parents' },
   { to: '/admin/recruiters', icon: FiBriefcase, label: 'Recruiters' },
   { to: '/admin/courses', icon: FiLayers, label: 'Courses' },

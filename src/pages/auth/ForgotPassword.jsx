@@ -61,7 +61,7 @@ const ForgotPassword = () => {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="you@school.com"
+                  placeholder="you@college.edu"
                   error={error}
                 />
                 <Button type="submit" variant="primary" className="w-full" loading={loading}>
