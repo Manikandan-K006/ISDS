@@ -15,6 +15,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import VerifyCertificate from './pages/public/VerifyCertificate';
+import Landing from './pages/public/Landing';
 
 // Student pages
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
