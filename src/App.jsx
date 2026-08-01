@@ -106,7 +106,7 @@ class ErrorBoundary extends Component {
             </div>
             <h1 className="text-lg font-semibold theme-text mb-2">Something went wrong</h1>
             <p className="text-sm theme-text-muted mb-4 font-mono break-all">{this.state.error.message}</p>
-            <button onClick={() => { this.setState({ error: null }); window.location.href = '/login'; }} className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors">Reload</button>
+            <button onClick={() => { this.setState({ error: null }); window.location.href = '/auth'; }} className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors">Reload</button>
           </div>
         </div>
       );

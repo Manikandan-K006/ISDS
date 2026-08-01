@@ -26,17 +26,17 @@ API.interceptors.response.use(
           localStorage.removeItem('sidts_token');
           localStorage.removeItem('sidts_refresh_token');
           localStorage.removeItem('sidts_user');
-          window.location.href = '/login';
+          window.location.href = '/auth';
         }
       } else {
         localStorage.removeItem('sidts_token');
         localStorage.removeItem('sidts_user');
-        window.location.href = '/login';
+        window.location.href = '/auth';
       }
     } else if (err.response?.status === 401) {
       localStorage.removeItem('sidts_token');
       localStorage.removeItem('sidts_user');
-      window.location.href = '/login';
+      window.location.href = '/auth';
     }
     return Promise.reject(err);
   }

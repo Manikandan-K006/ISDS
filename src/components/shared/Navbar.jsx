@@ -79,7 +79,7 @@ const Navbar = ({ onToggleSidebar }) => {
     } catch {}
   };
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleLogout = () => { logout(); navigate('/auth'); };
 
   const profilePath = user?.role === 'recruiter' ? '/recruiter/profile' : '/profile';
 

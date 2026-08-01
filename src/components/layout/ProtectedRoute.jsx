@@ -7,7 +7,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
       admin: '/admin/dashboard',
       recruiter: '/recruiter/dashboard',
     };
-    return <Navigate to={roleRoutes[user?.role] || '/login'} replace />;
+    return <Navigate to={roleRoutes[user?.role] || '/auth'} replace />;
   }
 
   return children;

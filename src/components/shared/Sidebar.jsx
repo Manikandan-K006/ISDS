@@ -221,7 +221,7 @@ const SidebarContent = ({ navLinks, isActive, collapsed, onClose, logout, naviga
     <div className="border-t theme-border py-3 px-2.5 space-y-1 flex-shrink-0">
       <motion.button
         whileTap={{ scale: 0.97 }}
-        onClick={() => { logout(); navigate('/login'); }}
+        onClick={() => { logout(); navigate('/auth'); }}
         className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-caption font-medium theme-text-muted hover:text-[var(--danger)] hover:bg-[var(--danger-subtle)] transition-all duration-150 group"
         title={collapsed ? 'Sign Out' : undefined}
       >
