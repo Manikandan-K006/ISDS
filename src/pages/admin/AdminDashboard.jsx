@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/client';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
-import { Users, BookOpen, GraduationCap, Building2, Activity } from 'lucide-react';
+import { Users, BookOpen, GraduationCap, Building2, Activity, Layers, CalendarClock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function AdminDashboard() {
@@ -31,6 +31,8 @@ export default function AdminDashboard() {
     { label: 'Parents', value: stats.totalParents, icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10', link: '/admin/parents' },
     { label: 'Courses', value: stats.totalCourses, icon: BookOpen, color: 'text-rose-500', bg: 'bg-rose-500/10', link: '/admin/courses' },
     { label: 'Departments', value: stats.totalDepartments, icon: Building2, color: 'text-cyan-500', bg: 'bg-cyan-500/10', link: '/admin/departments' },
+    { label: 'Programs', value: stats.totalPrograms, icon: Layers, color: 'text-purple-500', bg: 'bg-purple-500/10', link: '/admin/departments' },
+    { label: 'Semesters', value: stats.totalSemesters, icon: CalendarClock, color: 'text-pink-500', bg: 'bg-pink-500/10', link: '/admin/departments' },
   ];
 
   return (

@@ -27,10 +27,37 @@ export default function StudentDashboard() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      <div>
-        <h1 className="text-page-title theme-text">Student Dashboard</h1>
-        <p className="theme-text-muted mt-1">Welcome back, {user?.name}</p>
-      </div>
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="gradient-hero rounded-2xl p-6 lg:p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 theme-input rounded-full -translate-y-32 translate-x-32" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 theme-input rounded-full translate-y-24 -translate-x-24" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Welcome back, {user?.name}</h1>
+            <p className="theme-text mt-1">
+              {user?.program?.name || 'Program'} · {user?.department?.name || 'Department'}
+              {user?.registerNumber && <span className="ml-2 text-xs theme-text-muted">Reg: {user.registerNumber}</span>}
+            </p>
+            <p className="text-xs theme-text-muted mt-1">
+              {user?.semester && <span className="mr-3">Semester {user.semester}</span>}
+              {user?.batch && <span className="mr-3">Batch {user.batch}</span>}
+              {user?.section && <span className="mr-3">Section {user.section}</span>}
+              {user?.facultyAdvisor && <span>Faculty Advisor: {user.facultyAdvisor.name}</span>}
+            </p>
+          </div>
+          {user?.cgpa != null && (
+            <div className="flex items-center gap-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold theme-text">{user.cgpa}</p>
+                <p className="text-xs theme-text-muted">CGPA</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold theme-text">{user.creditsEarned ?? '—'}<span className="text-base theme-text-muted">/{user.creditsRequired || '—'}</span></p>
+                <p className="text-xs theme-text-muted">Credits</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

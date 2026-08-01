@@ -8,7 +8,7 @@ router.use(authorize('admin'));
 // GET /api/admin/dashboard
 router.get('/dashboard', async (req, res) => {
   try {
-    const [totalUsers, totalStudents, totalTeachers, totalParents, totalRecruiters, totalCourses, totalDepartments, recentUsers, recentActivity] = await Promise.all([
+    const [totalUsers, totalStudents, totalTeachers, totalParents, totalRecruiters, totalCourses, totalDepartments, totalPrograms, totalSemesters, recentUsers, recentActivity] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: 'student' } }),
       prisma.user.count({ where: { role: 'teacher' } }),
@@ -16,12 +16,14 @@ router.get('/dashboard', async (req, res) => {
       prisma.user.count({ where: { role: 'recruiter' } }),
       prisma.course.count(),
       prisma.department.count(),
+      prisma.program.count(),
+      prisma.semester.count(),
       prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 10, select: { id: true, name: true, email: true, role: true, profilePhoto: true, createdAt: true } }),
       prisma.activityLog.findMany({ orderBy: { createdAt: 'desc' }, take: 20, include: { user: { select: { name: true, profilePhoto: true } } } }),
     ]);
 
     res.json({
-      stats: { totalUsers, totalStudents, totalTeachers, totalParents, totalRecruiters, totalCourses, totalDepartments },
+      stats: { totalUsers, totalStudents, totalTeachers, totalParents, totalRecruiters, totalCourses, totalDepartments, totalPrograms, totalSemesters },
       recentUsers,
       recentActivity,
     });
@@ -116,7 +118,7 @@ router.delete('/users/:id', async (req, res) => {
 router.get('/departments', async (req, res) => {
   try {
     const departments = await prisma.department.findMany({
-      include: { _count: { select: { users: true, courses: true } } },
+      include: { _count: { select: { users: true, courses: true, programs: true } } },
       orderBy: { name: 'asc' },
     });
     res.json({ departments });
