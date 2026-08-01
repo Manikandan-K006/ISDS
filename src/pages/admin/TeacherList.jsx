@@ -142,6 +142,9 @@ const TeacherList = () => {
                         </div>
                       </td>
                       <td className="p-3">
+                        <span className="text-sm theme-text">{t.department?.name || 'N/A'}</span>
+                      </td>
+                      <td className="p-3">
                         <span className="text-sm theme-text">{t.subject || 'N/A'}</span>
                       </td>
                       <td className="p-3">
@@ -226,7 +229,7 @@ const TeacherList = () => {
           </div>
 
           <div className="flex items-center justify-between text-xs theme-text-muted">
-            <span>Showing {teachers.length} of {total} teachers</span>
+            <span>Showing {teachers.length} of {total} faculty</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -250,7 +253,7 @@ const TeacherList = () => {
 
       <Modal open={editOpen} onClose={() => { setEditOpen(false); setEditing(null); }} size="md">
         <div className="p-6">
-          <h2 className="text-lg font-semibold theme-text mb-4">Edit Teacher</h2>
+          <h2 className="text-lg font-semibold theme-text mb-4">Edit Faculty</h2>
           <div className="space-y-4">
             <Input label="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
             <Input label="Email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
