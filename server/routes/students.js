@@ -288,7 +288,7 @@ router.get('/leaderboard', authorize('student'), async (req, res) => {
       where: { period },
       orderBy: { points: 'desc' },
       take: 50,
-      include: { user: { select: { id: true, name: true, profilePhoto: true, class: true } } },
+      include: { user: { select: { id: true, name: true, profilePhoto: true, class: true, registerNumber: true, semester: true } } },
     });
 
     const myEntry = entries.find(e => e.userId === req.userId);

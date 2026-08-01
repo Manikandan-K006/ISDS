@@ -31,7 +31,7 @@ export default function Leaderboard() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium theme-text">{e.user?.name}</p>
-                <p className="text-xs theme-text-muted">{e.user?.class}</p>
+                <p className="text-xs theme-text-muted">{e.user?.semester ? `Sem ${e.user.semester}` : e.user?.class}{e.user?.registerNumber ? ` · ${e.user.registerNumber}` : ''}</p>
               </div>
               <div className="flex items-center gap-1">
                 <Trophy size={14} className="text-amber-500" />

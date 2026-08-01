@@ -34,14 +34,14 @@ export default function StudentDashboard() {
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold theme-text font-heading">Welcome back, {user?.name}</h1>
             <p className="theme-text mt-1">
-              {user?.program?.name || 'Program'} · {user?.department?.name || 'Department'}
+              {user?.program || 'Program'} · {user?.department || 'Department'}
               {user?.registerNumber && <span className="ml-2 text-xs theme-text-muted">Reg: {user.registerNumber}</span>}
             </p>
             <p className="text-xs theme-text-muted mt-1">
               {user?.semester && <span className="mr-3">Semester {user.semester}</span>}
               {user?.batch && <span className="mr-3">Batch {user.batch}</span>}
               {user?.section && <span className="mr-3">Section {user.section}</span>}
-              {user?.facultyAdvisor && <span>Faculty Advisor: {user.facultyAdvisor.name}</span>}
+              {user?.facultyAdvisor && <span>Faculty Advisor: {user.facultyAdvisor}</span>}
             </p>
           </div>
           {user?.cgpa != null && (
