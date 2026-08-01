@@ -3,44 +3,72 @@ require('dotenv').config();
 
 const prisma = require('./prisma');
 
+// ============================================================
+// COLLEGE SEED — ISDS College of Engineering & Management
+// ============================================================
+
+const departmentSeed = [
+  { name: 'Computer Science & Engineering', code: 'CSE', description: 'Core computer science, software systems and programming' },
+  { name: 'Information Technology', code: 'IT', description: 'IT infrastructure, networks and software applications' },
+  { name: 'Artificial Intelligence & Data Science', code: 'AI', description: 'Machine learning, data science and intelligent systems' },
+  { name: 'Electronics & Communication', code: 'ECE', description: 'Electronics, signal processing and communication systems' },
+  { name: 'Mechanical Engineering', code: 'ME', description: 'Mechanics, design and manufacturing' },
+  { name: 'Civil Engineering', code: 'CE', description: 'Structural, geotechnical and environmental engineering' },
+  { name: 'Management Studies', code: 'MBA', description: 'Business administration and management' },
+  { name: 'Science & Humanities', code: 'SH', description: 'Mathematics, physics, languages and liberal arts' },
+];
+
+const programSeed = [
+  { name: 'B.Tech Information Technology', code: 'B.TECH-IT', dept: 'IT', level: 'UG', durationYears: 4, creditsRequired: 160 },
+  { name: 'B.Tech Computer Science', code: 'B.TECH-CSE', dept: 'CSE', level: 'UG', durationYears: 4, creditsRequired: 160 },
+  { name: 'B.Tech Artificial Intelligence', code: 'B.TECH-AI', dept: 'AI', level: 'UG', durationYears: 4, creditsRequired: 160 },
+  { name: 'B.Tech Electronics & Communication', code: 'B.TECH-ECE', dept: 'ECE', level: 'UG', durationYears: 4, creditsRequired: 160 },
+  { name: 'B.Tech Mechanical', code: 'B.TECH-ME', dept: 'ME', level: 'UG', durationYears: 4, creditsRequired: 160 },
+  { name: 'B.Tech Civil', code: 'B.TECH-CE', dept: 'CE', level: 'UG', durationYears: 4, creditsRequired: 160 },
+  { name: 'MBA', code: 'MBA', dept: 'MBA', level: 'PG', durationYears: 2, creditsRequired: 80 },
+  { name: 'B.Sc Computer Science', code: 'BSC-CS', dept: 'SH', level: 'UG', durationYears: 3, creditsRequired: 120 },
+];
+
+const facultySeed = [
+  { name: 'Dr. Verma', email: 'verma@college.edu', subject: 'Mathematics', employeeId: 'F-101', dept: 'SH', designation: 'Professor & Head' },
+  { name: 'Prof. Kumar', email: 'kumar@college.edu', subject: 'Engineering Physics', employeeId: 'F-102', dept: 'SH', designation: 'Professor' },
+  { name: 'Ms. Singh', email: 'singh@college.edu', subject: 'Technical Communication', employeeId: 'F-103', dept: 'SH', designation: 'Associate Professor' },
+  { name: 'Dr. Gupta', email: 'gupta@college.edu', subject: 'Environmental Science', employeeId: 'F-104', dept: 'SH', designation: 'Assistant Professor' },
+  { name: 'Ms. Patel', email: 'patel@college.edu', subject: 'Professional Communication', employeeId: 'F-105', dept: 'SH', designation: 'Assistant Professor' },
+  { name: 'Mr. Raj', email: 'raj@college.edu', subject: 'Computer Science', employeeId: 'F-106', dept: 'CSE', designation: 'Assistant Professor' },
+  { name: 'Dr. Mehta', email: 'mehta@college.edu', subject: 'Data Structures & Algorithms', employeeId: 'F-107', dept: 'IT', designation: 'Associate Professor' },
+  { name: 'Prof. Iyer', email: 'iyer@college.edu', subject: 'Machine Learning', employeeId: 'F-108', dept: 'AI', designation: 'Professor' },
+];
+
 const studentSeed = [
-  { name: 'Arjun Sharma', email: 'arjun@school.com', password: 'password123', role: 'student', class: '10A', rollNumber: '1012', parentContact: '+91 98765 43210' },
-  { name: 'Priya Patel', email: 'priya@school.com', password: 'password123', role: 'student', class: '10A', rollNumber: '1015', parentContact: '+91 98765 43211' },
-  { name: 'Rahul Singh', email: 'rahul@school.com', password: 'password123', role: 'student', class: '10B', rollNumber: '1020', parentContact: '+91 98765 43212' },
-  { name: 'Ananya Gupta', email: 'ananya@school.com', password: 'password123', role: 'student', class: '9A', rollNumber: '901', parentContact: '+91 98765 43213' },
+  { name: 'Arjun Sharma', email: 'arjun@college.edu', password: 'password123', role: 'student', class: 'Sem 3', section: 'A', semester: 3, batch: '2024', registerNumber: '21IT301', rollNumber: '301', dept: 'IT', program: 'B.Tech Information Technology', faculty: 'Dr. Mehta', phone: '+91 98765 43210', cgpa: 8.6, currentSemesterGpa: 8.2, creditsEarned: 92, creditsRequired: 160, backlogs: 0, placementStatus: 'eligible', careerGoal: 'Full Stack Software Engineer', github: 'https://github.com/arjun', leetcode: 'https://leetcode.com/arjun21', codeforces: 'https://codeforces.com/profile/arjun21', hackerrank: 'https://hackerrank.com/arjun21' },
+  { name: 'Priya Patel', email: 'priya@college.edu', password: 'password123', role: 'student', class: 'Sem 3', section: 'A', semester: 3, batch: '2024', registerNumber: '21CS302', rollNumber: '302', dept: 'CSE', program: 'B.Tech Computer Science', faculty: 'Mr. Raj', phone: '+91 98765 43211', cgpa: 9.1, currentSemesterGpa: 8.9, creditsEarned: 95, creditsRequired: 160, backlogs: 0, placementStatus: 'eligible', careerGoal: 'Data Scientist' },
+  { name: 'Rahul Singh', email: 'rahul@college.edu', password: 'password123', role: 'student', class: 'Sem 3', section: 'B', semester: 3, batch: '2024', registerNumber: '21EC303', rollNumber: '303', dept: 'ECE', program: 'B.Tech Electronics & Communication', faculty: 'Prof. Kumar', phone: '+91 98765 43212', cgpa: 7.4, currentSemesterGpa: 7.1, creditsEarned: 88, creditsRequired: 160, backlogs: 1, placementStatus: 'not_eligible', careerGoal: 'VLSI Design Engineer' },
+  { name: 'Ananya Gupta', email: 'ananya@college.edu', password: 'password123', role: 'student', class: 'Sem 3', section: 'A', semester: 3, batch: '2024', registerNumber: '21AI304', rollNumber: '304', dept: 'AI', program: 'B.Tech Artificial Intelligence', faculty: 'Prof. Iyer', phone: '+91 98765 43213', cgpa: 8.9, currentSemesterGpa: 9.0, creditsEarned: 94, creditsRequired: 160, backlogs: 0, placementStatus: 'eligible', careerGoal: 'Machine Learning Engineer' },
 ];
 
 const courseSeed = [
-  { title: 'Advanced Mathematics', domain: 'Mandatory', type: 'mandatory', creditPoints: 4, instructor: 'Dr. Verma', duration: '12 weeks', difficulty: 'advanced', modules: [{ title: 'Module 1: Algebra', lessons: [{ title: 'Introduction to Algebra', videoUrl: 'https://youtu.be/NybHckSEQBI' }, { title: 'Linear Equations', videoUrl: 'https://youtu.be/Ft2_QtXAnh8' }, { title: 'Quadratic Equations', videoUrl: 'https://youtu.be/1F1LQh1_sNc' }] }, { title: 'Module 2: Calculus', lessons: [{ title: 'Limits & Continuity', videoUrl: 'https://youtu.be/9I7TVGvnIDg' }, { title: 'Derivatives', videoUrl: 'https://youtu.be/PIWAkMpGZTs' }, { title: 'Integration', videoUrl: 'https://youtu.be/JWlKfQ3MBXU' }] }] },
-  { title: 'Quantum Physics', domain: 'Science', type: 'elective', creditPoints: 0, instructor: 'Prof. Kumar', duration: '10 weeks', difficulty: 'advanced', modules: [{ title: 'Module 1: Basics', lessons: [{ title: 'Introduction to Quantum', videoUrl: 'https://youtu.be/JzIYSr3k5_s' }, { title: 'Wave-Particle Duality', videoUrl: 'https://youtu.be/Q_h4IoPJXZw' }] }] },
-  { title: 'English Literature', domain: 'Humanities', type: 'elective', creditPoints: 0, instructor: 'Ms. Singh', duration: '8 weeks', difficulty: 'intermediate', modules: [{ title: 'Module 1: Poetry', lessons: [{ title: 'Romantic Poetry', videoUrl: '' }, { title: 'Modern Poetry', videoUrl: '' }] }] },
-  { title: 'Basketball Fundamentals', domain: 'Physical Education', type: 'elective', creditPoints: 0, instructor: 'Coach Ravi', duration: '6 weeks', difficulty: 'beginner', modules: [] },
-  { title: 'Environmental Science', domain: 'Science', type: 'mandatory', creditPoints: 3, instructor: 'Dr. Gupta', duration: '10 weeks', difficulty: 'intermediate', modules: [{ title: 'Module 1: Ecosystems', lessons: [{ title: 'Introduction', videoUrl: '' }, { title: 'Ecosystem Types', videoUrl: '' }] }] },
-  { title: 'Debate & Communication', domain: 'Co-curricular', type: 'elective', creditPoints: 0, instructor: 'Ms. Patel', duration: '6 weeks', difficulty: 'intermediate', modules: [] },
-  { title: 'Computer Science Fundamentals', domain: 'Engineering', type: 'mandatory', creditPoints: 4, instructor: 'Mr. Raj', duration: '12 weeks', difficulty: 'intermediate', modules: [] },
-  { title: 'Music Theory 101', domain: 'Music', type: 'elective', creditPoints: 0, instructor: 'Mr. Taylor', duration: '8 weeks', difficulty: 'beginner', modules: [] },
-];
-
-const teacherSeed = [
-  { name: 'Dr. Verma', email: 'verma@school.com', subject: 'Mathematics', employeeId: 'T-101' },
-  { name: 'Prof. Kumar', email: 'kumar@school.com', subject: 'Physics', employeeId: 'T-102' },
-  { name: 'Ms. Singh', email: 'singh@school.com', subject: 'English', employeeId: 'T-103' },
-  { name: 'Coach Ravi', email: 'ravi@school.com', subject: 'Physical Education', employeeId: 'T-104' },
-  { name: 'Dr. Gupta', email: 'gupta@school.com', subject: 'Environmental Science', employeeId: 'T-105' },
-  { name: 'Ms. Patel', email: 'patel@school.com', subject: 'Communication', employeeId: 'T-106' },
-  { name: 'Mr. Raj', email: 'raj@school.com', subject: 'Computer Science', employeeId: 'T-107' },
-  { name: 'Mr. Taylor', email: 'taylor@school.com', subject: 'Music', employeeId: 'T-108' },
+  { code: 'MAT201', title: 'Advanced Mathematics', domain: 'Science & Humanities', type: 'core', creditPoints: 4, instructor: 'Dr. Verma', duration: '12 weeks', difficulty: 'advanced', modules: [{ title: 'Module 1: Algebra', lessons: [{ title: 'Introduction to Algebra', videoUrl: 'https://youtu.be/NybHckSEQBI' }, { title: 'Linear Equations', videoUrl: 'https://youtu.be/Ft2_QtXAnh8' }, { title: 'Quadratic Equations', videoUrl: 'https://youtu.be/1F1LQh1_sNc' }] }, { title: 'Module 2: Calculus', lessons: [{ title: 'Limits & Continuity', videoUrl: 'https://youtu.be/9I7TVGvnIDg' }, { title: 'Derivatives', videoUrl: 'https://youtu.be/PIWAkMpGZTs' }, { title: 'Integration', videoUrl: 'https://youtu.be/JWlKfQ3MBXU' }] }] },
+  { code: 'PHY201', title: 'Engineering Physics', domain: 'Science & Humanities', type: 'core', creditPoints: 3, instructor: 'Prof. Kumar', duration: '10 weeks', difficulty: 'advanced', modules: [{ title: 'Module 1: Quantum Mechanics', lessons: [{ title: 'Introduction to Quantum', videoUrl: 'https://youtu.be/JzIYSr3k5_s' }, { title: 'Wave-Particle Duality', videoUrl: 'https://youtu.be/Q_h4IoPJXZw' }] }] },
+  { code: 'HUM201', title: 'Technical Communication', domain: 'Science & Humanities', type: 'core', creditPoints: 3, instructor: 'Ms. Singh', duration: '8 weeks', difficulty: 'intermediate', modules: [{ title: 'Module 1: Technical Writing', lessons: [{ title: 'Technical Reports', videoUrl: '' }, { title: 'Presentations', videoUrl: '' }] }] },
+  { code: 'CSS201', title: 'Operating Systems', domain: 'Engineering', type: 'core', creditPoints: 4, instructor: 'Mr. Raj', duration: '12 weeks', difficulty: 'intermediate', modules: [{ title: 'Module 1: OS Fundamentals', lessons: [{ title: 'Processes & Threads', videoUrl: '' }, { title: 'Scheduling', videoUrl: '' }] }] },
+  { code: 'ENV201', title: 'Environmental Science & Engineering', domain: 'Science & Humanities', type: 'core', creditPoints: 3, instructor: 'Dr. Gupta', duration: '10 weeks', difficulty: 'intermediate', modules: [{ title: 'Module 1: Ecosystems', lessons: [{ title: 'Introduction', videoUrl: '' }, { title: 'Ecosystem Types', videoUrl: '' }] }] },
+  { code: 'HUM202', title: 'Professional Communication', domain: 'Co-curricular', type: 'elective', creditPoints: 2, instructor: 'Ms. Patel', duration: '6 weeks', difficulty: 'intermediate', modules: [] },
+  { code: 'CSF101', title: 'Programming Fundamentals', domain: 'Engineering', type: 'core', creditPoints: 4, instructor: 'Mr. Raj', duration: '12 weeks', difficulty: 'intermediate', modules: [] },
+  { code: 'CSD201', title: 'Database Management Systems', domain: 'Engineering', type: 'core', creditPoints: 4, instructor: 'Dr. Mehta', duration: '12 weeks', difficulty: 'intermediate', modules: [] },
 ];
 
 const achievementSeed = [
   { name: 'First Course Complete', description: 'Completed your first course!', icon: 'trophy', type: 'course_completion', points: 50 },
   { name: 'Perfect Attendance - April', description: '100% attendance in April 2026', icon: 'star', type: 'attendance_perfect', points: 30 },
-  { name: 'Top 3 in Class', description: 'Ranked in the top 3 of the class mid-term exams', icon: 'medal', type: 'leaderboard_top', points: 100 },
+  { name: 'Top 3 in Semester', description: 'Ranked in the top 3 of the semester examinations', icon: 'medal', type: 'leaderboard_top', points: 100 },
   { name: '5 Certificates Earned', description: 'Completed 5 courses', icon: 'award', type: 'course_completion', points: 200 },
 ];
 
 async function clearAll() {
   const order = [
+    prisma.internship.deleteMany({}),
+    prisma.researchPaper.deleteMany({}),
     prisma.projectReview.deleteMany({}),
     prisma.project.deleteMany({}),
     prisma.jobApplication.deleteMany({}),
@@ -72,7 +100,9 @@ async function clearAll() {
     prisma.aIStudyPlan.deleteMany({}),
     prisma.aIInsight.deleteMany({}),
     prisma.course.deleteMany({}),
+    prisma.semester.deleteMany({}),
     prisma.user.deleteMany({}),
+    prisma.program.deleteMany({}),
     prisma.skill.deleteMany({}),
     prisma.achievement.deleteMany({}),
     prisma.department.deleteMany({}),
@@ -87,47 +117,91 @@ async function seed() {
 
     const hash = (pw) => bcrypt.hashSync(pw, 12);
 
-    // Users
-    await prisma.user.create({ data: { name: 'Admin User', email: 'admin@school.com', password: hash('password123'), role: 'admin', isVerified: true } });
+    // ------------------------------------------------------------
+    // Departments
+    // ------------------------------------------------------------
+    const departments = {};
+    for (const d of departmentSeed) {
+      departments[d.code] = await prisma.department.create({ data: { name: d.name, code: d.code, description: d.description } });
+    }
+    console.log(`Created ${departmentSeed.length} departments`);
 
-    const teacherMap = {};
-    for (const t of teacherSeed) {
-      teacherMap[t.name] = await prisma.user.create({ data: { name: t.name, email: t.email, password: hash('password123'), role: 'teacher', subject: t.subject, employeeId: t.employeeId, isVerified: true } });
+    // ------------------------------------------------------------
+    // Programs + Semesters
+    // ------------------------------------------------------------
+    const programs = {};
+    for (const p of programSeed) {
+      const program = await prisma.program.create({
+        data: { name: p.name, code: p.code, departmentId: departments[p.dept].id, level: p.level, durationYears: p.durationYears, creditsRequired: p.creditsRequired },
+      });
+      programs[p.name] = program;
+      for (let n = 1; n <= p.durationYears * 2; n++) {
+        await prisma.semester.create({ data: { programId: program.id, number: n, name: `Semester ${n}`, isActive: n === 3 } });
+      }
+    }
+    console.log(`Created ${programSeed.length} programs with semesters`);
+
+    // ------------------------------------------------------------
+    // Users
+    // ------------------------------------------------------------
+    await prisma.user.create({ data: { name: 'Admin User', email: 'admin@college.edu', password: hash('password123'), role: 'admin', isVerified: true } });
+
+    const facultyMap = {};
+    for (const f of facultySeed) {
+      facultyMap[f.name] = await prisma.user.create({
+        data: { name: f.name, email: f.email, password: hash('password123'), role: 'teacher', subject: f.subject, employeeId: f.employeeId, departmentId: departments[f.dept].id, bio: `${f.designation}, Department of ${departments[f.dept].name}`, isVerified: true },
+      });
     }
 
     const students = [];
     for (const s of studentSeed) {
-      const u = await prisma.user.create({ data: { name: s.name, email: s.email, password: hash(s.password), role: 'student', class: s.class, rollNumber: s.rollNumber, phone: s.parentContact, isVerified: true } });
+      const u = await prisma.user.create({
+        data: {
+          name: s.name, email: s.email, password: hash(s.password), role: 'student',
+          class: s.class, section: s.section, semester: s.semester, batch: s.batch,
+          registerNumber: s.registerNumber, rollNumber: s.rollNumber,
+          departmentId: departments[s.dept].id, programId: programs[s.program].id,
+          facultyAdvisorId: facultyMap[s.faculty].id,
+          cgpa: s.cgpa, currentSemesterGpa: s.currentSemesterGpa, creditsEarned: s.creditsEarned, creditsRequired: s.creditsRequired,
+          backlogs: s.backlogs, placementStatus: s.placementStatus, careerGoal: s.careerGoal,
+          github: s.github, leetcode: s.leetcode, codeforces: s.codeforces, hackerrank: s.hackerrank,
+          phone: s.phone, isVerified: true,
+        },
+      });
       students.push(u);
     }
-    console.log(`Created ${1 + teacherSeed.length + students.length} users`);
+    console.log(`Created ${1 + facultySeed.length + students.length} users`);
 
-    // Parent accounts linked to students
+    // Parent/guardian accounts linked to students
     const parentDefs = [
-      { name: 'Parent of Arjun', email: 'parent-arjun@school.com', student: 'arjun@school.com' },
-      { name: 'Parent of Priya', email: 'parent-priya@school.com', student: 'priya@school.com' },
-      { name: 'Parent of Ananya', email: 'parent-ananya@school.com', student: 'ananya@school.com' },
+      { name: 'Parent of Arjun', email: 'parent-arjun@college.edu', student: 'arjun@college.edu' },
+      { name: 'Parent of Priya', email: 'parent-priya@college.edu', student: 'priya@college.edu' },
+      { name: 'Parent of Ananya', email: 'parent-ananya@college.edu', student: 'ananya@college.edu' },
     ];
     for (const p of parentDefs) {
       const student = students.find((s) => s.email === p.student);
       await prisma.user.create({ data: { name: p.name, email: p.email, password: hash('password123'), role: 'parent', isVerified: true, studentIds: JSON.stringify([student.id]) } });
     }
 
-    const recruiter = await prisma.user.create({ data: { name: 'Sana Kapoor', email: 'recruiter@school.com', password: hash('password123'), role: 'recruiter', employeeId: 'R-101', isVerified: true } });
+    const recruiter = await prisma.user.create({ data: { name: 'Sana Kapoor', email: 'recruiter@college.edu', password: hash('password123'), role: 'recruiter', employeeId: 'R-101', isVerified: true } });
 
-    const studentArjun = students.find((s) => s.email === 'arjun@school.com');
-    const studentPriya = students.find((s) => s.email === 'priya@school.com');
-    const studentAnanya = students.find((s) => s.email === 'ananya@school.com');
+    const studentArjun = students.find((s) => s.email === 'arjun@college.edu');
+    const studentPriya = students.find((s) => s.email === 'priya@college.edu');
+    const studentAnanya = students.find((s) => s.email === 'ananya@college.edu');
 
+    // ------------------------------------------------------------
     // Courses
+    // ------------------------------------------------------------
     const createdCourses = [];
     for (const c of courseSeed) {
-      const instructor = teacherMap[c.instructor];
+      const instructor = facultyMap[c.instructor];
       const course = await prisma.course.create({
         data: {
+          code: c.code,
           title: c.title,
-          description: `${c.domain} - ${c.duration}`,
+          description: `${c.domain} · ${c.duration} · ${c.creditPoints} credits`,
           instructorId: instructor.id,
+          departmentId: departments[instructor.dept || 'SH'].id,
           difficulty: c.difficulty,
           duration: c.duration,
           credits: c.creditPoints,
@@ -158,10 +232,10 @@ async function seed() {
 
     const byTitle = (t) => createdCourses.find((c) => c.title === t);
     const math = byTitle('Advanced Mathematics');
-    const physics = byTitle('Quantum Physics');
-    const english = byTitle('English Literature');
-    const envSci = byTitle('Environmental Science');
-    byTitle('Computer Science Fundamentals');
+    const physics = byTitle('Engineering Physics');
+    const english = byTitle('Technical Communication');
+    const envSci = byTitle('Environmental Science & Engineering');
+    byTitle('Programming Fundamentals');
 
     // Enrollments
     await prisma.enrollment.createMany({
@@ -176,17 +250,17 @@ async function seed() {
     console.log('Created enrollments');
 
     // Assignments
-    const teacher = teacherMap['Dr. Verma'];
+    const teacher = facultyMap['Dr. Verma'];
     await prisma.assignment.create({ data: { courseId: math.id, title: 'Calculus Problem Set', description: 'Solve 10 calculus problems', dueDate: new Date('2026-06-15T23:59:59Z'), maxMarks: 100, status: 'published', createdById: teacher.id } });
-    const a2 = await prisma.assignment.create({ data: { courseId: physics.id, title: 'Physics Lab Report', description: 'Write a lab report on quantum entanglement', dueDate: new Date('2026-06-20T23:59:59Z'), maxMarks: 50, status: 'published', createdById: teacherMap['Prof. Kumar'].id } });
-    const a3 = await prisma.assignment.create({ data: { courseId: english.id, title: 'Shakespeare Essay', description: 'Write a 2000 word essay on Hamlet', dueDate: new Date('2026-05-10T23:59:59Z'), maxMarks: 100, status: 'published', createdById: teacherMap['Ms. Singh'].id } });
+    const a2 = await prisma.assignment.create({ data: { courseId: physics.id, title: 'Physics Lab Report', description: 'Write a lab report on quantum entanglement', dueDate: new Date('2026-06-20T23:59:59Z'), maxMarks: 50, status: 'published', createdById: facultyMap['Prof. Kumar'].id } });
+    const a3 = await prisma.assignment.create({ data: { courseId: english.id, title: 'Technical Report Essay', description: 'Write a technical report on a topic of your choice', dueDate: new Date('2026-05-10T23:59:59Z'), maxMarks: 100, status: 'published', createdById: facultyMap['Ms. Singh'].id } });
     console.log('Created assignments');
 
     // Submissions
     await prisma.assignmentSubmission.createMany({
       data: [
         { assignmentId: a2.id, studentId: studentArjun.id, content: 'Lab report content...', status: 'submitted', submittedAt: new Date('2026-06-19T10:00:00Z') },
-        { assignmentId: a3.id, studentId: studentArjun.id, content: 'Shakespeare essay content...', marks: 88, feedback: 'Excellent analysis!', status: 'graded', submittedAt: new Date('2026-05-08T10:00:00Z'), gradedAt: new Date('2026-05-12T10:00:00Z') },
+        { assignmentId: a3.id, studentId: studentArjun.id, content: 'Technical report content...', marks: 88, feedback: 'Excellent analysis!', status: 'graded', submittedAt: new Date('2026-05-08T10:00:00Z'), gradedAt: new Date('2026-05-12T10:00:00Z') },
       ],
     });
     console.log('Created submissions');
@@ -211,7 +285,7 @@ async function seed() {
       data: {
         studentId: studentArjun.id,
         courseId: english.id,
-        title: 'English Literature - Certificate',
+        title: 'Technical Communication - Certificate',
         grade: 'A',
         percentage: 92,
         score: 92,
@@ -223,7 +297,7 @@ async function seed() {
       data: {
         studentId: studentAnanya.id,
         courseId: envSci.id,
-        title: 'Environmental Science - Certificate',
+        title: 'Environmental Science & Engineering - Certificate',
         grade: 'A-',
         percentage: 88,
         score: 88,
@@ -274,8 +348,8 @@ async function seed() {
     await prisma.notification.createMany({
       data: [
         { userId: studentArjun.id, title: 'Welcome!', message: 'Your account is ready. Explore courses and start learning.', type: 'info', category: 'system' },
-        { userId: studentArjun.id, title: 'Assignment graded', message: 'Your Shakespeare Essay was graded: 88/100', type: 'success', category: 'grade', link: `/assignments/${a3.id}` },
-        { userId: studentArjun.id, title: 'New certificate', message: 'You earned a certificate in English Literature!', type: 'success', category: 'certificate' },
+        { userId: studentArjun.id, title: 'Assignment graded', message: 'Your Technical Report was graded: 88/100', type: 'success', category: 'grade', link: `/assignments/${a3.id}` },
+        { userId: studentArjun.id, title: 'New certificate', message: 'You earned a certificate in Technical Communication!', type: 'success', category: 'certificate' },
       ],
     });
     console.log('Created notifications');
@@ -290,23 +364,46 @@ async function seed() {
     console.log('Created messages');
 
     // ------------------------------------------------------------
+    // Internships
+    // ------------------------------------------------------------
+    await prisma.internship.createMany({
+      data: [
+        { studentId: studentArjun.id, company: 'TechNova Solutions', role: 'Software Development Intern', startDate: new Date('2026-01-01T00:00:00Z'), endDate: new Date('2026-04-30T00:00:00Z'), status: 'completed', mentorName: 'Anil Rao', summary: 'Built REST APIs and React dashboards for a student-facing product.', isVerified: true },
+        { studentId: studentArjun.id, company: 'Campus Club', role: 'Web Development Intern (Virtual)', startDate: new Date('2025-06-01T00:00:00Z'), endDate: new Date('2025-08-31T00:00:00Z'), status: 'completed', mentorName: 'Ravi Menon', summary: 'Developed event pages and internal dashboards.' },
+        { studentId: studentAnanya.id, company: 'AeroML Labs', role: 'ML Research Intern', startDate: new Date('2026-05-01T00:00:00Z'), status: 'ongoing', mentorName: 'Prof. Iyer', summary: 'Working on NLP-based document classification.' },
+      ],
+    });
+    console.log('Created internships');
+
+    // ------------------------------------------------------------
+    // Research papers
+    // ------------------------------------------------------------
+    await prisma.researchPaper.createMany({
+      data: [
+        { studentId: studentArjun.id, title: 'Adaptive Learning Path Generation using Knowledge Graphs', type: 'conference', venue: 'ICACCT 2026', year: 2026, authors: JSON.stringify(['Arjun Sharma', 'Dr. Mehta', 'Prof. Iyer']), doi: '10.1109/ICACCT.2026.00012', link: 'https://ieeexplore.ieee.org/document/1234567', status: 'published', isVerified: true },
+        { studentId: studentArjun.id, title: 'Optimizing Student Habit Tracking with PWA Architecture', type: 'journal', venue: 'International Journal of Emerging Technologies', year: 2025, authors: JSON.stringify(['Arjun Sharma']), status: 'under_review' },
+      ],
+    });
+    console.log('Created research papers');
+
+    // ------------------------------------------------------------
     // Career profiles
     // ------------------------------------------------------------
     await prisma.careerProfile.create({
       data: {
         studentId: studentArjun.id,
         headline: 'Aspiring Full Stack Developer',
-        summary: 'Enthusiastic student passionate about web development, mathematics, and building real-world tools.',
+        summary: 'Enthusiastic college student passionate about web development, mathematics, and building real-world tools.',
         github: 'https://github.com/arjun',
         linkedin: 'https://linkedin.com/in/arjun',
         portfolioUrl: 'https://arjun.dev',
-        education: JSON.stringify([{ degree: 'Class 10', institution: 'ISDS School', year: '2026', score: '92%' }]),
-        experience: JSON.stringify([{ title: 'Web Dev Intern (Virtual)', company: 'Campus Club', startDate: '2026-01', endDate: '2026-04', description: 'Built event pages and dashboards' }]),
+        education: JSON.stringify([{ degree: 'B.Tech Information Technology', institution: 'ISDS College of Engineering & Management', year: '2028', score: '8.6 CGPA' }]),
+        experience: JSON.stringify([{ title: 'Software Development Intern', company: 'TechNova Solutions', startDate: '2026-01', endDate: '2026-04', description: 'Built REST APIs and React dashboards' }]),
         isPublic: true,
       },
     });
     await prisma.careerProfile.create({
-      data: { studentId: studentPriya.id, headline: 'Mathematics Enthusiast', summary: 'Top student in advanced mathematics.', isPublic: true },
+      data: { studentId: studentPriya.id, headline: 'Mathematics & Data Enthusiast', summary: 'Top student in advanced mathematics with strong Python foundations.', isPublic: true },
     });
     console.log('Created career profiles');
 
@@ -316,7 +413,7 @@ async function seed() {
     const projectArjun = await prisma.project.create({
       data: {
         studentId: studentArjun.id,
-        title: 'Student Habit Tracker',
+        title: 'Campus Habit Tracker',
         description: 'A web app that helps students track study streaks, planner tasks, and attendance risk.',
         techStack: JSON.stringify(['React', 'Node.js', 'JavaScript']),
         githubUrl: 'https://github.com/arjun/habit-tracker',
@@ -332,7 +429,7 @@ async function seed() {
       data: {
         studentId: studentArjun.id,
         title: 'Math Quiz Generator',
-        description: 'Generates adaptive math quizzes for class 9-10 with difficulty scaling.',
+        description: 'Generates adaptive mathematics quizzes for first-year engineering courses with difficulty scaling.',
         techStack: JSON.stringify(['JavaScript', 'React']),
         githubUrl: 'https://github.com/arjun/math-quiz',
         status: 'completed',
@@ -429,8 +526,8 @@ async function seed() {
     await prisma.plannerTask.createMany({
       data: [
         { studentId: studentArjun.id, title: 'Finish: Calculus Problem Set', subject: 'Advanced Mathematics', date: new Date('2026-06-15T00:00:00Z'), duration: 90, priority: 'high', status: 'pending', deadline: new Date('2026-06-15T23:59:59Z'), source: 'assignment' },
-        { studentId: studentArjun.id, title: 'Study: Quantum Physics (40% left)', subject: 'Quantum Physics', date: new Date('2026-06-18T00:00:00Z'), duration: 60, priority: 'medium', status: 'pending', source: 'course' },
-        { studentId: studentArjun.id, title: 'Revise English Literature notes', subject: 'English Literature', date: new Date('2026-06-10T00:00:00Z'), duration: 45, priority: 'low', status: 'completed', source: 'manual' },
+        { studentId: studentArjun.id, title: 'Study: Engineering Physics (40% left)', subject: 'Engineering Physics', date: new Date('2026-06-18T00:00:00Z'), duration: 60, priority: 'medium', status: 'pending', source: 'course' },
+        { studentId: studentArjun.id, title: 'Revise Technical Communication notes', subject: 'Technical Communication', date: new Date('2026-06-10T00:00:00Z'), duration: 45, priority: 'low', status: 'completed', source: 'manual' },
       ],
     });
     console.log('Created planner tasks');
@@ -438,7 +535,7 @@ async function seed() {
     // ------------------------------------------------------------
     // Coding problems
     // ------------------------------------------------------------
-    const codingInstructor = teacherMap['Mr. Raj'];
+    const codingInstructor = facultyMap['Mr. Raj'];
     await prisma.codingProblem.create({
       data: {
         title: 'Two Sum',
@@ -523,7 +620,7 @@ async function seed() {
     console.log('Created sample upload certificate');
 
     console.log('\n✅ Seed completed successfully!');
-    console.log(`Users: admin@school.com / password123 | teacher: verma@school.com / password123 | student: arjun@school.com / password123 | parent: parent-arjun@school.com / password123 | recruiter: recruiter@school.com / password123`);
+    console.log(`Users: admin@college.edu / password123 | faculty: verma@college.edu / password123 | student: arjun@college.edu / password123 | parent: parent-arjun@college.edu / password123 | recruiter: recruiter@college.edu / password123`);
     await prisma.$disconnect();
     process.exit(0);
   } catch (err) {

@@ -45,8 +45,27 @@ const formatUser = (user) => ({
   role: user.role,
   class: user.class,
   rollNumber: user.rollNumber,
+  registerNumber: user.registerNumber,
   departmentId: user.departmentId,
   department: user.department?.name || null,
+  programId: user.programId,
+  program: user.program?.name || null,
+  batch: user.batch,
+  semester: user.semester,
+  section: user.section,
+  facultyAdvisorId: user.facultyAdvisorId,
+  facultyAdvisor: user.facultyAdvisor?.name || null,
+  cgpa: user.cgpa,
+  currentSemesterGpa: user.currentSemesterGpa,
+  creditsEarned: user.creditsEarned,
+  creditsRequired: user.creditsRequired,
+  backlogs: user.backlogs,
+  placementStatus: user.placementStatus,
+  careerGoal: user.careerGoal,
+  github: user.github,
+  leetcode: user.leetcode,
+  codeforces: user.codeforces,
+  hackerrank: user.hackerrank,
   subject: user.subject,
   employeeId: user.employeeId,
   profilePhoto: user.profilePhoto,
@@ -55,7 +74,7 @@ const formatUser = (user) => ({
 
 // POST /api/auth/register
 router.post('/register', asyncHandler(async (req, res) => {
-  const { name, email, password, role, class: className, rollNumber, departmentId, subject, employeeId, adminSecretKey } = req.body;
+  const { name, email, password, role, class: className, rollNumber, registerNumber, departmentId, programId, section, semester, batch, facultyAdvisorId, subject, employeeId, adminSecretKey } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required.' });
@@ -91,14 +110,20 @@ router.post('/register', asyncHandler(async (req, res) => {
       role: selectedRole,
       class: className || null,
       rollNumber: rollNumber || null,
+      registerNumber: registerNumber || null,
       departmentId: departmentId || null,
+      programId: programId || null,
+      section: section || null,
+      semester: semester ? parseInt(semester) : null,
+      batch: batch || null,
+      facultyAdvisorId: facultyAdvisorId || null,
       subject: subject || null,
       employeeId: employeeId || null,
       settings: {
         create: { theme: 'dark', language: 'en' },
       },
     },
-    include: { department: true },
+    include: { department: true, program: true, facultyAdvisor: { select: { id: true, name: true } } },
   });
 
   const token = generateToken(user);
@@ -368,7 +393,7 @@ router.post('/logout', authenticate, asyncHandler(async (req, res) => {
 router.get('/me', authenticate, asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.userId },
-    include: { department: true, settings: true },
+    include: { department: true, program: true, facultyAdvisor: { select: { id: true, name: true } }, settings: true },
   });
   if (!user) return res.status(404).json({ error: 'User not found.' });
   res.json({ user: formatUser(user) });

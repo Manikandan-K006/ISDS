@@ -422,16 +422,209 @@ router.get('/analytics', authorize('student'), async (req, res) => {
   }
 });
 
+// GET /api/students/profile
+router.get('/profile', authorize('student'), async (req, res) => {
+  try {
+    const studentId = req.userId;
+    const [user, internships, researchPapers] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: studentId },
+        include: { department: true, program: true, facultyAdvisor: { select: { id: true, name: true, email: true, subject: true } } },
+      }),
+      prisma.internship.findMany({ where: { studentId }, orderBy: { createdAt: 'desc' } }),
+      prisma.researchPaper.findMany({ where: { studentId }, orderBy: { createdAt: 'desc' } }),
+    ]);
+    if (!user) return res.status(404).json({ error: 'Student not found' });
+    res.json({
+      profile: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        bio: user.bio,
+        profilePhoto: user.profilePhoto,
+        registerNumber: user.registerNumber,
+        rollNumber: user.rollNumber,
+        class: user.class,
+        section: user.section,
+        semester: user.semester,
+        batch: user.batch,
+        departmentId: user.departmentId,
+        department: user.department?.name || null,
+        programId: user.programId,
+        program: user.program?.name || null,
+        facultyAdvisorId: user.facultyAdvisorId,
+        facultyAdvisor: user.facultyAdvisor || null,
+        cgpa: user.cgpa,
+        currentSemesterGpa: user.currentSemesterGpa,
+        creditsEarned: user.creditsEarned,
+        creditsRequired: user.creditsRequired,
+        backlogs: user.backlogs,
+        placementStatus: user.placementStatus,
+        careerGoal: user.careerGoal,
+        github: user.github,
+        leetcode: user.leetcode,
+        codeforces: user.codeforces,
+        hackerrank: user.hackerrank,
+        codingProblemsSolved: user.codingProblemsSolved,
+        codingStreak: user.codingStreak,
+      },
+      internships,
+      researchPapers,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // PUT /api/students/profile
 router.put('/profile', authorize('student'), async (req, res) => {
   try {
-    const { name, phone, bio, profilePhoto } = req.body;
+    const {
+      name, phone, bio, profilePhoto,
+      registerNumber, section, semester, batch, programId, facultyAdvisorId,
+      cgpa, currentSemesterGpa, creditsEarned, creditsRequired, backlogs,
+      placementStatus, careerGoal, github, leetcode, codeforces, hackerrank,
+    } = req.body;
     const user = await prisma.user.update({
       where: { id: req.userId },
-      data: { name, phone, bio, profilePhoto },
-      select: { id: true, name: true, email: true, phone: true, bio: true, profilePhoto: true, role: true, class: true, rollNumber: true },
+      data: {
+        name, phone, bio, profilePhoto,
+        registerNumber, section,
+        semester: semester !== undefined && semester !== null && semester !== '' ? parseInt(semester) : undefined,
+        batch, programId, facultyAdvisorId,
+        cgpa: cgpa !== undefined && cgpa !== null && cgpa !== '' ? parseFloat(cgpa) : undefined,
+        currentSemesterGpa: currentSemesterGpa !== undefined && currentSemesterGpa !== null && currentSemesterGpa !== '' ? parseFloat(currentSemesterGpa) : undefined,
+        creditsEarned: creditsEarned !== undefined && creditsEarned !== null && creditsEarned !== '' ? parseInt(creditsEarned) : undefined,
+        creditsRequired: creditsRequired !== undefined && creditsRequired !== null && creditsRequired !== '' ? parseInt(creditsRequired) : undefined,
+        backlogs: backlogs !== undefined && backlogs !== null && backlogs !== '' ? parseInt(backlogs) : undefined,
+        placementStatus, careerGoal, github, leetcode, codeforces, hackerrank,
+      },
+      select: { id: true, name: true, email: true, phone: true, bio: true, profilePhoto: true, role: true, class: true, rollNumber: true, registerNumber: true, section: true, semester: true, batch: true, programId: true, departmentId: true, cgpa: true, currentSemesterGpa: true, creditsEarned: true, creditsRequired: true, backlogs: true, placementStatus: true, careerGoal: true, github: true, leetcode: true, codeforces: true, hackerrank: true },
     });
     res.json({ user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------------------------------------------------
+// Internships (student-owned CRUD)
+// ------------------------------------------------------------
+router.get('/internships', authorize('student'), async (req, res) => {
+  try {
+    const internships = await prisma.internship.findMany({ where: { studentId: req.userId }, orderBy: { createdAt: 'desc' } });
+    res.json({ internships });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/internships', authorize('student'), async (req, res) => {
+  try {
+    const { company, role, startDate, endDate, status, offerLetterUrl, completionCertificateUrl, mentorName, summary } = req.body;
+    if (!company || !role) return res.status(400).json({ error: 'Company and role are required.' });
+    const internship = await prisma.internship.create({
+      data: {
+        studentId: req.userId, company, role,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        status: status || 'completed', offerLetterUrl, completionCertificateUrl, mentorName, summary,
+      },
+    });
+    res.status(201).json({ internship });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/internships/:id', authorize('student'), async (req, res) => {
+  try {
+    const existing = await prisma.internship.findUnique({ where: { id: req.params.id } });
+    if (!existing || existing.studentId !== req.userId) return res.status(403).json({ error: 'Not authorized' });
+    const { company, role, startDate, endDate, status, offerLetterUrl, completionCertificateUrl, mentorName, summary } = req.body;
+    const internship = await prisma.internship.update({
+      where: { id: req.params.id },
+      data: {
+        company, role,
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        status, offerLetterUrl, completionCertificateUrl, mentorName, summary,
+      },
+    });
+    res.json({ internship });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/internships/:id', authorize('student'), async (req, res) => {
+  try {
+    const existing = await prisma.internship.findUnique({ where: { id: req.params.id } });
+    if (!existing || existing.studentId !== req.userId) return res.status(403).json({ error: 'Not authorized' });
+    await prisma.internship.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Internship deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ------------------------------------------------------------
+// Research papers (student-owned CRUD)
+// ------------------------------------------------------------
+router.get('/research', authorize('student'), async (req, res) => {
+  try {
+    const researchPapers = await prisma.researchPaper.findMany({ where: { studentId: req.userId }, orderBy: { createdAt: 'desc' } });
+    res.json({ researchPapers });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/research', authorize('student'), async (req, res) => {
+  try {
+    const { title, type, venue, year, authors, doi, link, status } = req.body;
+    if (!title) return res.status(400).json({ error: 'Title is required.' });
+    const paper = await prisma.researchPaper.create({
+      data: {
+        studentId: req.userId, title, type: type || 'journal', venue,
+        year: year ? parseInt(year) : null,
+        authors: Array.isArray(authors) ? JSON.stringify(authors) : '[]',
+        doi, link, status: status || 'published',
+      },
+    });
+    res.status(201).json({ paper });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/research/:id', authorize('student'), async (req, res) => {
+  try {
+    const existing = await prisma.researchPaper.findUnique({ where: { id: req.params.id } });
+    if (!existing || existing.studentId !== req.userId) return res.status(403).json({ error: 'Not authorized' });
+    const { title, type, venue, year, authors, doi, link, status } = req.body;
+    const paper = await prisma.researchPaper.update({
+      where: { id: req.params.id },
+      data: {
+        title, type, venue,
+        year: year !== undefined && year !== null && year !== '' ? parseInt(year) : null,
+        authors: Array.isArray(authors) ? JSON.stringify(authors) : '[]',
+        doi, link, status,
+      },
+    });
+    res.json({ paper });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/research/:id', authorize('student'), async (req, res) => {
+  try {
+    const existing = await prisma.researchPaper.findUnique({ where: { id: req.params.id } });
+    if (!existing || existing.studentId !== req.userId) return res.status(403).json({ error: 'Not authorized' });
+    await prisma.researchPaper.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Research paper deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -174,21 +174,45 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Student-specific
-  class         String?
-  rollNumber    String?
-  departmentId  String?
-  enrollmentYear Int?
-  
+  // Student-specific (college)
+  class               String?   // Backward-compatible alias for section label
+  rollNumber          String?
+  registerNumber      String?   // College register number (e.g., 21CS301)
+  departmentId        String?
+  programId           String?
+  batch               String?   // Admission batch year (e.g., 2024)
+  semester            Int?      // Current semester (1-8)
+  section             String?   // Section/Batch group (e.g., A, B)
+  facultyAdvisorId    String?   // Assigned Faculty Advisor
+  cgpa                Float?
+  currentSemesterGpa  Float?
+  creditsEarned       Int?
+  creditsRequired     Int?
+  backlogs            Int?
+  placementStatus     String?   // not_eligible / eligible / shortlisted / offered / placed
+  careerGoal          String?
+  github              String?
+  leetcode            String?
+  codeforces          String?
+  hackerrank          String?
+  codingProblemsSolved Int?
+  codingStreak        Int?
+  enrollmentYear      Int?
+
   // Teacher-specific
   employeeId    String?   @unique
   subject       String?
-  
+
   // Parent-specific
   studentIds    Json      @default("[]") // Array of student IDs linked to parent
-  
+
   // Relations
   department          Department?          @relation(fields: [departmentId], references: [id])
+  program             Program?             @relation(fields: [programId], references: [id])
+  facultyAdvisor      User?                @relation("FacultyAdvisor", fields: [facultyAdvisorId], references: [id])
+  advisees            User[]               @relation("FacultyAdvisor")
+  internships         Internship[]
+  researchPapers      ResearchPaper[]
   coursesTaught       Course[]             @relation("CourseInstructor")
   enrollments         Enrollment[]
   attendances         Attendance[]
@@ -263,9 +287,100 @@ model Department {
 
   users       User[]
   courses     Course[]
+  programs    Program[]
 
   @@index([code])
   @@map("departments")
+}
+
+// ============================================================
+// PROGRAMS (B.Tech, B.E., B.Sc., M.Tech., MBA, MCA ...)
+// ============================================================
+model Program {
+  id             String      @id @default(cuid())
+  name           String
+  code           String      @unique
+  departmentId   String
+  department     Department  @relation(fields: [departmentId], references: [id])
+  level          String      @default("UG") // UG / PG / Diploma
+  durationYears  Int         @default(4)
+  creditsRequired Int        @default(160)
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  users      User[]
+  semesters  Semester[]
+
+  @@index([departmentId])
+  @@map("programs")
+}
+
+// ============================================================
+// SEMESTERS
+// ============================================================
+model Semester {
+  id         String    @id @default(cuid())
+  programId  String
+  program    Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  number     Int
+  name       String?   // e.g. "Semester 3"
+  startDate  DateTime?
+  endDate    DateTime?
+  isActive   Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([programId, number])
+  @@index([programId])
+  @@map("semesters")
+}
+
+// ============================================================
+// INTERNSHIPS
+// ============================================================
+model Internship {
+  id                String    @id @default(cuid())
+  studentId         String
+  student           User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  company           String
+  role              String
+  startDate         DateTime?
+  endDate           DateTime?
+  status            String    @default("completed") // ongoing / completed
+  offerLetterUrl    String?
+  completionCertificateUrl String?
+  mentorName        String?
+  summary           String?
+  isVerified        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([studentId])
+  @@map("internships")
+}
+
+// ============================================================
+// RESEARCH PAPERS / PUBLICATIONS
+// ============================================================
+model ResearchPaper {
+  id         String   @id @default(cuid())
+  studentId  String
+  student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title      String
+  type       String   @default("journal") // journal / conference / patent / workshop
+  venue      String?
+  year       Int?
+  authors    Json     @default("[]")
+  doi        String?
+  link       String?
+  status     String   @default("published") // published / under_review / in_progress
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([studentId])
+  @@map("research_papers")
 }
 
 // ============================================================
@@ -273,6 +388,7 @@ model Department {
 // ============================================================
 model Course {
   id            String       @id @default(cuid())
+  code          String?
   title         String
   description   String?
   thumbnail     String?
