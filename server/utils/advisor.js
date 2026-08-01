@@ -90,7 +90,15 @@ function formatDate(d) {
 }
 
 async function buildStudentContext(prisma, userId) {
-  const [user, attendance, pendingAssignments, unattemptedQuizzes, quizResults, gradedSubmissions, plannerTasks, careerProfile, jobs, applications] = await Promise.all([
+  const enrollments = await prisma.enrollment.findMany({
+    where: { studentId: userId },
+    select: { courseId: true, course: { select: { title: true } } },
+  });
+  const enrolledCourseIds = enrollments.map((e) => e.courseId);
+  const courseTitles = {};
+  enrollments.forEach((e) => { courseTitles[e.courseId] = e.course.title; });
+
+  const [user, attendance, pendingAssignments, quizResults, gradedSubmissions, plannerTasks, careerProfile, jobs, applications] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, name: true, cgpa: true, currentSemesterGpa: true, backlogs: true, creditsEarned: true, creditsRequired: true, placementStatus: true, careerGoal: true, registerNumber: true },
@@ -100,19 +108,10 @@ async function buildStudentContext(prisma, userId) {
       where: {
         status: 'published',
         dueDate: { gte: new Date() },
-        course: { enrollments: { some: { studentId: userId } } },
+        courseId: { in: enrolledCourseIds },
       },
       include: { course: { select: { title: true } } },
       orderBy: { dueDate: 'asc' },
-      take: 8,
-    }),
-    prisma.quiz.findMany({
-      where: {
-        status: 'published',
-        course: { enrollments: { some: { studentId: userId } } },
-        results: { none: { studentId: userId } },
-      },
-      include: { course: { select: { title: true } } },
       take: 8,
     }),
     prisma.quizResult.findMany({
@@ -141,6 +140,18 @@ async function buildStudentContext(prisma, userId) {
       select: { status: true },
     }),
   ]);
+
+  const rawQuizzes = enrolledCourseIds.length
+    ? await prisma.quiz.findMany({
+        where: {
+          status: 'published',
+          courseId: { in: enrolledCourseIds },
+          results: { none: { studentId: userId } },
+        },
+        take: 8,
+      })
+    : [];
+  const unattemptedQuizzes = rawQuizzes.map((q) => ({ ...q, course: { title: courseTitles[q.courseId] || 'Enrolled course' } }));
 
   const att = computeAttendanceStats(attendance);
   const risk = attendanceRisk({ total: att.total, present: att.present, target: 75 });
