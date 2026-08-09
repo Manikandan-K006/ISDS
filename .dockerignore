@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.gitignore
+*.md
+**/uploads/*
+**/.env*
+Dockerfile
+render.yaml
+railway.json
+files.zip
