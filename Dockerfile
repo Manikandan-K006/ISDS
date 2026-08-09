@@ -18,4 +18,4 @@ RUN npx prisma generate || true
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "npx prisma generate && npx prisma db push --skip-generate --accept-data-loss && node server/bootstrap.js && node server/index.js"]
+CMD ["sh", "-c", "npx prisma generate && npx prisma db push --accept-data-loss && node server/bootstrap.js && node server/index.js"]
