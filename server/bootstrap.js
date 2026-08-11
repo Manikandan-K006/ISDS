@@ -6,7 +6,7 @@ const prisma = require('./prisma');
     const count = await prisma.user.count();
     if (count === 0) {
       console.log('ISDS: empty database — seeding demo data...');
-      execSync('node server/seed.js', { stdio: 'inherit', cwd: __dirname });
+      execSync('node seed.js', { stdio: 'inherit', cwd: __dirname });
       console.log('ISDS: demo data seeded.');
     } else {
       console.log(`ISDS: database already has ${count} users — skipping seed.`);

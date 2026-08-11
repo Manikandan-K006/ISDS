@@ -14,9 +14,9 @@ A full-stack student management platform: dashboards for **admin, teachers, stud
 ## Project layout
 
 ```
-prisma/schema.prisma    Prisma schema (MySQL)
-prisma.config.ts        Prisma CLI config (DATABASE_URL)
-server/                 Express API (CommonJS)
+server/                 Express API (CommonJS) — fully self-contained
+  prisma/schema.prisma  Prisma schema (MySQL)
+  prisma.config.ts      Prisma CLI config (DATABASE_URL)
   index.js              Entrypoint; mounts all /api routes
   config/env.js         Central env config (fails fast in production)
   middleware/           auth (JWT), audit, error
@@ -34,24 +34,24 @@ scripts/dev-db.ps1      Dev MySQL lifecycle helper (Windows)
 
 ## Prerequisites
 
-- Node.js **24+** (root `package.json` is ESM; `server/` is CommonJS — do not install `@prisma/client` inside `server/`)
+- Node.js **24+** (root `package.json` is ESM; `server/` is CommonJS and fully self-contained)
 - MySQL 8 server reachable on the port in `DATABASE_URL` (local dev default: `localhost:3307`, see `scripts/dev-db.ps1`)
 
 ## Setup
 
 ```bash
-npm install                 # installs frontend + server deps (server resolves deps from root node_modules)
+npm install                 # frontend deps (repo root)
+cd server && npm install    # backend deps (server/ is fully self-contained)
 
 # 1. Configure environment
-#    Root .env:        DATABASE_URL=mysql://root:<pass>@localhost:3307/isds
-#    server/.env:      DATABASE_URL=...  +  ADMIN_SECRET_KEY=...  (see .env.example style below)
+#    server/.env:   DATABASE_URL=mysql://root:<pass>@localhost:3307/isds  (see .env.example)
 
-# 2. Prepare the database
+# 2. Prepare the database (run from server/)
 npx prisma generate
-npx prisma db push         # apply schema (dev)
+npx prisma db push          # apply schema (dev)
 
 # 3. (Optional) Seed demo data
-node server/seed.js
+node seed.js
 ```
 
 ### Environment variables (`server/.env`)
@@ -89,7 +89,7 @@ npm run dev                # Vite dev server on :5173
 | `npm run lint` | ESLint (flat config; 0 errors expected) |
 | `npm test` | Server unit tests (Node `node:test`, no DB required) |
 
-## Demo accounts (after `node server/seed.js`)
+## Demo accounts (after `node seed.js` in `server/`)
 
 All passwords are `password123`.
 

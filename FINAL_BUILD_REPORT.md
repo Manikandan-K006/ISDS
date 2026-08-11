@@ -51,7 +51,7 @@ This report tracks the state of every item in `PROJECT_AUDIT.md` (Phase 1) at pr
 ## Audit recommendation status (Section 10)
 
 ### Critical
-1. **Prisma 7 runtime — FIXED.** MySQL + driver adapter in `server/prisma.js` (`new PrismaMariaDb(DATABASE_URL)` + `new PrismaClient({ adapter })`). CLI URL pinned in `prisma.config.ts` (`mysql://root:@localhost:3307/isds`). `prisma generate` + `db push` verified with zero data loss. Stale `server/generated/` deleted and gitignored.
+1. **Prisma 7 runtime — FIXED.** MySQL + driver adapter in `server/prisma.js` (`new PrismaMariaDb(DATABASE_URL)` + `new PrismaClient({ adapter })`). CLI URL pinned in `server/prisma.config.ts` (`mysql://root:@localhost:3307/isds`). `prisma generate` + `db push` verified with zero data loss. `server/` is fully self-contained (`prisma/schema.prisma` lives inside it; root is pure frontend). Stale `server/generated/` deleted and gitignored.
 2. **15 missing pages — FIXED.** All pages created under `src/pages/{admin,teacher,parent}`; `npm run build` passes; each wired to real backend endpoints with honest empty states.
 3. **Certificate integration — FIXED.** `server/routes/certificates.js` rebuilt to match `src/api/certificates.js`; public `GET /verify/:id` with rate limiting + expiry/revocation checks; PDF/DOCX/QR generation verified; admin stats/logs, revoke/restore/regenerate, share/download tracking all working.
 
