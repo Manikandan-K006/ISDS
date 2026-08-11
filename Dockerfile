@@ -5,9 +5,10 @@ RUN apk add --no-cache openssl
 WORKDIR /app
 
 # Install root deps (Prisma CLI + client) and server deps (Express + MariaDB adapter)
+# server uses `npm install` because its lockfile may lag package.json changes
 COPY package.json package-lock.json ./
-COPY server/package.json server/package.json
-RUN npm ci && cd server && npm ci
+COPY server/package.json server/package-lock.json ./
+RUN npm ci && cd server && npm install
 
 # Copy the rest of the project (node_modules / .env excluded via .dockerignore)
 COPY . .
