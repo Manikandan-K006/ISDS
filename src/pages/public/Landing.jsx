@@ -29,10 +29,10 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: 12, suffix: 'K+', label: 'Students guided' },
-  { value: 480, suffix: '+', label: 'Courses & labs' },
-  { value: 350, suffix: '+', label: 'Companies partnered' },
-  { value: 94, suffix: '%', label: 'Placement support' },
+  { value: 8, suffix: '+', label: 'Career tracks' },
+  { value: 24, suffix: '+', label: 'Skill modules' },
+  { value: 1, suffix: ' hub', label: 'Campus dashboard' },
+  { value: 100, suffix: '%', label: 'Actionable insights' },
 ];
 
 const TESTIMONIALS = [
@@ -103,7 +103,7 @@ const HeroMock = () => (
           <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
         </div>
-        <span className="ml-2 text-xs theme-text-muted font-mono">isds / dashboard</span>
+        <span className="ml-2 text-xs theme-text-muted font-mono">student / dashboard</span>
       </div>
       <div className="grid grid-cols-3 gap-2 mb-3">
         {[
@@ -148,8 +148,8 @@ const HeroMock = () => (
             <CheckCircle2 className="text-white" size={16} />
           </div>
           <div>
-            <div className="text-xs font-semibold theme-text">Assignment graded</div>
-            <div className="text-[10px] theme-text-muted">DSA · 92%</div>
+            <div className="text-xs font-semibold theme-text">Performance snapshot</div>
+            <div className="text-[10px] theme-text-muted">Data Structures · 92%</div>
           </div>
         </div>
       </div>
@@ -162,8 +162,8 @@ const HeroMock = () => (
             <Rocket className="text-white" size={16} />
           </div>
           <div>
-            <div className="text-xs font-semibold theme-text">Shortlisted</div>
-            <div className="text-[10px] theme-text-muted">TechNova Campus Drive</div>
+            <div className="text-xs font-semibold theme-text">Career readiness</div>
+            <div className="text-[10px] theme-text-muted">Target role: Product Analyst</div>
           </div>
         </div>
       </div>
