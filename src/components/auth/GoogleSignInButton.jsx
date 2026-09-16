@@ -29,6 +29,11 @@ export default function GoogleSignInButton({ role = 'student', adminAuthorizatio
   const [loading, setLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    if (!hasFirebaseConfig) {
+      toast.error('Google sign-in is unavailable until Firebase is configured in the frontend .env file.');
+      return;
+    }
+
     setLoading(true);
     try {
       const data = await googleLogin({ role, adminAuthorizationPassword });
@@ -45,25 +50,11 @@ export default function GoogleSignInButton({ role = 'student', adminAuthorizatio
     }
   };
 
-  if (!hasFirebaseConfig) {
-    return (
-      <div className="w-full">
-        <button
-          type="button"
-          disabled
-          className="w-full py-2.5 rounded-xl border border-[var(--border)] theme-text-muted text-sm font-medium opacity-60 cursor-not-allowed"
-        >
-          Google sign-in is disabled (Firebase not configured)
-        </button>
-      </div>
-    );
-  }
-
   return (
     <button
       type="button"
       onClick={handleGoogleSignIn}
-      disabled={loading}
+      disabled={loading || !hasFirebaseConfig}
       className={`w-full py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card-bg)] theme-text text-sm font-medium hover:bg-[var(--hover)] transition-colors flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:cursor-wait select-none ${className}`}
     >
       {loading ? (
@@ -71,7 +62,7 @@ export default function GoogleSignInButton({ role = 'student', adminAuthorizatio
       ) : (
         <GoogleIcon />
       )}
-      Continue with Google
+      {hasFirebaseConfig ? 'Continue with Google' : 'Google sign-in unavailable'}
     </button>
   );
 }

@@ -307,7 +307,7 @@ const Landing = () => {
                   <div key={i} className="w-8 h-8 rounded-full gradient-accent border-2 theme-border flex items-center justify-center text-[10px] text-white font-semibold">{i}</div>
                 ))}
               </div>
-              <span>Trusted by 12,000+ students across 40+ colleges</span>
+              <span>Built for modern campus career journeys</span>
             </motion.div>
           </div>
 

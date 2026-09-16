@@ -34,8 +34,8 @@ const getBackendToken = async (firebaseToken, userData = {}) => {
 };
 
 export const login = async ({ email, password }) => {
-  if (!hasFirebaseConfig) {
-    throw new Error('Firebase is not configured. Set Firebase environment variables.');
+  if (!hasFirebaseConfig || !auth) {
+    throw new Error('Email sign-in is unavailable because Firebase is not configured. Add VITE_FIREBASE_* values to your environment first.');
   }
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const firebaseToken = await userCredential.user.getIdToken();
@@ -44,8 +44,8 @@ export const login = async ({ email, password }) => {
 };
 
 export const register = async ({ name, email, password, role, class: className, adminAuthorizationPassword, rollNumber, department, subject, employeeId }) => {
-  if (!hasFirebaseConfig) {
-    throw new Error('Firebase is not configured. Set Firebase environment variables.');
+  if (!hasFirebaseConfig || !auth) {
+    throw new Error('Registration is unavailable because Firebase is not configured. Add VITE_FIREBASE_* values to your environment first.');
   }
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const firebaseToken = await userCredential.user.getIdToken();
@@ -68,8 +68,8 @@ export const forgotPassword = async ({ email }) => {
 };
 
 export const googleLogin = async ({ role, adminAuthorizationPassword, className } = {}) => {
-  if (!hasFirebaseConfig) {
-    throw new Error('Firebase is not configured.');
+  if (!hasFirebaseConfig || !auth) {
+    throw new Error('Google sign-in is unavailable because Firebase is not configured. Add VITE_FIREBASE_* values to your environment first.');
   }
   const provider = new GoogleAuthProvider();
   const userCredential = await signInWithPopup(auth, provider);

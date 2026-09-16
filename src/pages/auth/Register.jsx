@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiShield, FiBook, FiHash, FiBriefcase } from 'react-icons/fi';
+import { GraduationCap, Users, BriefcaseBusiness, ShieldCheck } from 'lucide-react';
 import API, { getErrorMessage } from '../../api/client';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
@@ -9,10 +10,10 @@ import { Button, Input, Divider } from '../../components/ui';
 import GoogleSignInButton from '../../components/auth/GoogleSignInButton';
 
 const roles = [
-  { id: 'student', label: 'Student', icon: '🎓', color: 'from-indigo-500 to-indigo-600' },
-  { id: 'teacher', label: 'Faculty', icon: '👨‍🏫', color: 'from-emerald-500 to-emerald-600' },
-  { id: 'recruiter', label: 'Recruiter', icon: '💼', color: 'from-sky-500 to-sky-600' },
-  { id: 'admin', label: 'Admin', icon: '⚙️', color: 'from-purple-500 to-purple-600' },
+  { id: 'student', label: 'Student', icon: GraduationCap, color: 'from-indigo-500 to-indigo-600' },
+  { id: 'teacher', label: 'Faculty', icon: Users, color: 'from-emerald-500 to-emerald-600' },
+  { id: 'recruiter', label: 'Recruiter', icon: BriefcaseBusiness, color: 'from-sky-500 to-sky-600' },
+  { id: 'admin', label: 'Admin', icon: ShieldCheck, color: 'from-purple-500 to-purple-600' },
 ];
 
 const Register = () => {
@@ -23,7 +24,6 @@ const Register = () => {
     confirmPassword: '',
     role: 'student',
     class: '',
-    registerNumber: '',
     department: '',
     subject: '',
     employeeId: '',
@@ -50,7 +50,6 @@ const Register = () => {
     else if (form.password !== form.confirmPassword) e.confirmPassword = 'Passwords do not match';
     if (form.role === 'student') {
       if (!form.class.trim()) e.class = 'Semester is required';
-      if (!form.registerNumber.trim()) e.registerNumber = 'Register number is required';
     }
     if (form.role === 'teacher') {
       if (!form.department.trim()) e.department = 'Department is required';
@@ -77,7 +76,6 @@ const Register = () => {
         password: form.password,
         role: form.role,
         class: form.role === 'student' ? form.class : undefined,
-        registerNumber: form.role === 'student' ? form.registerNumber : undefined,
         subject: form.role === 'teacher' ? form.subject : undefined,
         employeeId: form.role === 'teacher' || form.role === 'recruiter' ? form.employeeId : undefined,
         adminSecretKey: form.role === 'admin' || form.role === 'teacher' || form.role === 'recruiter' ? form.adminAuthorizationPassword : undefined,
@@ -129,13 +127,13 @@ const Register = () => {
                   key={r.id}
                   type="button"
                   onClick={() => setForm((prev) => ({ ...prev, role: r.id }))}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     form.role === r.id
-                      ? `bg-gradient-to-br ${r.color} text-white`
+                      ? `bg-gradient-to-br ${r.color} text-white shadow-lg shadow-indigo-500/20`
                       : 'theme-text-muted hover:theme-text hover:bg-[var(--hover)] border border-[var(--border)]'
                   }`}
                 >
-                  <span className="text-base">{r.icon}</span>
+                  <r.icon size={16} strokeWidth={2.2} />
                   <span className="hidden sm:inline">{r.label}</span>
                 </button>
               ))}
@@ -201,15 +199,6 @@ const Register = () => {
                       onChange={handleChange('class')}
                       placeholder="e.g. Sem 3"
                       error={errors.class}
-                    />
-                    <Input
-                      icon={FiHash}
-                      label="Register Number"
-                      type="text"
-                      value={form.registerNumber}
-                      onChange={handleChange('registerNumber')}
-                      placeholder="e.g. 21CS301"
-                      error={errors.registerNumber}
                     />
                   </motion.div>
                 )}
