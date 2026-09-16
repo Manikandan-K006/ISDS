@@ -93,7 +93,56 @@ const FAQItem = ({ q, a, open, onToggle }) => (
   </div>
 );
 
-const HeroMock = () => (
+const HeroPreview = () => (
+  <div className="relative">
+    <div className="absolute -inset-5 rounded-3xl bg-gradient-to-tr from-indigo-500/15 via-transparent to-violet-500/15 blur-2xl" />
+    <div className="relative glass rounded-2xl border theme-border shadow-2xl p-4 sm:p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80" />
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+        </div>
+        <span className="ml-2 text-xs theme-text-muted font-mono">student / dashboard</span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {[
+          { label: 'CGPA', value: '8.60', color: 'text-indigo-400' },
+          { label: 'Readiness', value: '86%', color: 'text-emerald-400' },
+          { label: 'Attendance', value: '94%', color: 'text-amber-400' },
+        ].map((s) => (
+          <div key={s.label} className="theme-card border theme-border rounded-xl p-3 text-center">
+            <div className={`text-lg font-bold ${s.color}`}>{s.value}</div>
+            <div className="text-[10px] uppercase tracking-wider theme-text-muted">{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between p-3 rounded-xl theme-input border theme-border">
+          <div className="flex items-center gap-2">
+            <Sparkles className="text-indigo-400" size={14} />
+            <span className="text-xs theme-text">AI Advisor</span>
+          </div>
+          <span className="text-xs text-emerald-400">● Online</span>
+        </div>
+
+        <div className="rounded-xl p-3 border theme-border theme-input">
+          <div className="flex justify-between mb-2">
+            <span className="text-xs theme-text">Skill gap · Full Stack</span>
+            <span className="text-xs text-indigo-400 font-semibold">68%</span>
+          </div>
+          <div className="h-2 rounded bg-[var(--hover)] overflow-hidden">
+            <div className="h-full w-[68%] gradient-accent rounded" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const DemoDashboardPreview = () => (
   <div className="relative">
     <div className="absolute -inset-6 rounded-3xl bg-gradient-to-tr from-indigo-500/20 via-transparent to-violet-500/20 blur-2xl" />
     <div className="relative glass rounded-2xl border theme-border shadow-2xl p-4 sm:p-5">
@@ -131,7 +180,7 @@ const HeroMock = () => (
         </div>
         <div className="rounded-xl p-3 border theme-border theme-input">
           <div className="flex justify-between mb-2">
-            <span className="text-xs theme-text">Skill Gap · Full Stack</span>
+            <span className="text-xs theme-text">Skill gap · Full Stack</span>
             <span className="text-xs text-indigo-400 font-semibold">68%</span>
           </div>
           <div className="h-2 rounded bg-[var(--hover)] overflow-hidden">
@@ -315,7 +364,7 @@ const Landing = () => {
             initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.25 }}
             className="relative pt-8 lg:pt-0"
           >
-            <HeroMock />
+            <HeroPreview />
           </motion.div>
         </div>
       </section>
@@ -546,7 +595,7 @@ const Landing = () => {
               </div>
             </div>
             <div className="theme-card border theme-border rounded-xl p-3 mb-4">
-              <HeroMock />
+              <DemoDashboardPreview />
             </div>
             <Link
               to="/register"
