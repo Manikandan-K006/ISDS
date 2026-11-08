@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiEdit2, FiSave, FiBookOpen, FiCalendar, FiAward, FiStar, FiFileText, FiMessageSquare, FiChevronLeft, FiBarChart2, FiTarget } from 'react-icons/fi';
@@ -30,7 +30,7 @@ const StudentDetailAdmin = () => {
   const [teacherNote, setTeacherNote] = useState('');
   const [notes, setNotes] = useState([]);
 
-  const fetchStudentData = async () => {
+  const fetchStudentData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -56,9 +56,9 @@ const StudentDetailAdmin = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  useEffect(() => { if (id) fetchStudentData(); }, [id]);
+  useEffect(() => { if (id) fetchStudentData(); }, [id, fetchStudentData]);
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">

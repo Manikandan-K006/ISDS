@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   FiAward, FiSearch, FiX, FiCheck, FiAlertTriangle, FiRefreshCw,
   FiDownload, FiTrash2, FiEye, FiBarChart2, FiFileText,
@@ -29,7 +29,7 @@ const AdminCertificates = () => {
   const [issuing, setIssuing] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     const results = await Promise.allSettled([
       getCertificates({ search, status: statusFilter || undefined }),
@@ -40,9 +40,9 @@ const AdminCertificates = () => {
     if (results[2].status === 'fulfilled') setCourses(results[2].value);
     if (results[3].status === 'fulfilled') setStats(results[3].value);
     setLoading(false);
-  };
+  }, [search, statusFilter]);
 
-  useEffect(() => { fetchAll(); }, [search, statusFilter]);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const handleIssue = async () => {
     if (!issueForm.studentId || !issueForm.courseId) return toast.error('Select student and course');

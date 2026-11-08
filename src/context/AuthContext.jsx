@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
           refreshAuth();
         });
     }
-  }, []);
+  }, [refreshAuth, token]);
 
   return (
     <AuthContext.Provider value={{

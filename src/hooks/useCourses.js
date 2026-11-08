@@ -9,11 +9,13 @@ export const useCourses = (params) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const serializedParams = JSON.stringify(params ?? {});
+
   useEffect(() => {
     const fetch = async () => {
       try {
         setLoading(true);
-        const { data } = await api.get('/', { params });
+        const { data } = await api.get('/', { params: JSON.parse(serializedParams) });
         setCourses(data);
       } catch (err) {
         setError(err.message);
@@ -23,7 +25,7 @@ export const useCourses = (params) => {
       }
     };
     fetch();
-  }, [JSON.stringify(params)]);
+  }, [serializedParams]);
 
   return { courses, loading, error };
 };
