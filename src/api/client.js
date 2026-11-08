@@ -48,7 +48,7 @@ API.interceptors.response.use(
 
 export const getErrorMessage = (err, fallback = 'Something went wrong. Please try again.') => {
   if (!err?.response) {
-    return 'Cannot reach the server. Check your connection and try again.';
+    return 'Cannot reach the API server. Start the backend with "npm run dev:server" and verify server/.env is configured.';
   }
   const data = err.response.data;
   if (data && typeof data.error === 'string' && data.error) {

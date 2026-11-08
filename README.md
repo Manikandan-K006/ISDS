@@ -77,7 +77,20 @@ node index.js              # listens on :5000 (set PORT to change); health check
 
 # Frontend (from repo root)
 npm run dev                # Vite dev server on :5173
+
+# Full stack (from repo root, after configuring server/.env)
+npm run dev:full           # Vite on :5173 and API on :5000
 ```
+
+If login shows “Cannot reach the API server”, the backend is not running or
+`server/.env` is missing/incorrect. Install backend dependencies with
+`npm install --prefix server`, configure `DATABASE_URL`, then run
+`npm run dev:server` or `npm run dev:full`.
+
+Google sign-in requires the `VITE_FIREBASE_*` values in the root `.env` and a
+Firebase Web app with Google provider enabled. The backend also needs
+`FIREBASE_PROJECT_ID` and `FIREBASE_SERVICE_ACCOUNT_BASE64` in `server/.env`
+to verify Firebase ID tokens.
 
 ## Scripts
 

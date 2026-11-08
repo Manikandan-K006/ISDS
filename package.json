@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:server": "npm.cmd --prefix server run dev",
+    "dev:full": "node scripts/dev-full.cjs",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
